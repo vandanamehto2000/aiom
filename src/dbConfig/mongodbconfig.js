@@ -11,6 +11,7 @@ mongoose
   .connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    autoIndex: true,
   })
   .then(() => {
     console.log("Successfully connected to database");
@@ -23,5 +24,5 @@ mongoose
 //   console.log(`${collectionName}.${method}`, JSON.stringify(query), doc);
 // });
 mongoose.Promise = global.Promise;
-const mongodb = mongoose.connection;
+let mongodb = mongoose.connection;
 module.exports = mongodb;
