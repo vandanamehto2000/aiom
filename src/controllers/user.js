@@ -8,7 +8,7 @@ const generateAccessToken = (response) => {
     {
       _id: response._id,
       email: response.email,
-      username:response.username
+      username: response.username,
     },
     process.env.JWT_SEC,
     { expiresIn: "30m" }
@@ -33,7 +33,7 @@ const register = async (req, res, next) => {
       data: userData,
     });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     err.code === 11000
       ? next({
           status: StatusCodes.BAD_REQUEST,
@@ -56,10 +56,11 @@ const login = async (req, res, next) => {
       );
       let decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
       if (req.body.password === decryptedPassword) {
-        const token1 = generateAccessToken(response)
+        const token1 = generateAccessToken(response);
         let data = await User.findOneAndUpdate(
           { email: req.body.email },
-          { token: token1 },{new: true}
+          { token: token1 },
+          { new: true }
         );
         next({
           status: StatusCodes.OK,
@@ -79,7 +80,7 @@ const login = async (req, res, next) => {
       });
     }
   } catch (err) {
-    console.log(err)
+    console.log(err);
     next({
       status: StatusCodes.BAD_REQUEST,
       message: err.message,
@@ -89,22 +90,29 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    let token = req.body.token;
-    const response = await User.find({ token: req.body.token });
-    if (response.length !== 0 && response[0].token === token ) {
-      await User.updateOne({ token: token }, { token: "" },{new:true});
+    let { _id, email, username } = req.auth;
+    let token = req.headers.authorization.split(" ")[1];
+    const response = await User.find({ email: email });
+    if (response.length !== 0 && response[0].token === token) {
+      await User.updateOne({ token: token }, { token: "" }, { new: true });
       next({
         status: StatusCodes.OK,
         message: "You logged out successfully",
       });
-    } else {
+    }
+    // else if(response.length !== 0 && response[0].token === "") {
+    //   next({
+    //     status: StatusCodes.OK,
+    //     message: "User Already Logged Out",
+    //   });
+    // }
+    else {
       next({
         status: StatusCodes.OK,
         message: "Unauthorized User",
       });
     }
   } catch (err) {
-    console.log(err)
     next({
       status: StatusCodes.BAD_REQUEST,
       message: err.message,
