@@ -6,12 +6,14 @@ const httpStatus = require("http-status-codes");
 const commonErrorHandler = require("./utils/errorHandler");
 const mongodb = require("./dbConfig/mongodbconfig");
 const userRoute = require("./routers/user");
+const facebookRoute = require("./routers/facebook")
 require("dotenv").config();
 mongodb.on("open", function () {});
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use("/user", userRoute);
+app.use("/facebook", facebookRoute);
 app.use(commonErrorHandler);
 app.get("/", (req, res) => {
   res.send("Welcome To AIOM");

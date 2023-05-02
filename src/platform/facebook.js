@@ -1,33 +1,44 @@
 "use strict";
 const bizSdk = require("facebook-nodejs-business-sdk");
+const { StatusCodes } = require("http-status-codes");
 const AdAccount = bizSdk.AdAccount;
 const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
 // const Ad = bizSdk.Ad;
 const { curly } = require("node-libcurl");
 
-// const access_token =
-//   "EAARmX2NDin4BALPXvTxw1aABZAGqfKaWOTPWgVtzEVOfcwuvuOpJA0qnGn4j7NhTAshZCsSXcuZCZCZAgv69hmeI08DZCAxbQqRqRakm6Rqutl1UnECGUXRH67mV6S7ABhZBf6BgB74xUqrhY0TMXob7NbyoMGHprapvNZAlZAX2ERgOmsbgXoDEcUyNAlExzyKEAGDXfJZCuYHuiPFk0mSEzI";
+const access_token =
+  "EAARmX2NDin4BALPXvTxw1aABZAGqfKaWOTPWgVtzEVOfcwuvuOpJA0qnGn4j7NhTAshZCsSXcuZCZCZAgv69hmeI08DZCAxbQqRqRakm6Rqutl1UnECGUXRH67mV6S7ABhZBf6BgB74xUqrhY0TMXob7NbyoMGHprapvNZAlZAX2ERgOmsbgXoDEcUyNAlExzyKEAGDXfJZCuYHuiPFk0mSEzI";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
 // const id = "act_1239957706633747"; //local
-// const api = bizSdk.FacebookAdsApi.init(access_token);
+const api = bizSdk.FacebookAdsApi.init(access_token);
 const showDebugingInfo = true; // Setting this to true shows more debugging info.
-// if (showDebugingInfo) {
-//   api.setDebug(true);
-// }
+if (showDebugingInfo) {
+  api.setDebug(true);
+}
 
 //Create a Campaign
-const facebook_create_campaign = async (access_token,id,fields,params) => {
+const facebook_create_campaign = async (req,res,next) => {
   try {
+    let {id,fields,params} = req.body
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
-    return campaigns
+    // return campaigns
+   return next({
+      status: StatusCodes.CREATED,
+      message: "Campaign created successfully",
+      data: campaigns,
+    });
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error
+    // return error
+   return next({
+      status: StatusCodes.BAD_REQUEST,
+      message: error,
+    });
   }
 };
 
