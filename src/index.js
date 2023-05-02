@@ -1,16 +1,17 @@
 const express = require("express");
 const app = express();
-const cluster = require("cluster"); 
+const cluster = require("cluster");
 const totalCPUs = require("os").cpus().length;
-const httpStatus = require('http-status-codes');
+const httpStatus = require("http-status-codes");
 const commonErrorHandler = require("./utils/errorHandler");
-const testRoutes = require('./routers/test');
+const mongodb = require("./dbConfig/mongodbconfig");
+const userRoute = require("./routers/user");
 require("dotenv").config();
+mongodb.on("open", function () {});
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use('/test',testRoutes);
-
+app.use("/user", userRoute);
 app.use(commonErrorHandler);
 app.get("/", (req, res) => {
   res.send("Welcome To AIOM");

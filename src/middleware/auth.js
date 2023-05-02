@@ -1,6 +1,5 @@
-const httpStatus = require("http-status");
+const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
-const secretKey = require("../dbConfig/secretKey");
 const { TOKEN_NOT_FOUND, UNAUTHORIZED_USER } = require("../utils/message");
 
 function authenticateToken(req, res, next) {
@@ -8,18 +7,17 @@ function authenticateToken(req, res, next) {
     const token = req.headers.authorization.split(" ")[1];
     if (!token) {
       return next({
-        statusCode: httpStatus.UNAUTHORIZED,
-        status: false,
+        statusCode: StatusCodes.UNAUTHORIZED,
         message: TOKEN_NOT_FOUND,
       });
     }
 
     //  find by token
-    jwt.verify(token, secretKey, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SEC, (err, decoded) => {
       if (err) {
+        console.log(err);
         return next({
-          statusCode: httpStatus.UNAUTHORIZED,
-          status: false,
+          status: StatusCodes.UNAUTHORIZED,
           message: UNAUTHORIZED_USER,
         });
       }
@@ -28,11 +26,10 @@ function authenticateToken(req, res, next) {
     });
   } else {
     return next({
-      statusCode: httpStatus.UNAUTHORIZED,
-      status: false,
+      status: StatusCodes.UNAUTHORIZED,
       message: TOKEN_NOT_FOUND,
     });
   }
 }
 
-module.exports = { authenticateToken };
+module.exports = authenticateToken;
