@@ -4,7 +4,7 @@ let MONGO_URI = "";
 if (process.env.MONGO_DATABASE_USERNAME == "") {
   MONGO_URI = `mongodb://${process.env.MONGO_DATABASE_HOST}:27017/${process.env.MONGO_DATABASE_DATABASE}`;
 } else {
-  MONGO_URI = `mongodb://${process.env.MONGO_DATABASE_USERNAME}:${process.env.MONGO_DATABASE_PASSWORD}@${process.env.MONGO_DATABASE_HOST}:27017/admin?authSource=admin&readPreference=primary`;
+  MONGO_URI = `mongodb://${process.env.MONGO_DATABASE_USERNAME}:${process.env.MONGO_DATABASE_PASSWORD}@${process.env.MONGO_DATABASE_HOST}:27017/${process.env.MONGO_DATABASE_DATABASE}?authSource=admin&authMechanism=SCRAM-SHA-1`;
 }
 
 mongoose
@@ -14,7 +14,7 @@ mongoose
     autoIndex: true,
   })
   .then(() => {
-    console.log("Successfully connected to database");
+    console.log("Successfully connected to database!");
   })
   .catch((error) => {
     console.log("database connection failed. exiting now...", error);

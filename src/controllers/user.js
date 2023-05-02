@@ -24,7 +24,6 @@ const register = async (req, res, next) => {
       process.env.PASS_SECRET
     ).toString(),
   };
-
   try {
     let userData = await User.create(newUser);
     return next({
