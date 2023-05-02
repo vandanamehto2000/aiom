@@ -7,12 +7,11 @@ const AdSet = bizSdk.AdSet;
 // const Ad = bizSdk.Ad;
 const { curly } = require("node-libcurl");
 
-const access_token =
-  "EAARmX2NDin4BALPXvTxw1aABZAGqfKaWOTPWgVtzEVOfcwuvuOpJA0qnGn4j7NhTAshZCsSXcuZCZCZAgv69hmeI08DZCAxbQqRqRakm6Rqutl1UnECGUXRH67mV6S7ABhZBf6BgB74xUqrhY0TMXob7NbyoMGHprapvNZAlZAX2ERgOmsbgXoDEcUyNAlExzyKEAGDXfJZCuYHuiPFk0mSEzI";
+const access_token = "EAARmX2NDin4BAOh7P0SwNveZAIt5lt4h1iWTaxJHtbKZBndZAWh9R8prhB0oXYM368pXmcYPG0ZBQGdXkKM2FPxWpcQsAsmUhP3yvSdPunvX0nNUOPRdvNOjEgK0TsSl93fpOZCUY6Yxd8qX3UZCZBVlvfY7oS2HZB0xjePafrLu0I6QkSLJ83yrfXjFXX2zgYbftGhjWZAQ8o6paMwxsJgGK";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
-// const id = "act_1239957706633747"; //local
+const id = "act_1239957706633747"; //local
 const api = bizSdk.FacebookAdsApi.init(access_token);
 const showDebugingInfo = true; // Setting this to true shows more debugging info.
 if (showDebugingInfo) {
@@ -24,49 +23,45 @@ const facebook_create_campaign = async (req,res,next) => {
   try {
     let {id,fields,params} = req.body
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
-    // return campaigns
-   return next({
-      status: StatusCodes.CREATED,
-      message: "Campaign created successfully",
-      data: campaigns,
-    });
+    return {
+      message:"success",
+      data:campaigns._data
+    }
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    // return error
-   return next({
-      status: StatusCodes.BAD_REQUEST,
-      message: error,
-    });
+    return {
+      message:"error",
+      data:error
+    }
   }
 };
 
 //Get a Campaign
-const facebook_get_campaign = async () => {
+const facebook_get_campaign = async (id,fields,params) => {
   try {
-    let fields, params;
-    fields = [
-      "name",
-      "start_time",
-      "end_time",
-      "daily_budget",
-      "lifetime_budget",
-      "buying_type",
-    ];
-    params = {
-      effective_status: ["ACTIVE", "PAUSED"],
-    };
     const campaignss = await new AdAccount(id).getCampaigns(fields, params);
-    console.log(campaignss);
     logApiCallResult("campaignss api call complete.", campaignss);
+    const result =  campaignss.map((item)=>{
+      return item._data
+    })
+    return  {
+      message:"success",
+      data:result
+    }
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
+    return {
+      message:"error",
+      data:error
+    }
   }
 };
 
+// facebook_get_campaign()
 //Brand_Awareness campaign ID - 23853906349450580
 //"23853823531720580",  //conversions campaign ID
 
