@@ -6,8 +6,8 @@ const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
 // const Ad = bizSdk.Ad;
 const { curly } = require("node-libcurl");
-
-const access_token = "EAARmX2NDin4BAOh7P0SwNveZAIt5lt4h1iWTaxJHtbKZBndZAWh9R8prhB0oXYM368pXmcYPG0ZBQGdXkKM2FPxWpcQsAsmUhP3yvSdPunvX0nNUOPRdvNOjEgK0TsSl93fpOZCUY6Yxd8qX3UZCZBVlvfY7oS2HZB0xjePafrLu0I6QkSLJ83yrfXjFXX2zgYbftGhjWZAQ8o6paMwxsJgGK";
+const access_token =
+  "EAARmX2NDin4BAGBOmoU927K8Q5AUOgeQKxki169dJmzKHmAr4ZAkukYvm1fCKYVc9V7pztm50CEqisgBqTQa99wA4kRjnRVyYf8SKKTjeXEbDHkj6QBsSrxjaRMAPVwMYXkcceY8y36N0rQpEf91CBiAZCANUetUGtRb3DS3KLZATXXZBZC4Qf2JHHX5IEi9EWZCIJ7nFphzFsi1gKWR9ZC";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -19,45 +19,56 @@ if (showDebugingInfo) {
 }
 
 //Create a Campaign
-const facebook_create_campaign = async (req,res,next) => {
+const facebook_create_campaign = async (id, fields, params) => {
   try {
-    let {id,fields,params} = req.body
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
+    console.log("success part1",campaigns)
     return {
-      message:"success",
-      data:campaigns._data
-    }
+      status: StatusCodes.CREATED,
+      message: "success",
+      data: campaigns._data,
+    };
+    // return campaigns;
   } catch (error) {
-    console.log(error);
+    console.log("error part1",error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return {
-      message:"error",
-      data:error
-    }
+    // return error;
+   return {
+      status: StatusCodes.BAD_REQUEST,
+      message: "error",
+      data: error,
+    };
   }
 };
 
 //Get a Campaign
-const facebook_get_campaign = async (id,fields,params) => {
+const facebook_get_campaign = async (id, fields, params) => {
+  console.log("get++++++:::::::::", id, fields, params);
   try {
-    const campaignss = await new AdAccount(id).getCampaigns(fields, params);
+    let fields1, params1;
+    fields1 = [
+      "name",
+      "start_time",
+      "end_time",
+      "daily_budget",
+      "lifetime_budget",
+      "buying_type",
+    ];
+    params1 = {
+      effective_status: ["ACTIVE", "PAUSED"],
+    };
+    const campaignss = await new AdAccount(id).getCampaigns(fields1, params1);
     logApiCallResult("campaignss api call complete.", campaignss);
-    const result =  campaignss.map((item)=>{
-      return item._data
-    })
-    return  {
-      message:"success",
-      data:result
-    }
+    const result = campaignss.map((item) => {
+      return item._data;
+    });
+    return result;
   } catch (error) {
     console.log(error);
-    console.log("Error Message:" + error);
+    console.log("Error Message:-----------" + error);
     console.log("Error Stack:" + error.stack);
-    return {
-      message:"error",
-      data:error
-    }
+    return error;
   }
 };
 
@@ -66,10 +77,10 @@ const facebook_get_campaign = async (id,fields,params) => {
 //"23853823531720580",  //conversions campaign ID
 
 //Create AdSET
-const facebook_create_adSet = async () => {
+const facebook_create_adSet = async (id, fields, params) => {
   try {
-    let fields, params;
-    fields = [];
+    // let fields, params;
+    // fields = [];
     // params = {
     //   name: "My First AdSet",
     //   lifetime_budget: "41300",
@@ -99,32 +110,34 @@ const facebook_create_adSet = async () => {
     //   status: "PAUSED",
     // };
 
-    params = {
-      name: "My AdSet",
-      optimization_goal: "AD_RECALL_LIFT",
-      billing_event: "IMPRESSIONS",
-      bid_strategy: "LOWEST_COST_WITHOUT_CAP",
-      // autobid:"true",
-      // bid_amount: "2",
-      // bid_cap:"10",
-      daily_budget: "50000",
-      campaign_id: "23853906349450580",
-      targeting: {
-        facebook_positions: ["feed"],
-        geo_locations: { countries: ["IN"] },
-        behaviors: [
-          // { id: 6007101597783, name: "Business Travelers" },
-          { id: 6004386044572, name: "Android Owners (All)" },
-        ],
-      },
-    };
+    // params = {
+    //   name: "My AdSet",
+    //   optimization_goal: "AD_RECALL_LIFT",
+    //   billing_event: "IMPRESSIONS",
+    //   bid_strategy: "LOWEST_COST_WITHOUT_CAP",
+    //   // autobid:"true",
+    //   // bid_amount: "2",
+    //   // bid_cap:"10",
+    //   daily_budget: "50000",
+    //   campaign_id: "23853906349450580",
+    //   targeting: {
+    //     facebook_positions: ["feed"],
+    //     geo_locations: { countries: ["IN"] },
+    //     behaviors: [
+    //       // { id: 6007101597783, name: "Business Travelers" },
+    //       { id: 6004386044572, name: "Android Owners (All)" },
+    //     ],
+    //   },
+    // };
 
     const adsets = await new AdAccount(id).createAdSet(fields, params);
     console.log(adsets, "--------------");
+    return adsets._data;
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
+    return error;
   }
 };
 
@@ -159,6 +172,7 @@ const facebook_get_adSet = async () => {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
+    return error;
   }
 };
 
@@ -205,31 +219,33 @@ const facebook_get_ad = async () => {
 
 //page ID -106284349116205
 //Create creative
-const facebook_create_creative = async () => {
+const facebook_create_creative = async (id,fields,params) => {
   try {
-    let fields, params;
-    fields = [];
-    params = {
-      // 'object_story_id' : '106284349116205_113796205024659',
+    // let fields, params;
+    // fields = [];
+    // params = {
+    //   // 'object_story_id' : '106284349116205_113796205024659',
 
-      name: "Sample Creative",
-      object_story_spec: {
-        page_id: "106284349116205",
-        link_data: {
-          link: "https://facebook.com/106284349116205",
-          message: "try it out",
-        },
-      },
-    };
+    //   name: "Sample Creative",
+    //   object_story_spec: {
+    //     page_id: "106284349116205",
+    //     link_data: {
+    //       link: "https://facebook.com/106284349116205",
+    //       message: "try it out",
+    //     },
+    //   },
+    // };
     const adcreatives = await new AdAccount(id).createAdCreative(
       fields,
       params
     );
     logApiCallResult("adcreatives api call complete.", adcreatives);
+    return adcreatives;
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
+    return error
   }
 };
 
@@ -251,7 +267,7 @@ const facebook_get_creative = async () => {
 //AdSet id - 23853907338140580
 //creative id - 23853908495800580
 //Create Ad
-const facebook_create_ad = async () => {
+const facebook_create_ad = async (id,fields,params) => {
   try {
     let fields, params;
     fields = [];
@@ -264,10 +280,12 @@ const facebook_create_ad = async () => {
     const ads = await new AdAccount(id).createAd(fields, params);
     console.log(ads);
     logApiCallResult("ads api call complete.", ads);
+    return ads
   } catch (error) {
-    console.log(error);
+    console.log("catch error",error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
+    return error
   }
 };
 
@@ -333,7 +351,7 @@ const logApiCallResult = (apiCallName, data) => {
   }
 };
 
-exports.module = {
+module.exports = {
   facebook_create_campaign,
   facebook_get_campaign,
   facebook_create_adSet,
