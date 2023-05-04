@@ -7,7 +7,7 @@ const AdSet = bizSdk.AdSet;
 // const Ad = bizSdk.Ad;
 const { curly } = require("node-libcurl");
 const access_token =
-  "EAARmX2NDin4BAGBOmoU927K8Q5AUOgeQKxki169dJmzKHmAr4ZAkukYvm1fCKYVc9V7pztm50CEqisgBqTQa99wA4kRjnRVyYf8SKKTjeXEbDHkj6QBsSrxjaRMAPVwMYXkcceY8y36N0rQpEf91CBiAZCANUetUGtRb3DS3KLZATXXZBZC4Qf2JHHX5IEi9EWZCIJ7nFphzFsi1gKWR9ZC";
+  "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -46,19 +46,19 @@ const facebook_create_campaign = async (id, fields, params) => {
 const facebook_get_campaign = async (id, fields, params) => {
   console.log("get++++++:::::::::", id, fields, params);
   try {
-    let fields1, params1;
-    fields1 = [
-      "name",
-      "start_time",
-      "end_time",
-      "daily_budget",
-      "lifetime_budget",
-      "buying_type",
-    ];
-    params1 = {
-      effective_status: ["ACTIVE", "PAUSED"],
-    };
-    const campaignss = await new AdAccount(id).getCampaigns(fields1, params1);
+    // let fields1, params1;
+    // fields1 = [
+    //   "name",
+    //   "start_time",
+    //   "end_time",
+    //   "daily_budget",
+    //   "lifetime_budget",
+    //   "buying_type",
+    // ];
+    // let params1 = {
+    //   effective_status: ["ACTIVE", "PAUSED"],
+    // };
+    const campaignss = await new AdAccount(id).getCampaigns(fields, params);
     logApiCallResult("campaignss api call complete.", campaignss);
     const result = campaignss.map((item) => {
       return item._data;

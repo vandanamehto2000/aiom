@@ -19,32 +19,35 @@ const create_campaign = async (req, res, next) => {
 //Get a Campaign
 const get_campaign = async (req, res, next) => {
   try {
-    let { id, access_token } = req.query;
+    let { id,fields_array,effective_status_array, access_token } = req.query;
     // console.log("00000000000000000000", req.query);
-    // let fields1 = fields_array.split(",");
-    // let effective_status1 = effective_status_array.split(",");
+    let fields1 = fields_array.split(",");
+    let effective_status1 = effective_status_array.split(",");
 
     //   let {id,fields,params,access_token} = data
-    let fields;
-    fields = [
-      "name",
-      "start_time",
-      "end_time",
-      "daily_budget",
-      "lifetime_budget",
-      "buying_type",
-    ];
+    console.log("fields_array--",fields_array,"effective_status_array--",effective_status_array)
+    let fields=[];
+    // fields = [
+    //   "name",
+    //   "start_time",
+    //   "end_time",
+    //   "daily_budget",
+    //   "lifetime_budget",
+    //   "buying_type",
+    // ];
     // params = {
     //   effective_status: ["ACTIVE", "PAUSED"],
     // };
-    //   effective_status = [];
-    // for (let i = 0; i < fields1.length; i++) {
-    //   fields.push(fields1[i]);
-    // }
-    // for (let i = 0; i < effective_status1.length; i++) {
-    //   effective_status.push(effective_status1[i]);
-    // }
-    let params = { effective_status: ["ACTIVE", "PAUSE"] };
+     let effective_status = [];
+    for (let i = 0; i < fields1.length; i++) {
+      fields.push(fields1[i]);
+    }
+    for (let i = 0; i < effective_status1.length; i++) {
+      effective_status.push(effective_status1[i]);
+    }
+    let params = { effective_status:effective_status};
+    console.log("fields+++++++++++",fields)
+    console.log("params+++++++++",params)
 
     const campaignss = await facebook_get_campaign(id, fields, params);
     return next({
