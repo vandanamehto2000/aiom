@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require('cors');
 const app = express();
 const cluster = require("cluster");
 const totalCPUs = require("os").cpus().length;
@@ -11,6 +12,7 @@ require("dotenv").config();
 mongodb.on("open", function () {});
 const port = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.json());
 app.use("/user", userRoute);
 app.use("/facebook", facebookRoute);
