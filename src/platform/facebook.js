@@ -22,23 +22,12 @@ if (showDebugingInfo) {
 const facebook_create_campaign = async (id, fields, params) => {
   try {
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
-    console.log("success part1",campaigns)
-    return {
-      status: StatusCodes.CREATED,
-      message: "success",
-      data: campaigns._data,
-    };
-    // return campaigns;
+    return campaigns;
   } catch (error) {
     console.log("error part1",error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    // return error;
-   return {
-      status: StatusCodes.BAD_REQUEST,
-      message: "error",
-      data: error,
-    };
+  return error
   }
 };
 
@@ -131,7 +120,6 @@ const facebook_create_adSet = async (id, fields, params) => {
     // };
 
     const adsets = await new AdAccount(id).createAdSet(fields, params);
-    console.log(adsets, "--------------");
     return adsets._data;
   } catch (error) {
     console.log(error);
@@ -142,7 +130,7 @@ const facebook_create_adSet = async (id, fields, params) => {
 };
 
 //Get AdSet
-const facebook_get_adSet = async () => {
+const facebook_get_adSet = async (id, fields,params) => {
   try {
     let fields, params;
     fields = [
@@ -161,7 +149,7 @@ const facebook_get_adSet = async () => {
         "WITH_ISSUES",
       ],
     };
-    const adsetss = await new Campaign("23853823531720580").getAdSets(
+    const adsetss = await new Campaign(id).getAdSets(
       fields,
       params
     );
