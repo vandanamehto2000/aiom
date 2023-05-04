@@ -4,9 +4,12 @@ const AdAccount = bizSdk.AdAccount;
 const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
 // const Ad = bizSdk.Ad;
+const User = bizSdk.User
 const { curly } = require("node-libcurl");
+const { Curl } = require("node-libcurl");
 
-const access_token = "EAARmX2NDin4BAOh7P0SwNveZAIt5lt4h1iWTaxJHtbKZBndZAWh9R8prhB0oXYM368pXmcYPG0ZBQGdXkKM2FPxWpcQsAsmUhP3yvSdPunvX0nNUOPRdvNOjEgK0TsSl93fpOZCUY6Yxd8qX3UZCZBVlvfY7oS2HZB0xjePafrLu0I6QkSLJ83yrfXjFXX2zgYbftGhjWZAQ8o6paMwxsJgGK";
+const access_token =
+  "EAARmX2NDin4BADCZAKJQigyIvIfLoK7CsMkVqLPonxbr2ghQB8crkB6tRY0UtZADO9TK6sXZAhfIjjVgsBCIqDioqKvq7zMOMHNttR9WZAh4uj6PSiCXZBdKv2EV3rb6Vvvi7HoqOQzp4srAaYLDyVPMZBM9yl9A0kOkZCjCiqWxZAJXLQMwNnLVSX9tb87nu16knvjy8gwrWO9kbOZA9nOWc";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -18,44 +21,44 @@ if (showDebugingInfo) {
 }
 
 //Create a Campaign
-const facebook_create_campaign = async (access_token,id,fields,params) => {
+const facebook_create_campaign = async (access_token, id, fields, params) => {
   try {
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
     return {
-      message:"success",
-      data:campaigns._data
-    }
+      message: "success",
+      data: campaigns._data,
+    };
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
     return {
-      message:"error",
-      data:error
-    }
+      message: "error",
+      data: error,
+    };
   }
 };
 
 //Get a Campaign
-const facebook_get_campaign = async (id,fields,params) => {
+const facebook_get_campaign = async (id, fields, params) => {
   try {
     const campaignss = await new AdAccount(id).getCampaigns(fields, params);
     logApiCallResult("campaignss api call complete.", campaignss);
-    const result =  campaignss.map((item)=>{
-      return item._data
-    })
-    return  {
-      message:"success",
-      data:result
-    }
+    const result = campaignss.map((item) => {
+      return item._data;
+    });
+    return {
+      message: "success",
+      data: result,
+    };
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
     return {
-      message:"error",
-      data:error
-    }
+      message: "error",
+      data: error,
+    };
   }
 };
 
@@ -98,15 +101,18 @@ const facebook_create_adSet = async () => {
     // };
 
     params = {
-      name: "My AdSet",
+      name: "My AdSet 13",
       optimization_goal: "AD_RECALL_LIFT",
       billing_event: "IMPRESSIONS",
       bid_strategy: "LOWEST_COST_WITHOUT_CAP",
       // autobid:"true",
       // bid_amount: "2",
       // bid_cap:"10",
-      daily_budget: "50000",
-      campaign_id: "23853906349450580",
+      start_time: "2023-05-04T09:24:18-0700",
+      end_time: "2023-05-05T09:24:18-0700",
+      // daily_budget: "40000",
+      lifetime_budget: "30000",
+      campaign_id: "23853941462420580",
       targeting: {
         facebook_positions: ["feed"],
         geo_locations: { countries: ["IN"] },
@@ -125,6 +131,7 @@ const facebook_create_adSet = async () => {
     console.log("Error Stack:" + error.stack);
   }
 };
+// facebook_create_adSet()
 
 //Get AdSet
 const facebook_get_adSet = async () => {
@@ -269,57 +276,56 @@ const facebook_create_ad = async () => {
   }
 };
 
+// image HAsh -69b1f27b22e5cbf02f03d5663318604c
 const imagePath =
   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
 const facebook_get_image_hash = async () => {
   try {
-    const url = `https://graph.facebook.com/v2.11/act_${id}/adimages`;
+    const url = `https://graph.facebook.com/v16.0/${id}/adimages`;
 
-    const { statusCode, data } = await curly.post(url, {
-      postFields: JSON.stringify({
-        filename: imagePath,
-        access_token: access_token,
-      }),
-      httpHeader: [
-        "Content-Type: application/json",
-        "Accept: application/json",
-      ],
+    const curl = new Curl();
+    const close = curl.close.bind(curl);
+    // Disable SSL certificate verification(TO BE REMOVED IN PRODUCTION)
+    curl.setOpt(Curl.option.SSL_VERIFYPEER, false);
+
+    curl.setOpt(Curl.option.URL, url);
+    curl.setOpt(Curl.option.HTTPPOST, [
+      { name: "filename", file: imagePath, type: "multipart/formdata" },
+      { name: "access_token", contents: access_token },
+    ]);
+    // console.log("----------------")
+    curl.on("end", function (statusCode, body, headers) {
+      console.log(statusCode);
+      console.log(body);
+      console.log(headers);
+      close();
     });
-
-    // console.log(data,statusCode,"------------")
-    //     const headers = ['Content-Type: multipart/form-data'];
-    //     const formData = [
-    //       {
-    //         name: 'access_token',
-    //         contents: access_token
-    //       },
-    //       {
-    //         name: 'filename',
-    //         file: imagePath,
-    //         type: 'image/jpeg'
-    //       }
-    //     ];
-    //     curly.post(
-    //       url,
-    //       {
-    //   headers: headers,
-    //   multipartFormData: formData
-    // },
-    //       function (err, response, body) {
-    //         if (err) {
-    //           console.error(err);
-    //         } else {
-    //           console.log(body);
-    //         }
-    //       }
-    //     ).setOpt('VERBOSE', true)
-    //     .setOpt('SSL_VERIFYPEER', false)
-    //     .setOpt('HTTPHEADER', headers)
-    //     .setOpt('HTTPPOST', formData);
+    curl.on("error", function (err) {
+      console.error(err);
+      close();
+    });
+    curl.perform();
   } catch (error) {
     console.log(error);
   }
 };
+
+//User account_id - 113796205024659
+
+const facebook_get_accounts_pages = async () => {
+  try {
+    let fields, params;
+    fields = [
+      "id","name"
+    ];
+    params = {};
+    const accountss = await new User(113796205024659).getAccounts(fields, params);  //Id here is account_id(NOT AD_ACCOUNT_ID)
+    logApiCallResult("accountss api call complete.", accountss);
+  } catch (error) {
+    console.log(error)
+  }
+};
+// facebook_get_accounts_pages()
 
 const logApiCallResult = (apiCallName, data) => {
   //   console.log(apiCallName);
@@ -331,7 +337,7 @@ const logApiCallResult = (apiCallName, data) => {
   }
 };
 
-exports.module = {
+module.exports = {
   facebook_create_campaign,
   facebook_get_campaign,
   facebook_create_adSet,
