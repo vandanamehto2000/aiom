@@ -118,9 +118,8 @@ const facebook_create_adSet = async (id, fields, params) => {
     //     ],
     //   },
     // };
-
     const adsets = await new AdAccount(id).createAdSet(fields, params);
-    return adsets._data;
+    return adsets;
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
