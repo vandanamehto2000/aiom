@@ -5,12 +5,12 @@ const AdAccount = bizSdk.AdAccount;
 const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
 // const Ad = bizSdk.Ad;
-const User = bizSdk.User
+const User = bizSdk.User;
 const { curly } = require("node-libcurl");
 const { Curl } = require("node-libcurl");
 
 const access_token =
-  "EAARmX2NDin4BADCZAKJQigyIvIfLoK7CsMkVqLPonxbr2ghQB8crkB6tRY0UtZADO9TK6sXZAhfIjjVgsBCIqDioqKvq7zMOMHNttR9WZAh4uj6PSiCXZBdKv2EV3rb6Vvvi7HoqOQzp4srAaYLDyVPMZBM9yl9A0kOkZCjCiqWxZAJXLQMwNnLVSX9tb87nu16knvjy8gwrWO9kbOZA9nOWc";
+  "EAARmX2NDin4BAJOsFC0OYCViWQuERkPBnjpQS3clwGpYZBZBpjPpIzjmsU8fOUH6WOdPZAZCxNyZAENxh68ZCkPRJKhcZAJEG2J1Oz0j2XdweCxvzlIEN4uTspzGTApcQWITb371J8mJMU2TAscxZB1xpPtEJN1Cgl5ZCBfVSWKk3z7VjieltjvZALtVVL1PLaDAo621Ohny7vXZC559tJ0jn06OLtfTZBPxaZA0ZD";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -25,7 +25,7 @@ if (showDebugingInfo) {
 const facebook_create_campaign = async (id, fields, params) => {
   try {
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
-    console.log("success part1",campaigns)
+    console.log("success part1", campaigns);
     return {
       status: StatusCodes.CREATED,
       message: "success",
@@ -33,11 +33,11 @@ const facebook_create_campaign = async (id, fields, params) => {
     };
     // return campaigns;
   } catch (error) {
-    console.log("error part1",error);
+    console.log("error part1", error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
     // return error;
-   return {
+    return {
       status: StatusCodes.BAD_REQUEST,
       message: "error",
       data: error,
@@ -138,6 +138,7 @@ const facebook_create_adSet = async (id, fields, params) => {
 
     const adsets = await new AdAccount(id).createAdSet(fields, params);
     console.log(adsets, "--------------");
+
     return adsets._data;
   } catch (error) {
     console.log(error);
@@ -226,7 +227,7 @@ const facebook_get_ad = async () => {
 
 //page ID -106284349116205
 //Create creative
-const facebook_create_creative = async (id,fields,params) => {
+const facebook_create_creative = async (id, fields, params) => {
   try {
     // let fields, params;
     // fields = [];
@@ -252,7 +253,7 @@ const facebook_create_creative = async (id,fields,params) => {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error
+    return error;
   }
 };
 
@@ -274,7 +275,7 @@ const facebook_get_creative = async () => {
 //AdSet id - 23853907338140580
 //creative id - 23853908495800580
 //Create Ad
-const facebook_create_ad = async (id,fields,params) => {
+const facebook_create_ad = async (id, fields, params) => {
   try {
     let fields, params;
     fields = [];
@@ -287,12 +288,12 @@ const facebook_create_ad = async (id,fields,params) => {
     const ads = await new AdAccount(id).createAd(fields, params);
     console.log(ads);
     logApiCallResult("ads api call complete.", ads);
-    return ads
+    return ads;
   } catch (error) {
-    console.log("catch error",error);
+    console.log("catch error", error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error
+    return error;
   }
 };
 
@@ -335,17 +336,42 @@ const facebook_get_image_hash = async () => {
 const facebook_get_accounts_pages = async () => {
   try {
     let fields, params;
-    fields = [
-      "id","name"
-    ];
+    fields = ["id", "name"];
     params = {};
-    const accountss = await new User(113796205024659).getAccounts(fields, params);  //Id here is account_id(NOT AD_ACCOUNT_ID)
+    const accountss = await new User(113796205024659).getAccounts(
+      fields,
+      params
+    ); //Id here is account_id(NOT AD_ACCOUNT_ID)
     logApiCallResult("accountss api call complete.", accountss);
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 };
 // facebook_get_accounts_pages()
+
+const facebook_generate_previews = async () => {
+  let fields, params;
+  fields = [];
+  // params = {
+  //   creative: "<adCreativeSpec>",   
+  //   ad_format: "<adFormat>",
+  // };
+  params = {
+    'creative' : {'object_story_id':'<pageID>_<postID>'},
+    'ad_format' : 'DESKTOP_FEED_STANDARD',
+  };
+  const generatepreviewss = new AdAccount(id).getGeneratePreviews(
+    fields,
+    params
+  );
+  logApiCallResult("generatepreviewss api call complete.", generatepreviewss);
+};
+
+///////////////////////////////////////GET CUSTOM AUDIENCES/////////////////////////////////////////////////////////////////
+// curl -i -X GET \
+//  "https://graph.facebook.com/v16.0/act_1239957706633747/customaudiences?access_token=EAARmX2NDin4BAJOsFC0OYCViWQuERkPBnjpQS3clwGpYZBZBpjPpIzjmsU8fOUH6WOdPZAZCxNyZAENxh68ZCkPRJKhcZAJEG2J1Oz0j2XdweCxvzlIEN4uTspzGTApcQWITb371J8mJMU2TAscxZB1xpPtEJN1Cgl5ZCBfVSWKk3z7VjieltjvZALtVVL1PLaDAo621Ohny7vXZC559tJ0jn06OLtfTZBPxaZA0ZD"
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const logApiCallResult = (apiCallName, data) => {
   //   console.log(apiCallName);

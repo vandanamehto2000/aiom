@@ -123,12 +123,21 @@ const create_adSet = async (req, res, next) => {
     // };
 
     const adsets = await facebook_create_adSet(id, fields, params);
-    console.log(adsets, "--------------");
-    return next({
-      status: StatusCodes.CREATED,
-      message: "success",
-      data: adsets,
-    });
+    // console.log(adsets.status, "--------------");
+    if(adsets._data){
+      return next({
+        status: StatusCodes.CREATED,
+        message: "success",
+        data: adsets,
+      });
+    }else{
+      return next({
+        status: StatusCodes.BAD_REQUEST,
+        message: "error",
+        data: adsets.response,
+      });
+    }
+    
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
