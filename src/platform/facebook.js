@@ -40,7 +40,10 @@ const facebook_create_campaign = async (id, fields, params) => {
     console.log("error part1", error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error;
+    return  {
+      status: "error",
+      data: error.message?error.message:error,
+    };
   }
 };
 
@@ -48,11 +51,14 @@ const facebook_create_campaign = async (id, fields, params) => {
 const facebook_get_campaign = async (id, fields, params) => {
   try {
     const campaignss = await new AdAccount(id).getCampaigns(fields, params);
-    logApiCallResult("campaignss api call complete.", campaignss);
     if (campaignss[0]._data) {
+      let result = [];
+      for (let i = 0; i < campaignss.length; i++) {
+        result.push(campaignss[i]._data);
+      }
       return {
         status: "success",
-        data: campaignss,
+        data: result,
       };
     } else {
       return {
@@ -64,7 +70,10 @@ const facebook_get_campaign = async (id, fields, params) => {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error;
+    return  {
+      status: "error",
+      data: error.message?error.message:error,
+    };
   }
 };
 
@@ -126,7 +135,6 @@ const facebook_create_adSet = async (id, fields, params) => {
     //   },
     // };
     const adsets = await new AdAccount(id).createAdSet(fields, params);
-    console.log("----------------------",adsets)
     if (adsets._data) {
       return {
         status: "success",
@@ -142,7 +150,10 @@ const facebook_create_adSet = async (id, fields, params) => {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error;
+    return {
+      status:"error",
+      data: error.message?error.message:error,
+    }
   }
 };
 // facebook_create_adSet()
@@ -150,9 +161,7 @@ const facebook_create_adSet = async (id, fields, params) => {
 //Get AdSet
 const facebook_get_adSet = async (id, fields, params) => {
   try {
-    let params1 = {};
-    const adsetss = await new Campaign(id).getAdSets(fields, params1);
-    logApiCallResult("adsetss api call complete.", adsetss);
+    const adsetss = await new Campaign(id).getAdSets(fields, params);
     if (adsetss[0]._data) {
       let arr = [];
       for (let i = 0; i < adsetss.length; i++) {

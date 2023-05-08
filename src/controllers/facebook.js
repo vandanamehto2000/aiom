@@ -14,13 +14,13 @@ const create_campaign = async (req, res, next) => {
   try {
     let { id, fields, params } = req.body;
     const facebook_result = await facebook_create_campaign(id, fields, params);
-    if(facebook_result.status=="success"){
+    if (facebook_result.status == "success") {
       return next({
         status: StatusCodes.CREATED,
         message: "success",
         data: facebook_result.data,
-      })
-    }else{
+      });
+    } else {
       return next({
         status: StatusCodes.BAD_REQUEST,
         message: "error",
@@ -31,30 +31,25 @@ const create_campaign = async (req, res, next) => {
     return next({
       status: StatusCodes.BAD_REQUEST,
       message: "error",
-      data: error,
-    })
+      data: error.message ? error.message : error,
+    });
   }
 };
 
 //Get a Campaign
 const get_campaign = async (req, res, next) => {
   try {
-    let { id, fields_array, effective_status_array, access_token } = req.query;
-    let fields=fields_array.slice(1,-1).split(",");
-    let effective_status =effective_status_array.slice(1,-1).split(",");
-    let params = { effective_status: effective_status };
-    const campaignss = await facebook_get_campaign(id, fields, params);
-    if(campaignss.status=="success"){
-      let result = [];
-      for (let i = 0; i < campaignss.data.length; i++) {
-        result.push(campaignss.data[i]._data);
-      }
+    let { id, fields_array, params } = req.query;
+    fields_array = JSON.parse(fields_array);
+    params = JSON.parse(params);
+    const campaignss = await facebook_get_campaign(id, fields_array, params);
+    if (campaignss.status == "success") {
       return next({
         status: StatusCodes.OK,
         message: "success",
-        data: result,
-      })
-    }else{
+        data: campaignss.data,
+      });
+    } else {
       return next({
         status: StatusCodes.BAD_REQUEST,
         message: "error",
@@ -67,7 +62,7 @@ const get_campaign = async (req, res, next) => {
     return next({
       status: StatusCodes.BAD_REQUEST,
       message: "error",
-      data: error,
+      data: error.message ? error.message : error,
     });
   }
 };
@@ -87,7 +82,7 @@ const create_adSet = async (req, res, next) => {
       return next({
         status: StatusCodes.BAD_REQUEST,
         message: "error",
-        data: adsets.response,
+        data: adsets.data,
       });
     }
   } catch (error) {
@@ -96,24 +91,24 @@ const create_adSet = async (req, res, next) => {
     return next({
       status: StatusCodes.BAD_REQUEST,
       message: "error",
-      data: error,
+      data: error.message ? error.message : error,
     });
   }
 };
 
 const get_adSet = async (req, res, next) => {
   try {
-    let { id, fields_array, access_token } = req.query;
-    let fields = fields_array.slice(1,-1).split(",")
+    let { id, fields_array } = req.query;
+    let fields = JSON.parse(fields_array)
     let params = {};
     const adset_data = await facebook_get_adSet(id, fields, params);
-    if(adset_data.status=="success"){
+    if (adset_data.status == "success") {
       return next({
         status: StatusCodes.OK,
         message: "success",
         data: adset_data.data,
-      })
-    }else{
+      });
+    } else {
       return next({
         status: StatusCodes.BAD_REQUEST,
         message: "error",
@@ -126,7 +121,7 @@ const get_adSet = async (req, res, next) => {
     return next({
       status: StatusCodes.BAD_REQUEST,
       message: "error",
-      data: error,
+      data:error.message ? error.message : error,
     });
   }
 };
