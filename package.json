@@ -13,6 +13,7 @@
         "jsonwebtoken": "^9.0.0",
         "mongoose": "^7.0.4",
         "node-libcurl": "^3.0.0",
-        "nodemon": "^2.0.22"
+        "nodemon": "^2.0.22",
+        "util-deprecate": "^1.0.2"
     }
 }
