@@ -10,7 +10,7 @@ const { curly } = require("node-libcurl");
 const { Curl } = require("node-libcurl");
 
 const access_token =
-  "EAARmX2NDin4BANa7xYNkgq10xVFIrpP3QmnAvwUsdzZAQucwgmItujKclBxgisR6AfSJYke7eJBrp6BZBdui4ZAX5hifWBSNiB5QZCimadVBwSBtVsjg74h1MBWzqembs4zeZCn8UuFR6y7RXv0VVVHbJcA54ROlTQmEuWNJuI2PU8MRZCwmpHGCYtF5LfxuKS1ZAOAoUehEqL4PaUZBmBA6";
+  "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -25,16 +25,16 @@ if (showDebugingInfo) {
 const facebook_create_campaign = async (id, fields, params) => {
   try {
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
-    if(campaigns._data){
+    if (campaigns._data) {
       return {
-        status:"success",
-        data:campaigns._data
-      }
-    }else{
-      return{
-        status:"unsuccessfull",
-        data:campaigns
-      }
+        status: "success",
+        data: campaigns._data,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: campaigns,
+      };
     }
   } catch (error) {
     console.log("error part1", error);
@@ -49,10 +49,17 @@ const facebook_get_campaign = async (id, fields, params) => {
   try {
     const campaignss = await new AdAccount(id).getCampaigns(fields, params);
     logApiCallResult("campaignss api call complete.", campaignss);
-    const result = campaignss.map((item) => {
-      return item._data;
-    });
-    return result;
+    if (campaignss[0]._data) {
+      return {
+        status: "success",
+        data: campaignss,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: campaignss,
+      };
+    }
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
@@ -118,10 +125,19 @@ const facebook_create_adSet = async (id, fields, params) => {
     //     ],
     //   },
     // };
-    console.log("id---", id);
     const adsets = await new AdAccount(id).createAdSet(fields, params);
-
-    return adsets;
+    console.log("----------------------",adsets)
+    if (adsets._data) {
+      return {
+        status: "success",
+        data: adsets._data,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: adsets,
+      };
+    }
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
@@ -142,13 +158,17 @@ const facebook_get_adSet = async (id, fields, params) => {
       for (let i = 0; i < adsetss.length; i++) {
         arr.push(adsetss[i]._data);
       }
-      return arr;
+      return {
+        status: "success",
+        data: arr,
+      };
     } else {
-      console.log("error else------------")
-      return adsetss.response;
+      return {
+        status: "unsuccessfull",
+        data: adsetss,
+      };
     }
   } catch (error) {
-    console.log("platfor-----------------------", error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
     return error;
@@ -324,12 +344,12 @@ const facebook_generate_previews = async () => {
   let fields, params;
   fields = [];
   // params = {
-  //   creative: "<adCreativeSpec>",   
+  //   creative: "<adCreativeSpec>",
   //   ad_format: "<adFormat>",
   // };
   params = {
-    'creative' : {'object_story_id':'<pageID>_<postID>'},
-    'ad_format' : 'DESKTOP_FEED_STANDARD',
+    creative: { object_story_id: "<pageID>_<postID>" },
+    ad_format: "DESKTOP_FEED_STANDARD",
   };
   const generatepreviewss = new AdAccount(id).getGeneratePreviews(
     fields,
