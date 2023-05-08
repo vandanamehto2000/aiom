@@ -5,11 +5,12 @@ const AdAccount = bizSdk.AdAccount;
 const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
 // const Ad = bizSdk.Ad;
+const User = bizSdk.User;
 const { curly } = require("node-libcurl");
-// const access_token =
-//   "EAABzM6QfIAgBAEM15lLq2mQ0AJHAbZAu1qH8P6guqm7fZBCQmQmcfdaMv9lX8bTgxoikuck9OKd1ZCJREzAv2BUnisHZBtndvJC1bZBvUpfUwkCLfJW8K60E1vWiXqdQUFCtdhUZBXddkndhjYaeDoOOrhqVinoadmqmn7MLx57yW0lclG2f4j4HPuE3x7DZCWzAQytrGyePYa1MnzNgZA7wdpn62c3KIidC740yZA0tVimiGilEfLaWX";
+const { Curl } = require("node-libcurl");
+
 const access_token =
-  "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
+  "EAARmX2NDin4BANa7xYNkgq10xVFIrpP3QmnAvwUsdzZAQucwgmItujKclBxgisR6AfSJYke7eJBrp6BZBdui4ZAX5hifWBSNiB5QZCimadVBwSBtVsjg74h1MBWzqembs4zeZCn8UuFR6y7RXv0VVVHbJcA54ROlTQmEuWNJuI2PU8MRZCwmpHGCYtF5LfxuKS1ZAOAoUehEqL4PaUZBmBA6";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -24,7 +25,17 @@ if (showDebugingInfo) {
 const facebook_create_campaign = async (id, fields, params) => {
   try {
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
-    return campaigns;
+    if(campaigns._data){
+      return {
+        status:"success",
+        data:campaigns._data
+      }
+    }else{
+      return{
+        status:"unsuccessfull",
+        data:campaigns
+      }
+    }
   } catch (error) {
     console.log("error part1", error);
     console.log("Error Message:" + error);
@@ -118,6 +129,7 @@ const facebook_create_adSet = async (id, fields, params) => {
     return error;
   }
 };
+// facebook_create_adSet()
 
 //Get AdSet
 const facebook_get_adSet = async (id, fields, params) => {
@@ -256,57 +268,81 @@ const facebook_create_ad = async (id, fields, params) => {
   }
 };
 
+// image HAsh -69b1f27b22e5cbf02f03d5663318604c
 const imagePath =
   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
 const facebook_get_image_hash = async () => {
   try {
-    const url = `https://graph.facebook.com/v2.11/act_${id}/adimages`;
+    const url = `https://graph.facebook.com/v16.0/${id}/adimages`;
 
-    const { statusCode, data } = await curly.post(url, {
-      postFields: JSON.stringify({
-        filename: imagePath,
-        access_token: access_token,
-      }),
-      httpHeader: [
-        "Content-Type: application/json",
-        "Accept: application/json",
-      ],
+    const curl = new Curl();
+    const close = curl.close.bind(curl);
+    // Disable SSL certificate verification(TO BE REMOVED IN PRODUCTION)
+    curl.setOpt(Curl.option.SSL_VERIFYPEER, false);
+
+    curl.setOpt(Curl.option.URL, url);
+    curl.setOpt(Curl.option.HTTPPOST, [
+      { name: "filename", file: imagePath, type: "multipart/formdata" },
+      { name: "access_token", contents: access_token },
+    ]);
+    // console.log("----------------")
+    curl.on("end", function (statusCode, body, headers) {
+      console.log(statusCode);
+      console.log(body);
+      console.log(headers);
+      close();
     });
-
-    // console.log(data,statusCode,"------------")
-    //     const headers = ['Content-Type: multipart/form-data'];
-    //     const formData = [
-    //       {
-    //         name: 'access_token',
-    //         contents: access_token
-    //       },
-    //       {
-    //         name: 'filename',
-    //         file: imagePath,
-    //         type: 'image/jpeg'
-    //       }
-    //     ];
-    //     curly.post(
-    //       url,
-    //       {
-    //   headers: headers,
-    //   multipartFormData: formData
-    // },
-    //       function (err, response, body) {
-    //         if (err) {
-    //           console.error(err);
-    //         } else {
-    //           console.log(body);
-    //         }
-    //       }
-    //     ).setOpt('VERBOSE', true)
-    //     .setOpt('SSL_VERIFYPEER', false)
-    //     .setOpt('HTTPHEADER', headers)
-    //     .setOpt('HTTPPOST', formData);
+    curl.on("error", function (err) {
+      console.error(err);
+      close();
+    });
+    curl.perform();
   } catch (error) {
     console.log(error);
   }
 };
+
+//User account_id - 113796205024659
+
+const facebook_get_accounts_pages = async () => {
+  try {
+    let fields, params;
+    fields = ["id", "name"];
+    params = {};
+    const accountss = await new User(113796205024659).getAccounts(
+      fields,
+      params
+    ); //Id here is account_id(NOT AD_ACCOUNT_ID)
+    logApiCallResult("accountss api call complete.", accountss);
+  } catch (error) {
+    console.log(error);
+  }
+};
+// facebook_get_accounts_pages()
+
+const facebook_generate_previews = async () => {
+  let fields, params;
+  fields = [];
+  // params = {
+  //   creative: "<adCreativeSpec>",   
+  //   ad_format: "<adFormat>",
+  // };
+  params = {
+    'creative' : {'object_story_id':'<pageID>_<postID>'},
+    'ad_format' : 'DESKTOP_FEED_STANDARD',
+  };
+  const generatepreviewss = new AdAccount(id).getGeneratePreviews(
+    fields,
+    params
+  );
+  logApiCallResult("generatepreviewss api call complete.", generatepreviewss);
+};
+
+///////////////////////////////////////GET CUSTOM AUDIENCES/////////////////////////////////////////////////////////////////
+// curl -i -X GET \
+//  "https://graph.facebook.com/v16.0/act_1239957706633747/customaudiences?access_token=EAARmX2NDin4BAJOsFC0OYCViWQuERkPBnjpQS3clwGpYZBZBpjPpIzjmsU8fOUH6WOdPZAZCxNyZAENxh68ZCkPRJKhcZAJEG2J1Oz0j2XdweCxvzlIEN4uTspzGTApcQWITb371J8mJMU2TAscxZB1xpPtEJN1Cgl5ZCBfVSWKk3z7VjieltjvZALtVVL1PLaDAo621Ohny7vXZC559tJ0jn06OLtfTZBPxaZA0ZD"
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const logApiCallResult = (apiCallName, data) => {
   //   console.log(apiCallName);

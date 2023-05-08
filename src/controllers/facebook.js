@@ -10,22 +10,28 @@ const {
 const { StatusCodes } = require("http-status-codes");
 //Create a Campaign
 const create_campaign = async (req, res, next) => {
-  // try {
-  let { id, fields, params } = req.body;
-  const facebook_result = await facebook_create_campaign(id, fields, params);
-  // return next(facebook_result);
-  if (facebook_result._data) {
-    return next({
-      status: StatusCodes.CREATED,
-      message: "success",
-      data: facebook_result._data,
-    });
-  } else {
+  try {
+    let { id, fields, params } = req.body;
+    const facebook_result = await facebook_create_campaign(id, fields, params);
+    if(facebook_result.status=="success"){
+      return next({
+        status: StatusCodes.CREATED,
+        message: "success",
+        data: facebook_result.data,
+      })
+    }else{
+      return next({
+        status: StatusCodes.BAD_REQUEST,
+        message: "error",
+        data: facebook_result.data,
+      });
+    }
+  } catch (error) {
     return next({
       status: StatusCodes.BAD_REQUEST,
       message: "error",
-      data: facebook_result.response,
-    });
+      data: error,
+    })
   }
 };
 
