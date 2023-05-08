@@ -1,0 +1,12 @@
+const {create_campaign, get_campaign,create_adSet,create_creative,create_ad} = require("../controllers/facebook");
+const authenticateToken = require('../middleware/auth')
+const express = require("express");
+const router = express.Router();
+
+router.post("/campaign/create", create_campaign);
+router.get("/campaign/get", get_campaign);
+router.post("/ad-set/create", create_adSet);
+router.post("/ad-creative/create", create_creative);
+router.post("/ad/create", create_ad);
+
+module.exports = router;
