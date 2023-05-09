@@ -180,7 +180,10 @@ const facebook_get_adSet = async (id, fields, params) => {
   } catch (error) {
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error;
+    return  {
+      status: "error",
+      data: error.message?error.message:error,
+    };
   }
 };
 
@@ -227,7 +230,7 @@ const facebook_get_ad = async () => {
 
 //page ID -106284349116205
 //Create creative
-const facebook_create_creative = async (id, fields, params) => {
+const facebook_create_creative = async (imagePath,imageName,id, fields, params) => {
   try {
     // let fields, params;
     // fields = [];
@@ -243,17 +246,31 @@ const facebook_create_creative = async (id, fields, params) => {
     //     },
     //   },
     // };
+   let result= await facebook_get_image_hash(imagePath,imageName);
     const adcreatives = await new AdAccount(id).createAdCreative(
       fields,
       params
     );
     logApiCallResult("adcreatives api call complete.", adcreatives);
-    return adcreatives;
+    if (adcreatives._data) {
+      return {
+        status: "success",
+        data: adcreatives._data,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: adcreatives,
+      };
+    }
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error;
+    return  {
+      status: "error",
+      data: error.message?error.message:error,
+    };
   }
 };
 
@@ -298,10 +315,11 @@ const facebook_create_ad = async (id, fields, params) => {
 };
 
 // image HAsh -69b1f27b22e5cbf02f03d5663318604c
-const imagePath =
-  "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
-const facebook_get_image_hash = async () => {
+// const imagePath =
+//   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
+const facebook_get_image_hash = async (imagePath,imageName) => {
   try {
+    console.log("id---",id,"imageName--",imageName,"imagePath",imagePath)
     const url = `https://graph.facebook.com/v16.0/${id}/adimages`;
 
     const curl = new Curl();
@@ -311,7 +329,7 @@ const facebook_get_image_hash = async () => {
 
     curl.setOpt(Curl.option.URL, url);
     curl.setOpt(Curl.option.HTTPPOST, [
-      { name: "filename", file: imagePath, type: "multipart/formdata" },
+      { name: imageName, file: imagePath, type: "multipart/formdata" },
       { name: "access_token", contents: access_token },
     ]);
     // console.log("----------------")
