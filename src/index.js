@@ -7,7 +7,8 @@ const httpStatus = require("http-status-codes");
 const commonErrorHandler = require("./utils/errorHandler");
 const mongodb = require("./dbConfig/mongodbconfig");
 const userRoute = require("./routers/user");
-const facebookRoute = require("./routers/facebook")
+const facebookRoute = require("./routers/facebook");
+const path = require("path");;
 require("dotenv").config();
 mongodb.on("open", function () {});
 const port = process.env.PORT || 3000;
@@ -20,7 +21,7 @@ app.use(commonErrorHandler);
 app.get("/", (req, res) => {
   res.send("Welcome To AIOM");
 });
-
+app.use("/assets", express.static(path.join(__dirname, ".", "uploads")));
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
