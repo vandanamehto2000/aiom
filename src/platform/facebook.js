@@ -11,7 +11,7 @@ const FormData = require("form-data");
 const fs = require("fs");
 
 const access_token =
-  "EAARmX2NDin4BAF0i2CViPCB7g52aOrciGSforTmF8CIuJJ9Buirx9qAMPIwwJrblqbZADj0aDqjiqGGryZAKymUHEhw3JNVRH1rZBGZAmynTkDUeXZAwBvjO3Mb64LxFuZCBUdZAHjuDrQLZA4EUCWvih5XRR6tpVZBnq3wzH5nClERU5FzU3bEJKCuvkrtAZB9JrqvbpyCSyUly4U2deUpmdz";
+  "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -181,9 +181,9 @@ const facebook_get_adSet = async (id, fields, params) => {
   } catch (error) {
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return  {
+    return {
       status: "error",
-      data: error.message?error.message:error,
+      data: error.message ? error.message : error,
     };
   }
 };
@@ -231,7 +231,13 @@ const facebook_get_ad = async () => {
 
 //page ID -106284349116205
 //Create creative
-const facebook_create_creative = async (imagePath,imageName,id, fields, params) => {
+const facebook_create_creative = async (
+  imagePath,
+  imageName,
+  id,
+  fields,
+  params
+) => {
   try {
     // let fields, params;
     // fields = [];
@@ -247,7 +253,27 @@ const facebook_create_creative = async (imagePath,imageName,id, fields, params) 
     //     },
     //   },
     // };
-   let result= await facebook_get_image_hash(imagePath,imageName);
+    // let params1  = {
+    //   image_hash: "<imageHash>",
+    //   object_story_spec: {
+    //     page_id: "<pageID>",
+    //     link_data: {
+    //       image_hash: "<imageHash>",
+    //       link: "<canvasURI>",
+    //       name: "Creative message",
+    //       call_to_action: { type: "LEARN_MORE" },
+    //     },
+    //   },
+    // };
+
+
+
+    let result = await facebook_get_image_hash(imagePath, imageName);
+    let {hash,url,name}= result.images[`${imageName}`]
+
+    params.image_hash = hash;
+    params.object_story_spec.link_data.link = url;
+    params.object_story_spec.link_data.image_hash = hash;
     const adcreatives = await new AdAccount(id).createAdCreative(
       fields,
       params
@@ -268,25 +294,45 @@ const facebook_create_creative = async (imagePath,imageName,id, fields, params) 
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return  {
+    return {
       status: "error",
-      data: error.message?error.message:error,
+      data: error.message ? error.message : error,
     };
   }
 };
 
 //get Creative
-const facebook_get_creative = async () => {
+const facebook_get_creative = async (id,fields,params) => {
   try {
-    let fields, params;
-    fields = ["name", "status", "object_id"];
-    params = {};
     const adcreativess = await new AdAccount(id).getAdCreatives(fields, params);
+    // console.log("data+++++++++++++",adcreativess)
     logApiCallResult("adcreativess api call complete.", adcreativess);
+    if (adcreativess[0]._data) {
+      let arr = [];
+      for (let i = 0; i < adcreativess.length; i++) {
+        arr.push(adcreativess[i]._data);
+      }
+      console.log("success in platform+++++++++++++")
+      return {
+        status: "success",
+        data: arr,
+      };
+    } else {
+      console.log("unsuccessfull in platform+++++++++++++")
+      return {
+        status: "unsuccessfull",
+        data: adcreativess,
+      };
+    }
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
+    console.log("catch in platform+++++++++++++")
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 
@@ -318,17 +364,11 @@ const facebook_create_ad = async (id, fields, params) => {
 // image HAsh -69b1f27b22e5cbf02f03d5663318604c
 // const imagePath =
 //   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
-const facebook_get_image_hash = async (imagePath,imageName) => {
+const facebook_get_image_hash = async (imagePath, imageName) => {
   try {
     let data = new FormData();
-    data.append(
-      "filename",
-      fs.createReadStream(imagePath)
-    );
-    data.append(
-      "access_token",
-      access_token
-    );
+    data.append(imageName, fs.createReadStream(imagePath));
+    data.append("access_token", access_token);
 
     let config = {
       method: "post",
@@ -340,10 +380,10 @@ const facebook_get_image_hash = async (imagePath,imageName) => {
       data: data,
     };
 
-    axios
+    return axios
       .request(config)
       .then((response) => {
-        console.log(JSON.stringify(response.data));
+        return response.data;;
       })
       .catch((error) => {
         console.log(error);
