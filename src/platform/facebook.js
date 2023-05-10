@@ -11,7 +11,7 @@ const FormData = require("form-data");
 const fs = require("fs");
 
 const access_token =
-  "EAARmX2NDin4BAF0i2CViPCB7g52aOrciGSforTmF8CIuJJ9Buirx9qAMPIwwJrblqbZADj0aDqjiqGGryZAKymUHEhw3JNVRH1rZBGZAmynTkDUeXZAwBvjO3Mb64LxFuZCBUdZAHjuDrQLZA4EUCWvih5XRR6tpVZBnq3wzH5nClERU5FzU3bEJKCuvkrtAZB9JrqvbpyCSyUly4U2deUpmdz";
+  "EAARmX2NDin4BAP7iZBiUtiNEpkn9OhqpwbhtD0a5zAbs6z93BTu4h4ypxZCq6Wa8uYgFFxe9MBLKzIWNUnZC5geH2TGhuBRlPLEg5RHkCyYHQzQa3vyYcMrBSZA70dXAnmIbZBc3zQBUBqZABCjOpkzTROLHZAWjeVTEjcSCZBX1XwUl59wQOZCA6aT6FvIq70DaTF0eu49sYO9M7yyQDfjwu";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -372,12 +372,13 @@ const facebook_generate_previews = async () => {
   logApiCallResult("generatepreviewss api call complete.", generatepreviewss);
 };
 
-const facebook_get_location = async () => {
-  let params = {
-    location_types: ["zip"],
-    type: "adgeolocation",
-    q: "110038",
-  };
+const facebook_get_location = async (params) => {
+  try {
+    // let params = {
+  //   location_types: ["zip"],
+  //   type: "adgeolocation",
+  //   q: "110038",
+  // };
   const url = "https://graph.facebook.com/v16.0/search";
 
   let config = {
@@ -395,15 +396,66 @@ const facebook_get_location = async () => {
     .catch((error) => {
       console.log(error);
     });
+  } catch (error) {
+    console.log(error)
+  }
 };
 // facebook_get_location()
 
-const facebook_get_interest = async () => {};
-///////////////////////////////////////GET CUSTOM AUDIENCES/////////////////////////////////////////////////////////////////
-// curl -i -X GET \
-//  "https://graph.facebook.com/v16.0/act_1239957706633747/customaudiences?access_token=EAARmX2NDin4BAJOsFC0OYCViWQuERkPBnjpQS3clwGpYZBZBpjPpIzjmsU8fOUH6WOdPZAZCxNyZAENxh68ZCkPRJKhcZAJEG2J1Oz0j2XdweCxvzlIEN4uTspzGTApcQWITb371J8mJMU2TAscxZB1xpPtEJN1Cgl5ZCBfVSWKk3z7VjieltjvZALtVVL1PLaDAo621Ohny7vXZC559tJ0jn06OLtfTZBPxaZA0ZD"
+const facebook_get_interest = async () => {
+  try {
+    let params={
+      type: "adinterest",
+      q: "cricket",
+    }
+    const url = "https://graph.facebook.com/v16.0/search";
+  
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
+      headers: {},
+    };
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  } catch (error) {
+    console.log(error)   
+  }
+};
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const facebook_get_demographics = async () => {
+  try {
+    let params={
+      type: "adeducationschool",
+      q: "DELHi",
+    }
+    const url = "https://graph.facebook.com/v16.0/search";
+  
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
+      headers: {},
+    };
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  } catch (error) {
+    console.log(error)   
+  }
+};
+
 
 const logApiCallResult = (apiCallName, data) => {
   //   console.log(apiCallName);
