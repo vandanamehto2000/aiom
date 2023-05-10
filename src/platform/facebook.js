@@ -6,11 +6,12 @@ const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
 // const Ad = bizSdk.Ad;
 const User = bizSdk.User;
-const { curly } = require("node-libcurl");
-const { Curl } = require("node-libcurl");
+const axios = require("axios");
+const FormData = require("form-data");
+const fs = require("fs");
 
 const access_token =
-  "EAARmX2NDin4BANa7xYNkgq10xVFIrpP3QmnAvwUsdzZAQucwgmItujKclBxgisR6AfSJYke7eJBrp6BZBdui4ZAX5hifWBSNiB5QZCimadVBwSBtVsjg74h1MBWzqembs4zeZCn8UuFR6y7RXv0VVVHbJcA54ROlTQmEuWNJuI2PU8MRZCwmpHGCYtF5LfxuKS1ZAOAoUehEqL4PaUZBmBA6";
+  "EAARmX2NDin4BAF0i2CViPCB7g52aOrciGSforTmF8CIuJJ9Buirx9qAMPIwwJrblqbZADj0aDqjiqGGryZAKymUHEhw3JNVRH1rZBGZAmynTkDUeXZAwBvjO3Mb64LxFuZCBUdZAHjuDrQLZA4EUCWvih5XRR6tpVZBnq3wzH5nClERU5FzU3bEJKCuvkrtAZB9JrqvbpyCSyUly4U2deUpmdz";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -25,55 +26,55 @@ if (showDebugingInfo) {
 const facebook_create_campaign = async (id, fields, params) => {
   try {
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
-    if(campaigns._data){
+    if (campaigns._data) {
       return {
-        status:"success",
-        data:campaigns._data
-      }
-    }else{
-      return{
-        status:"unsuccessfull",
-        data:campaigns
-      }
+        status: "success",
+        data: campaigns._data,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: campaigns,
+      };
     }
   } catch (error) {
     console.log("error part1", error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-  return {
-    status:"error",
-    data:error.response?error.response:error
-  }
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 
 //Get a Campaign
 const facebook_get_campaign = async (id, fields, params) => {
-  console.log("get++++++:::::::::", id, fields, params);
   try {
-    // let fields1, params1;
-    // fields1 = [
-    //   "name",
-    //   "start_time",
-    //   "end_time",
-    //   "daily_budget",
-    //   "lifetime_budget",
-    //   "buying_type",
-    // ];
-    // let params1 = {
-    //   effective_status: ["ACTIVE", "PAUSED"],
-    // };
     const campaignss = await new AdAccount(id).getCampaigns(fields, params);
-    logApiCallResult("campaignss api call complete.", campaignss);
-    const result = campaignss.map((item) => {
-      return item._data;
-    });
-    return result;
+    if (campaignss[0]._data) {
+      let result = [];
+      for (let i = 0; i < campaignss.length; i++) {
+        result.push(campaignss[i]._data);
+      }
+      return {
+        status: "success",
+        data: result,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: campaignss,
+      };
+    }
   } catch (error) {
     console.log(error);
-    console.log("Error Message:-----------" + error);
+    console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error;
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 
@@ -135,45 +136,49 @@ const facebook_create_adSet = async (id, fields, params) => {
     //   },
     // };
     const adsets = await new AdAccount(id).createAdSet(fields, params);
-    return adsets;
+    if (adsets._data) {
+      return {
+        status: "success",
+        data: adsets._data,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: adsets,
+      };
+    }
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error;
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 // facebook_create_adSet()
 
 //Get AdSet
-const facebook_get_adSet = async (id, fields,params) => {
+const facebook_get_adSet = async (id, fields, params) => {
   try {
-    let fields, params;
-    fields = [
-      "name",
-      "start_time",
-      "end_time",
-      "daily_budget",
-      "lifetime_budget",
-    ];
-    params = {
-      effective_status: [
-        "ACTIVE",
-        "PAUSED",
-        "ARCHIVED",
-        "IN_PROCESS",
-        "WITH_ISSUES",
-      ],
-    };
-    const adsetss = await new Campaign(id).getAdSets(
-      fields,
-      params
-    );
-
-    console.log(adsetss, "---------");
-    logApiCallResult("adsetss api call complete.", adsetss);
+    const adsetss = await new Campaign(id).getAdSets(fields, params);
+    if (adsetss[0]._data) {
+      let arr = [];
+      for (let i = 0; i < adsetss.length; i++) {
+        arr.push(adsetss[i]._data);
+      }
+      return {
+        status: "success",
+        data: arr,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: adsetss,
+      };
+    }
   } catch (error) {
-    console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
     return error;
@@ -298,30 +303,34 @@ const imagePath =
   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
 const facebook_get_image_hash = async () => {
   try {
-    const url = `https://graph.facebook.com/v16.0/${id}/adimages`;
+    let data = new FormData();
+    data.append(
+      "filename",
+      fs.createReadStream(imagePath)
+    );
+    data.append(
+      "access_token",
+      access_token
+    );
 
-    const curl = new Curl();
-    const close = curl.close.bind(curl);
-    // Disable SSL certificate verification(TO BE REMOVED IN PRODUCTION)
-    curl.setOpt(Curl.option.SSL_VERIFYPEER, false);
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://graph.facebook.com/v16.0/act_1239957706633747/adimages",
+      headers: {
+        ...data.getHeaders(),
+      },
+      data: data,
+    };
 
-    curl.setOpt(Curl.option.URL, url);
-    curl.setOpt(Curl.option.HTTPPOST, [
-      { name: "filename", file: imagePath, type: "multipart/formdata" },
-      { name: "access_token", contents: access_token },
-    ]);
-    // console.log("----------------")
-    curl.on("end", function (statusCode, body, headers) {
-      console.log(statusCode);
-      console.log(body);
-      console.log(headers);
-      close();
-    });
-    curl.on("error", function (err) {
-      console.error(err);
-      close();
-    });
-    curl.perform();
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   } catch (error) {
     console.log(error);
   }
@@ -349,12 +358,12 @@ const facebook_generate_previews = async () => {
   let fields, params;
   fields = [];
   // params = {
-  //   creative: "<adCreativeSpec>",   
+  //   creative: "<adCreativeSpec>",
   //   ad_format: "<adFormat>",
   // };
   params = {
-    'creative' : {'object_story_id':'<pageID>_<postID>'},
-    'ad_format' : 'DESKTOP_FEED_STANDARD',
+    creative: { object_story_id: "<pageID>_<postID>" },
+    ad_format: "DESKTOP_FEED_STANDARD",
   };
   const generatepreviewss = new AdAccount(id).getGeneratePreviews(
     fields,
@@ -363,6 +372,33 @@ const facebook_generate_previews = async () => {
   logApiCallResult("generatepreviewss api call complete.", generatepreviewss);
 };
 
+const facebook_get_location = async () => {
+  let params = {
+    location_types: ["zip"],
+    type: "adgeolocation",
+    q: "110038",
+  };
+  const url = "https://graph.facebook.com/v16.0/search";
+
+  let config = {
+    method: "get",
+    maxBodyLength: Infinity,
+    url: `${url}?location_types=${params.location_types}&type=${params.type}&q=${params.q}&access_token=${access_token}`,
+    headers: {},
+  };
+
+  axios
+    .request(config)
+    .then((response) => {
+      console.log(response.data);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+// facebook_get_location()
+
+const facebook_get_interest = async () => {};
 ///////////////////////////////////////GET CUSTOM AUDIENCES/////////////////////////////////////////////////////////////////
 // curl -i -X GET \
 //  "https://graph.facebook.com/v16.0/act_1239957706633747/customaudiences?access_token=EAARmX2NDin4BAJOsFC0OYCViWQuERkPBnjpQS3clwGpYZBZBpjPpIzjmsU8fOUH6WOdPZAZCxNyZAENxh68ZCkPRJKhcZAJEG2J1Oz0j2XdweCxvzlIEN4uTspzGTApcQWITb371J8mJMU2TAscxZB1xpPtEJN1Cgl5ZCBfVSWKk3z7VjieltjvZALtVVL1PLaDAo621Ohny7vXZC559tJ0jn06OLtfTZBPxaZA0ZD"
