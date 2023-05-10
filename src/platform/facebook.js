@@ -22,6 +22,7 @@ if (showDebugingInfo) {
 const facebook_create_campaign = async (id, fields, params) => {
   try {
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
+    console.log(campaigns, "ooooooooooooo");
     return campaigns;
   } catch (error) {
     console.log("error part1",error);

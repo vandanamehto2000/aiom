@@ -11,6 +11,7 @@ const { StatusCodes } = require("http-status-codes");
 const create_campaign = async (req, res, next) => {
   // try {
     let { id, fields, params } = req.body;
+    console.log(id, fields, params, "ppppppp");
     const facebook_result = await facebook_create_campaign(id, fields, params);
     // return next(facebook_result);
     if(facebook_result._data){
