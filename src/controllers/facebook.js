@@ -5,6 +5,7 @@ const {
   facebook_create_adSet,
   facebook_get_adSet,
   facebook_create_creative,
+  facebook_get_creative,
   facebook_create_ad,
 } = require("../platform/facebook");
 const { StatusCodes } = require("http-status-codes");
@@ -14,11 +15,9 @@ const responseApi = require("../utils/apiresponse");
 //multer for file upload
 let storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    console.log("--------------", file)
     cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    console.log("-------filename-------", file)
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
@@ -40,14 +39,14 @@ const create_campaign = async (req, res, next) => {
 
     const facebook_result = await facebook_create_campaign(id, fields, params);
     if (facebook_result.status == "success") {
-      return responseApi.successResponseWithData(res, "success", facebook_result.data, StatusCodes.CREATED)
+      return responseApi.successResponseWithData(res, "success", facebook_result.data, StatusCodes.CREATED);
     } else {
       return responseApi.ErrorResponse(res, "error", facebook_result.data, StatusCodes.BAD_REQUEST);
-
     }
   } catch (error) {
-    let data = error.message ? error.message : error;
-    return responseApi.ErrorResponse(res, "error", data);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error, StatusCodes.BAD_REQUEST);
   }
 };
 
@@ -59,23 +58,14 @@ const get_campaign = async (req, res, next) => {
     params = JSON.parse(params);
     const campaignss = await facebook_get_campaign(id, fields_array, params);
     if (campaignss.status == "success") {
-      let statusCode = StatusCodes.OK;
-      let msg = "success";
-      let data = campaignss.data;
-      return responseApi.successResponseWithData(res, msg, data, statusCode);
+      return responseApi.successResponseWithData(res, "success", campaignss.data, StatusCodes.OK);
     } else {
-      let statusCode = StatusCodes.BAD_REQUEST;
-      let msg = "error";
-      let data = campaignss.data;
-      return responseApi.ErrorResponse(res, msg, data, statusCode);
+      return responseApi.ErrorResponse(res, "error", campaignss.data, StatusCodes.BAD_REQUEST);
     }
   } catch (error) {
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    let statusCode = StatusCodes.BAD_REQUEST;
-    let msg = "error";
-    let data = error.message ? error.message : error;
-    return responseApi.ErrorResponse(res, msg, data, statusCode);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
 
@@ -85,23 +75,14 @@ const create_adSet = async (req, res, next) => {
     let { id, fields, params } = req.body;
     const adsets = await facebook_create_adSet(id, fields, params);
     if (adsets.status === "success") {
-      let statusCode = StatusCodes.CREATED;
-      let msg = "success";
-      let data = adsets.data;
-      return responseApi.successResponseWithData(res, msg, data, statusCode);
+      return responseApi.successResponseWithData(res, "success", adsets.data, StatusCodes.CREATED);
     } else {
-      let statusCode = StatusCodes.BAD_REQUEST;
-      let msg = "error";
-      let data = adsets.data;
-      return responseApi.ErrorResponse(res, msg, data, statusCode);
+      return responseApi.ErrorResponse(res, "error", adsets.data, StatusCodes.BAD_REQUEST);
     }
   } catch (error) {
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    let statusCode = StatusCodes.BAD_REQUEST;
-    let msg = "error";
-    let data = error.message ? error.message : error;
-    return responseApi.ErrorResponse(res, msg, data, statusCode);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
 
@@ -112,23 +93,14 @@ const get_adSet = async (req, res, next) => {
     let params = {};
     const adset_data = await facebook_get_adSet(id, fields, params);
     if (adset_data.status == "success") {
-      let statusCode = StatusCodes.OK;
-      let msg = "success";
-      let data = adset_data.data;
-      return responseApi.successResponseWithData(res, msg, data, statusCode);
+      return responseApi.successResponseWithData(res, "success", adset_data.data, StatusCodes.OK);
     } else {
-      let statusCode = StatusCodes.BAD_REQUEST;
-      let msg = "error";
-      let data = adset_data.data;
-      return responseApi.ErrorResponse(res, msg, data, statusCode);
+      return responseApi.ErrorResponse(res, "error", adset_data.data, StatusCodes.BAD_REQUEST);
     }
   } catch (error) {
     console.log("Error Message: controller" + error);
     console.log("Error Stack:" + error.stack);
-    let statusCode = StatusCodes.BAD_REQUEST;
-    let msg = "error";
-    let data = error.message ? error.message : error;
-    return responseApi.ErrorResponse(res, msg, data, statusCode);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
 
@@ -136,32 +108,19 @@ const get_adSet = async (req, res, next) => {
 const create_creative = async (req, res, next) => {
   try {
     uploadFile(req, res, async function (err) {
-      console.log("first---------")
       if (err instanceof multer.MulterError || !req.file || err) {
-        let statusCode = StatusCodes.BAD_REQUEST;
-        let msg = "error";
-        let data = err;
-        console.log("instanceof-----", data)
-        return responseApi.ErrorResponse(res, msg, data, statusCode);
+        return responseApi.ErrorResponse(res, "error", err, StatusCodes.BAD_REQUEST);
       } else {
         let { id, fields, params } = req.body;
-        let { path, filename, originalname, fieldname } = req.file;
-        //  let imageName = JSON.parse(filename);
-        //   let imagePath = JSON.parse(path);
+        let {path,filename,originalname,fieldname}=req.file;
         id = JSON.parse(id);
         fields = JSON.parse(fields);
         params = JSON.parse(params);
         const adcreatives = await facebook_create_creative(path, filename, id, fields, params);
         if (adcreatives.status == "success") {
-          let statusCode = StatusCodes.CREATED;
-          let msg = "success";
-          let data = adcreatives.data;
-          return responseApi.successResponseWithData(res, msg, data, statusCode);
+          return responseApi.successResponseWithData(res, "success", adcreatives.data, StatusCodes.CREATED);
         } else {
-          let statusCode = StatusCodes.BAD_REQUEST;
-          let msg = "error";
-          let data = adcreatives.data;
-          return responseApi.ErrorResponse(res, msg, data, statusCode);
+          return responseApi.ErrorResponse(res, "error", adcreatives.data, StatusCodes.BAD_REQUEST);
         }
       }
     });
@@ -169,10 +128,28 @@ const create_creative = async (req, res, next) => {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    let statusCode = StatusCodes.BAD_REQUEST;
-    let msg = "error";
-    let data = error.message ? error.message : error;
-    return responseApi.ErrorResponse(res, msg, data, statusCode);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+  }
+};
+
+//get Creative
+const get_creative = async (req, res, next) => {
+  try {
+    let {id, fields} = req.query;
+     fields = JSON.parse(fields);
+     id = JSON.parse(id);
+    let params = {};
+    const creative_data =await facebook_get_creative(id, fields, params);
+    if (creative_data.status == "success") {
+      return responseApi.successResponseWithData(res, "success", creative_data.data, StatusCodes.OK);
+    } else {
+      return responseApi.ErrorResponse(res, "error", creative_data.data, StatusCodes.BAD_REQUEST);
+    }
+  } catch (error) {
+    console.log(error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
 
@@ -203,5 +180,6 @@ module.exports = {
   create_adSet,
   get_adSet,
   create_creative,
+  get_creative,
   create_ad,
 };
