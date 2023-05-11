@@ -46,7 +46,7 @@ const create_campaign = async (req, res, next) => {
   } catch (error) {
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error, StatusCodes.BAD_REQUEST);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
 
@@ -72,7 +72,11 @@ const get_campaign = async (req, res, next) => {
 //Create AdSET
 const create_adSet = async (req, res, next) => {
   try {
-    let { id, fields, params } = req.body;
+    const { id, fields, params } = req.body;
+    if (!(id && fields && params)) {
+      return responseApi.ErrorResponse(res, "All input is required, One of the fields is missing-(id, fields, params)", StatusCodes.BAD_REQUEST)
+    }
+
     const adsets = await facebook_create_adSet(id, fields, params);
     if (adsets.status === "success") {
       return responseApi.successResponseWithData(res, "success", adsets.data, StatusCodes.CREATED);
@@ -112,7 +116,7 @@ const create_creative = async (req, res, next) => {
         return responseApi.ErrorResponse(res, "error", err, StatusCodes.BAD_REQUEST);
       } else {
         let { id, fields, params } = req.body;
-        let {path,filename,originalname,fieldname}=req.file;
+        let { path, filename, originalname, fieldname } = req.file;
         id = JSON.parse(id);
         fields = JSON.parse(fields);
         params = JSON.parse(params);
@@ -135,11 +139,11 @@ const create_creative = async (req, res, next) => {
 //get Creative
 const get_creative = async (req, res, next) => {
   try {
-    let {id, fields} = req.query;
-     fields = JSON.parse(fields);
-     id = JSON.parse(id);
+    let { id, fields } = req.query;
+    fields = JSON.parse(fields);
+    id = JSON.parse(id);
     let params = {};
-    const creative_data =await facebook_get_creative(id, fields, params);
+    const creative_data = await facebook_get_creative(id, fields, params);
     if (creative_data.status == "success") {
       return responseApi.successResponseWithData(res, "success", creative_data.data, StatusCodes.OK);
     } else {
