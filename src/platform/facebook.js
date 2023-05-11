@@ -487,30 +487,34 @@ const facebook_generate_previews = async () => {
 
 const facebook_get_location = async (params) => {
   try {
-    // let params = {
-  //   location_types: ["zip"],
-  //   type: "adgeolocation",
-  //   q: "110038",
-  // };
   const url = "https://graph.facebook.com/v16.0/search";
-
   let config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: `${url}?location_types=${params.location_types}&type=${params.type}&q=${params.q}&access_token=${access_token}`,
+    url: `${url}?location_types=${params.location_types}&type=${params.type}&q=${params.q}&limit=1000&access_token=${access_token}`,
     headers: {},
   };
 
-  axios
-    .request(config)
-    .then((response) => {
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  const result = await axios.request(config)
+
+  if(result.data){
+    return {
+      status:"success",
+      data: result.data
+    }
+  }else{
+    return{
+      status:"error",
+      data: result.message?result.message:result
+    }
+  }
+    
   } catch (error) {
     console.log(error)
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 // facebook_get_location()
@@ -590,7 +594,8 @@ module.exports = {
   facebook_get_creative,
   facebook_create_creative,
   facebook_get_user_account_id,
-  facebook_get_accounts_pages
+  facebook_get_accounts_pages,
+  facebook_get_location
 };
 
 // facebook_create_campaign()
