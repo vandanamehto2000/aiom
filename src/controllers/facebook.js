@@ -7,10 +7,13 @@ const {
   facebook_create_creative,
   facebook_get_creative,
   facebook_create_ad,
+  facebook_get_user_account_id,
+  facebook_get_accounts_pages,
 } = require("../platform/facebook");
 const { StatusCodes } = require("http-status-codes");
 const multer = require("multer");
 const responseApi = require("../utils/apiresponse");
+const { APIResponse } = require("facebook-nodejs-business-sdk");
 
 //multer for file upload
 let storage = multer.diskStorage({
@@ -178,6 +181,24 @@ const create_ad = async (req, res, next) => {
     });
   }
 };
+
+const get_account_pages = async (req,res,next)=>{
+  try {
+      const account_pages = await facebook_get_accounts_pages()
+      if(account_pages!=="success"){
+        return responseApi.ErrorResponse(res, "error",account_pages.data, StatusCodes.BAD_REQUEST);
+      }
+        return responseApi.successResponseWithData(res,"success",account_pages.data)
+      
+     
+  } catch (error) {
+    console.log(error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+  }
+}
+
 module.exports = {
   create_campaign,
   get_campaign,
@@ -186,4 +207,5 @@ module.exports = {
   create_creative,
   get_creative,
   create_ad,
+  get_account_pages
 };

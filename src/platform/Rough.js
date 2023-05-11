@@ -340,3 +340,94 @@
 // PREAPPROVED
 // DISABLED
 
+
+/////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////LOCATION/////////////////////////////////////////////////////////////////
+{"data":[{"key":"1728","name":"Delhi","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1737","name":"Meghalaya","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1726","name":"Chandigarh","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1742","name":"Punjab","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1731","name":"Himachal Pradesh","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1736","name":"Manipur","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1745","name":"Tripura","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1747","name":"Sikkim","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1732","name":"Jammu and Kashmir","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1751","name":"Goa","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1741","name":"Pondicherry","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1749","name":"Mizoram","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1739","name":"Nagaland","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1748","name":"Arunachal Pradesh","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1727","name":"Dadra and Nagar Haveli","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1723","name":"Andaman and Nicobar Islands","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1755","name":"Chhattisgarh","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1756","name":"Jharkhand","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1735","name":"Maharashtra","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1730","name":"Haryana","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1746","name":"West Bengal","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1733","name":"Kerala","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1738","name":"Karnataka","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1754","name":"Uttar Pradesh","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true},{"key":"1743","name":"Rajasthan","type":"region","country_code":"IN","country_name":"India","supports_region":true,"supports_city":true}],"paging":{"cursors":{"before":"MAZDZD","after":"MjQZD"},"next":"https:\/\/graph.facebook.com\/v16.0\/search?access_token=EAARmX2NDin4BABaVKKSHzZCB7okpsO2UazQjtAhsG00OcIljIGcuDsajeV9mkYcEUJlYZBbvFNz6uAOvPZBv1YOkEOFBimVccj9JzNuuetsKZBv54rbaVZAyPO2KoqGCxBxlEGEFQ4KqJnTxoozZB9qkMV5Bg72R1pcu5GS8sZAN2vxlAzYIccnaKiO0ZCEslzONmbj4VHVN8gZDZD&type=adgeolocation&location_types=\u00255B\u002522region\u002522\u00255D&q=India&limit=25&after=MjQZD"}}
+
+curl -G -d 'location_types=["region"]' -d 'type=adgeolocation' -d 'q=India' -d 'access_token=EAARmX2NDin4BABaVKKSHzZCB7okpsO2UazQjtAhsG00OcIljIGcuDsajeV9mkYcEUJlYZBbvFNz6uAOvPZBv1YOkEOFBimVccj9JzNuuetsKZBv54rbaVZAyPO2KoqGCxBxlEGEFQ4KqJnTxoozZB9qkMV5Bg72R1pcu5GS8sZAN2vxlAzYIccnaKiO0ZCEslzONmbj4VHVN8gZDZD' https://graph.facebook.com/v16.0/search
+
+"excluded_geo_locations": {
+  "regions": [
+    {
+      "key": "3847"
+    }
+  ]
+},
+
+
+//country
+{
+  location_types:["country"],
+  type:"adgeolocation",
+  q:"India"
+ }
+
+ //region
+ {
+  location_types:["region"],
+  type:"adgeolocation",
+  q:"India"
+ }
+
+ //city
+ {
+  location_types:["city"],
+  type:"adgeolocation",
+  q:"Delhi"
+ }
+
+ //zip
+ {
+  location_types:["zip"],
+  type:"adgeolocation",
+  q:"110038"
+ }
+
+
+ //interest
+ {
+  type: "adinterest",
+  q: "cricket",
+ }
+
+
+ ////////////////behavior/////////////////////////////////
+ {
+  type: "adeducationschool",
+  q: "cricket",
+ }
+
+ All the available type: -
+
+// adeducationschool - Autocomplete college targeting
+
+// adeducationmajor - Autocomplete college major targeting
+
+// adgeolocation - Autocomplete combined for country, city, state & zip
+
+// adgeolocation.adcountry - Autocomplete for country
+
+// adgeolocation.adzipcode - Autocomplete for zip code
+
+// adgeolocation.adgeolocationmeta - Additional metadata for geolocations
+
+// adgeolocation.adradiussuggestion - Returns recommended radius around location
+
+// adinterest - Autocomplete locale targeting
+
+// adinterest.adinterestsuggestion - Suggestions based on interest targeting
+
+// adinterest.adinterestvalid - Validates string as valid interest targeting option
+
+// adlocale - Autocomplete locale targeting
+
+// adTargetingCategory - Parameter q ignored. See all possible targeting options for class with parameter class.
+// Possible values of class: interests, behaviors, demographics, life_events, industries, income, family_statuses, user_device, user_os
+
+// adworkemployer - Autocomplete values for work employer
+
+// adworkposition - Autocomplete values for job title
+
+ /////////////////////////////////////////////////////////////////////////
