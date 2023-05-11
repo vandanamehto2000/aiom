@@ -9,6 +9,7 @@ const {
   facebook_create_ad,
   facebook_get_user_account_id,
   facebook_get_accounts_pages,
+  facebook_get_location,
 } = require("../platform/facebook");
 const { StatusCodes } = require("http-status-codes");
 const multer = require("multer");
@@ -176,13 +177,36 @@ const get_account_pages = async (req,res,next)=>{
       if(account_pages!=="success"){
         return responseApi.ErrorResponse(res, "error",account_pages.data, StatusCodes.BAD_REQUEST);
       }
-        return responseApi.successResponseWithData(res,"success",account_pages.data)
-      
-     
+        return responseApi.successResponseWithData(res,"success",account_pages.data)  
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+  }
+}
+
+const get_location_keys = async (req,res,next)=>{
+  try {
+    let { location,country_code }= req.query
+    location = JSON.parse(location)
+    if(!location){
+      return responseApi.ErrorResponse(res,"error",data,"Location Params is required ",StatusCodes.BAD_REQUEST)
+    }
+    const location_details = await facebook_get_location(location)
+    let filtered_location = location_details.data
+    if(country_code){
+       filtered_location = location_details.data.data.filter((item)=>{
+        return `"${item.country_code}"` ==country_code
+      })
+    }
+    if(location_details.status==="success"){
+      return responseApi.successResponseWithData(res,"success",filtered_location)
+    }else{
+      return responseApi.ErrorResponse(res,"error",data,location_details.data,StatusCodes.BAD_REQUEST)
+    }
+    
+  } catch (error) {
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 }
@@ -195,5 +219,6 @@ module.exports = {
   create_creative,
   get_creative,
   create_ad,
-  get_account_pages
+  get_account_pages,
+  get_location_keys
 };
