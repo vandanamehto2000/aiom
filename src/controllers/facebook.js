@@ -15,6 +15,7 @@ const multer = require("multer");
 const responseApi = require("../utils/apiresponse");
 const { APIResponse } = require("facebook-nodejs-business-sdk");
 
+
 //multer for file upload
 let storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -41,6 +42,7 @@ const create_campaign = async (req, res, next) => {
     }
 
     const facebook_result = await facebook_create_campaign(id, fields, params);
+    console.log(facebook_result, "++++++++++++++++++++++++++++++++++")
     if (facebook_result.status == "success") {
       return responseApi.successResponseWithData(res, "success", facebook_result.data, StatusCodes.CREATED);
     } else {
@@ -182,15 +184,15 @@ const create_ad = async (req, res, next) => {
   }
 };
 
-const get_account_pages = async (req,res,next)=>{
+const get_account_pages = async (req, res, next) => {
   try {
-      const account_pages = await facebook_get_accounts_pages()
-      if(account_pages!=="success"){
-        return responseApi.ErrorResponse(res, "error",account_pages.data, StatusCodes.BAD_REQUEST);
-      }
-        return responseApi.successResponseWithData(res,"success",account_pages.data)
-      
-     
+    const account_pages = await facebook_get_accounts_pages()
+    if (account_pages !== "success") {
+      return responseApi.ErrorResponse(res, "error", account_pages.data, StatusCodes.BAD_REQUEST);
+    }
+    return responseApi.successResponseWithData(res, "success", account_pages.data)
+
+
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
@@ -198,6 +200,8 @@ const get_account_pages = async (req,res,next)=>{
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 }
+
+
 
 module.exports = {
   create_campaign,
@@ -207,5 +211,5 @@ module.exports = {
   create_creative,
   get_creative,
   create_ad,
-  get_account_pages
+  get_account_pages,
 };
