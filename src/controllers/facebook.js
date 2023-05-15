@@ -16,7 +16,7 @@ const multer = require("multer");
 const responseApi = require("../utils/apiresponse");
 const { APIResponse } = require("facebook-nodejs-business-sdk");
 
-
+console.log()
 //multer for file upload
 let storage = multer.diskStorage({
   destination: function (req, file, cb) {
