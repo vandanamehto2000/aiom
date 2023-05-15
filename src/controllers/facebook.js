@@ -174,7 +174,7 @@ const create_ad = async (req, res, next) => {
 const get_account_pages = async (req,res,next)=>{
   try {
       const account_pages = await facebook_get_accounts_pages()
-      if(account_pages!=="success"){
+      if(account_pages.status!=="success"){
         return responseApi.ErrorResponse(res, "error",account_pages.data, StatusCodes.BAD_REQUEST);
       }
         return responseApi.successResponseWithData(res,"success",account_pages.data)  
