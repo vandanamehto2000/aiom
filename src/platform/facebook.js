@@ -11,7 +11,7 @@ const FormData = require("form-data");
 const fs = require("fs");
 
 const access_token =
-  "EAARmX2NDin4BAF0i2CViPCB7g52aOrciGSforTmF8CIuJJ9Buirx9qAMPIwwJrblqbZADj0aDqjiqGGryZAKymUHEhw3JNVRH1rZBGZAmynTkDUeXZAwBvjO3Mb64LxFuZCBUdZAHjuDrQLZA4EUCWvih5XRR6tpVZBnq3wzH5nClERU5FzU3bEJKCuvkrtAZB9JrqvbpyCSyUly4U2deUpmdz";
+  "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -181,7 +181,10 @@ const facebook_get_adSet = async (id, fields, params) => {
   } catch (error) {
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error;
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 
@@ -228,7 +231,13 @@ const facebook_get_ad = async () => {
 
 //page ID -106284349116205
 //Create creative
-const facebook_create_creative = async (id, fields, params) => {
+const facebook_create_creative = async (
+  imagePath,
+  imageName,
+  id,
+  fields,
+  params
+) => {
   try {
     // let fields, params;
     // fields = [];
@@ -244,32 +253,84 @@ const facebook_create_creative = async (id, fields, params) => {
     //     },
     //   },
     // };
+    // let params1  = {
+    //   image_hash: "<imageHash>",
+    //   object_story_spec: {
+    //     page_id: "<pageID>",
+    //     link_data: {
+    //       image_hash: "<imageHash>",
+    //       link: "<canvasURI>",
+    //       name: "Creative message",
+    //       call_to_action: { type: "LEARN_MORE" },
+    //     },
+    //   },
+    // };
+
+
+
+    let result = await facebook_get_image_hash(imagePath, imageName);
+    let {hash,url,name}= result.images[`${imageName}`]
+
+    params.image_hash = hash;
+    params.object_story_spec.link_data.link = url;
+    params.object_story_spec.link_data.image_hash = hash;
     const adcreatives = await new AdAccount(id).createAdCreative(
       fields,
       params
     );
     logApiCallResult("adcreatives api call complete.", adcreatives);
-    return adcreatives;
+    if (adcreatives._data) {
+      return {
+        status: "success",
+        data: adcreatives._data,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: adcreatives,
+      };
+    }
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error;
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 
 //get Creative
-const facebook_get_creative = async () => {
+const facebook_get_creative = async (id,fields,params) => {
   try {
-    let fields, params;
-    fields = ["name", "status", "object_id"];
-    params = {};
     const adcreativess = await new AdAccount(id).getAdCreatives(fields, params);
+    // console.log("data+++++++++++++",adcreativess)
     logApiCallResult("adcreativess api call complete.", adcreativess);
+    if (adcreativess[0]._data) {
+      let arr = [];
+      for (let i = 0; i < adcreativess.length; i++) {
+        arr.push(adcreativess[i]._data);
+      }
+      return {
+        status: "success",
+        data: arr,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: adcreativess,
+      };
+    }
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
+    console.log("catch in platform+++++++++++++")
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 
@@ -299,19 +360,13 @@ const facebook_create_ad = async (id, fields, params) => {
 };
 
 // image HAsh -69b1f27b22e5cbf02f03d5663318604c
-const imagePath =
-  "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
-const facebook_get_image_hash = async () => {
+// const imagePath =
+//   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
+const facebook_get_image_hash = async (imagePath, imageName) => {
   try {
     let data = new FormData();
-    data.append(
-      "filename",
-      fs.createReadStream(imagePath)
-    );
-    data.append(
-      "access_token",
-      access_token
-    );
+    data.append(imageName, fs.createReadStream(imagePath));
+    data.append("access_token", access_token);
 
     let config = {
       method: "post",
@@ -323,10 +378,10 @@ const facebook_get_image_hash = async () => {
       data: data,
     };
 
-    axios
+    return axios
       .request(config)
       .then((response) => {
-        console.log(JSON.stringify(response.data));
+        return response.data;;
       })
       .catch((error) => {
         console.log(error);
@@ -337,22 +392,80 @@ const facebook_get_image_hash = async () => {
 };
 
 //User account_id - 113796205024659
+//GET User account ID
+const facebook_get_user_account_id = async () =>{
+  try {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `https://graph.facebook.com/v16.0/me?fields=id,name&access_token=${access_token}`,
+      headers: { }
+    };
+    
+    const response = await axios.request(config)
+    if(response.data){
+      return {
+        status:"success",
+        data: response.data
+      }
+    }else{
+      return{
+        status:"error",
+        data: response.message?response.message:response
+      }
+    }
+    
+  } catch (error) {
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+}
 
+
+
+//pages related to the user account id
 const facebook_get_accounts_pages = async () => {
   try {
+    const user_details = await facebook_get_user_account_id()
+    if(user_details.status!=="success"){
+      return {
+        status:"error",
+        data:user_details.data
+      }
+    }
     let fields, params;
-    fields = ["id", "name"];
+    fields = ["id", "name","description"];
     params = {};
-    const accountss = await new User(113796205024659).getAccounts(
+    const accountss = await new User(user_details.data.id).getAccounts(
       fields,
       params
     ); //Id here is account_id(NOT AD_ACCOUNT_ID)
-    logApiCallResult("accountss api call complete.", accountss);
+    if (accountss[0]._data) {
+      let arr = [];
+      for (let i = 0; i < accountss.length; i++) {
+        arr.push(accountss[i]._data);
+      }
+      return {
+        status: "success",
+        data: arr,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: accountss,
+      };
+    }
+    
+    // logApiCallResult("accountss api call complete.", accountss);
   } catch (error) {
-    console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
-// facebook_get_accounts_pages()
 
 const facebook_generate_previews = async () => {
   let fields, params;
@@ -372,38 +485,94 @@ const facebook_generate_previews = async () => {
   logApiCallResult("generatepreviewss api call complete.", generatepreviewss);
 };
 
-const facebook_get_location = async () => {
-  let params = {
-    location_types: ["zip"],
-    type: "adgeolocation",
-    q: "110038",
-  };
+const facebook_get_location = async (params) => {
+  try {
   const url = "https://graph.facebook.com/v16.0/search";
-
   let config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: `${url}?location_types=${params.location_types}&type=${params.type}&q=${params.q}&access_token=${access_token}`,
+    url: `${url}?location_types=${params.location_types}&type=${params.type}&q=${params.q}&limit=1000&access_token=${access_token}`,
     headers: {},
   };
 
-  axios
-    .request(config)
-    .then((response) => {
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  const result = await axios.request(config)
+
+  if(result.data){
+    return {
+      status:"success",
+      data: result.data
+    }
+  }else{
+    return{
+      status:"error",
+      data: result.message?result.message:result
+    }
+  }
+    
+  } catch (error) {
+    console.log(error)
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
 };
 // facebook_get_location()
 
-const facebook_get_interest = async () => {};
-///////////////////////////////////////GET CUSTOM AUDIENCES/////////////////////////////////////////////////////////////////
-// curl -i -X GET \
-//  "https://graph.facebook.com/v16.0/act_1239957706633747/customaudiences?access_token=EAARmX2NDin4BAJOsFC0OYCViWQuERkPBnjpQS3clwGpYZBZBpjPpIzjmsU8fOUH6WOdPZAZCxNyZAENxh68ZCkPRJKhcZAJEG2J1Oz0j2XdweCxvzlIEN4uTspzGTApcQWITb371J8mJMU2TAscxZB1xpPtEJN1Cgl5ZCBfVSWKk3z7VjieltjvZALtVVL1PLaDAo621Ohny7vXZC559tJ0jn06OLtfTZBPxaZA0ZD"
+const facebook_get_interest = async () => {
+  try {
+    let params={
+      type: "adinterest",
+      q: "cricket",
+    }
+    const url = "https://graph.facebook.com/v16.0/search";
+  
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
+      headers: {},
+    };
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  } catch (error) {
+    console.log(error)   
+  }
+};
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const facebook_get_demographics = async () => {
+  try {
+    let params={
+      type: "adeducationschool",
+      q: "DELHi",
+    }
+    const url = "https://graph.facebook.com/v16.0/search";
+  
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
+      headers: {},
+    };
+    axios
+      .request(config)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  } catch (error) {
+    console.log(error)   
+  }
+};
+
 
 const logApiCallResult = (apiCallName, data) => {
   //   console.log(apiCallName);
@@ -424,6 +593,9 @@ module.exports = {
   facebook_create_ad,
   facebook_get_creative,
   facebook_create_creative,
+  facebook_get_user_account_id,
+  facebook_get_accounts_pages,
+  facebook_get_location
 };
 
 // facebook_create_campaign()
