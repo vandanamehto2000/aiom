@@ -17,6 +17,7 @@
         "mongoose": "^7.0.4",
         "multer": "^1.4.5-lts.1",
         "node-libcurl": "^3.0.0",
-        "nodemon": "^2.0.22"
+        "nodemon": "^2.0.22",
+        "util-deprecate": "^1.0.2"
     }
 }

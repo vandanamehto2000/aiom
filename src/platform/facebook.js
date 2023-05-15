@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 const bizSdk = require("facebook-nodejs-business-sdk");
 const { StatusCodes } = require("http-status-codes");
 const AdAccount = bizSdk.AdAccount;
@@ -9,6 +9,23 @@ const User = bizSdk.User;
 const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
+const facebook = require('../models/facebook')
+
+// // global.Token;
+// // let obj = {}
+// let globalToken;
+// const access_details_fun = async()=>{
+//   const details = await facebook.find()
+//   // console.log(details)
+//   return details[0].token
+// }
+
+// const handleAccess = async()=>{
+// let token = await access_details_fun()
+//   globalToken= token
+// }
+
+
 
 const access_token =
   "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
@@ -269,7 +286,7 @@ const facebook_create_creative = async (
 
 
     let result = await facebook_get_image_hash(imagePath, imageName);
-    let {hash,url,name}= result.images[`${imageName}`]
+    let { hash, url, name } = result.images[`${imageName}`]
 
     params.image_hash = hash;
     params.object_story_spec.link_data.link = url;
@@ -302,7 +319,7 @@ const facebook_create_creative = async (
 };
 
 //get Creative
-const facebook_get_creative = async (id,fields,params) => {
+const facebook_get_creative = async (id, fields, params) => {
   try {
     const adcreativess = await new AdAccount(id).getAdCreatives(fields, params);
     // console.log("data+++++++++++++",adcreativess)
@@ -393,28 +410,28 @@ const facebook_get_image_hash = async (imagePath, imageName) => {
 
 //User account_id - 113796205024659
 //GET User account ID
-const facebook_get_user_account_id = async () =>{
+const facebook_get_user_account_id = async () => {
   try {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
       url: `https://graph.facebook.com/v16.0/me?fields=id,name&access_token=${access_token}`,
-      headers: { }
+      headers: {}
     };
-    
+
     const response = await axios.request(config)
-    if(response.data){
+    if (response.data) {
       return {
-        status:"success",
+        status: "success",
         data: response.data
       }
-    }else{
-      return{
-        status:"error",
-        data: response.message?response.message:response
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response
       }
     }
-    
+
   } catch (error) {
     return {
       status: "error",
@@ -429,14 +446,14 @@ const facebook_get_user_account_id = async () =>{
 const facebook_get_accounts_pages = async () => {
   try {
     const user_details = await facebook_get_user_account_id()
-    if(user_details.status!=="success"){
+    if (user_details.status !== "success") {
       return {
-        status:"error",
-        data:user_details.data
+        status: "error",
+        data: user_details.data
       }
     }
     let fields, params;
-    fields = ["id", "name","description"];
+    fields = ["id", "name", "description"];
     params = {};
     const accountss = await new User(user_details.data.id).getAccounts(
       fields,
@@ -457,7 +474,7 @@ const facebook_get_accounts_pages = async () => {
         data: accountss,
       };
     }
-    
+
     // logApiCallResult("accountss api call complete.", accountss);
   } catch (error) {
     return {
@@ -521,12 +538,12 @@ const facebook_get_location = async (params) => {
 
 const facebook_get_interest = async () => {
   try {
-    let params={
+    let params = {
       type: "adinterest",
       q: "cricket",
     }
     const url = "https://graph.facebook.com/v16.0/search";
-  
+
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -542,18 +559,18 @@ const facebook_get_interest = async () => {
         console.log(error);
       });
   } catch (error) {
-    console.log(error)   
+    console.log(error)
   }
 };
 
 const facebook_get_demographics = async () => {
   try {
-    let params={
+    let params = {
       type: "adeducationschool",
       q: "DELHi",
     }
     const url = "https://graph.facebook.com/v16.0/search";
-  
+
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -569,7 +586,7 @@ const facebook_get_demographics = async () => {
         console.log(error);
       });
   } catch (error) {
-    console.log(error)   
+    console.log(error)
   }
 };
 
