@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 const bizSdk = require("facebook-nodejs-business-sdk");
 const { StatusCodes } = require("http-status-codes");
 const AdAccount = bizSdk.AdAccount;
@@ -9,6 +9,23 @@ const User = bizSdk.User;
 const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
+const facebook = require('../models/facebook')
+
+// // global.Token;
+// // let obj = {}
+// let globalToken;
+// const access_details_fun = async()=>{
+//   const details = await facebook.find()
+//   // console.log(details)
+//   return details[0].token
+// }
+
+// const handleAccess = async()=>{
+// let token = await access_details_fun()
+//   globalToken= token
+// }
+
+
 
 const access_token =
   "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";

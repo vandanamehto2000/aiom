@@ -3,7 +3,8 @@ const Joi = require("joi");
 const registerUser = Joi.object({
     username : Joi.string().required(),
     email : Joi.string().required().email(),
-    password : Joi.string().required().min(3)
+    password : Joi.string().required().min(3),
+    roles:Joi.string().required()
 })
 
 const loginUser = Joi.object({

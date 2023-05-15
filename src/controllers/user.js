@@ -2,6 +2,7 @@ const CryptoJS = require("crypto-js");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const Role = require("../models/role");
 
 const generateAccessToken = (response) => {
   return jwt.sign(
@@ -23,6 +24,7 @@ const register = async (req, res, next) => {
       req.body.password,
       process.env.PASS_SECRET
     ).toString(),
+    roles: req.body.roles
   };
   try {
     let userData = await User.create(newUser);
@@ -48,19 +50,26 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const response = await User.findOne({ email: req.body.email });
+    console.log(response, "ppppppppppppppppp")
     if (response) {
       let bytes = CryptoJS.AES.decrypt(
         response.password,
         process.env.PASS_SECRET
       );
+      console.log(bytes)
+
       let decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
+      console.log(decryptedPassword, "...............")
       if (req.body.password === decryptedPassword) {
+        console.log(req.body.password===decryptedPassword)
         const token1 = generateAccessToken(response);
+        console.log(token1)
         let data = await User.findOneAndUpdate(
           { email: req.body.email },
           { token: token1 },
           { new: true }
         );
+        console.log(data, "+++++++++++++")
         next({
           status: StatusCodes.OK,
           message: "User login successfully",
@@ -90,8 +99,13 @@ const login = async (req, res, next) => {
 const logout = async (req, res, next) => {
   try {
     let { _id, email, username } = req.auth;
+    console.log(_id, email, username)
     let token = req.headers.authorization.split(" ")[1];
+    console.log(token);
     const response = await User.find({ email: email });
+    console.log(response)
+    console.log(response.length !== 0)
+    console.log(response[0].token === token)
     if (response.length !== 0 && response[0].token === token) {
       await User.updateOne({ token: token }, { token: "" }, { new: true });
       next({
