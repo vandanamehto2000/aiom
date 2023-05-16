@@ -2,7 +2,6 @@ const CryptoJS = require("crypto-js");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const Role = require("../models/role");
 
 const generateAccessToken = (response) => {
   return jwt.sign(
@@ -10,6 +9,8 @@ const generateAccessToken = (response) => {
       _id: response._id,
       email: response.email,
       username: response.username,
+      roles: response.roles
+
     },
     process.env.JWT_SEC,
     { expiresIn: "30m" }
@@ -24,6 +25,7 @@ const register = async (req, res, next) => {
       req.body.password,
       process.env.PASS_SECRET
     ).toString(),
+    organization: req.body.organization,
     roles: req.body.roles
   };
   try {
@@ -37,20 +39,19 @@ const register = async (req, res, next) => {
     console.log(err);
     err.code === 11000
       ? next({
-          status: StatusCodes.BAD_REQUEST,
-          message: "User already exist",
-        })
+        status: StatusCodes.BAD_REQUEST,
+        message: "User already exist",
+      })
       : next({
-          status: StatusCodes.BAD_REQUEST,
-          message: err.message,
-        });
+        status: StatusCodes.BAD_REQUEST,
+        message: err.message,
+      });
   }
 };
 
 const login = async (req, res, next) => {
   try {
     const response = await User.findOne({ email: req.body.email });
-    console.log(response, "ppppppppppppppppp")
     if (response) {
       let bytes = CryptoJS.AES.decrypt(
         response.password,
@@ -59,17 +60,13 @@ const login = async (req, res, next) => {
       console.log(bytes)
 
       let decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
-      console.log(decryptedPassword, "...............")
       if (req.body.password === decryptedPassword) {
-        console.log(req.body.password===decryptedPassword)
         const token1 = generateAccessToken(response);
-        console.log(token1)
         let data = await User.findOneAndUpdate(
           { email: req.body.email },
           { token: token1 },
           { new: true }
         );
-        console.log(data, "+++++++++++++")
         next({
           status: StatusCodes.OK,
           message: "User login successfully",
@@ -98,14 +95,10 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    let { _id, email, username } = req.auth;
-    console.log(_id, email, username)
+    let { _id, email, username, roles } = req.auth;
     let token = req.headers.authorization.split(" ")[1];
-    console.log(token);
     const response = await User.find({ email: email });
-    console.log(response)
-    console.log(response.length !== 0)
-    console.log(response[0].token === token)
+
     if (response.length !== 0 && response[0].token === token) {
       await User.updateOne({ token: token }, { token: "" }, { new: true });
       next({
