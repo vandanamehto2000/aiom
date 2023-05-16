@@ -11,6 +11,8 @@ const {
   facebook_get_accounts_pages,
   facebook_get_location,
 } = require("../platform/facebook");
+
+const fields_constant = require('../utils/constant')
 const { StatusCodes } = require("http-status-codes");
 const multer = require("multer");
 const responseApi = require("../utils/apiresponse");
@@ -49,10 +51,10 @@ const create_campaign = async (req, res, next) => {
 //Get a Campaign
 const get_campaign = async (req, res, next) => {
   try {
-    let { id, fields_array, params } = req.query;
-    fields_array = JSON.parse(fields_array);
+    let { id, fields, params } = req.query;
+    fields = fields_constant.fields[fields]
     params = JSON.parse(params);
-    const campaignss = await facebook_get_campaign(id, fields_array, params);
+    const campaignss = await facebook_get_campaign(id, fields, params);
     if (campaignss.status == "success") {
       return responseApi.successResponseWithData(res, "success", campaignss.data, StatusCodes.OK);
     } else {
@@ -84,8 +86,8 @@ const create_adSet = async (req, res, next) => {
 
 const get_adSet = async (req, res, next) => {
   try {
-    let { id, fields_array } = req.query;
-    let fields = JSON.parse(fields_array);
+    let { id, fields } = req.query;
+    fields = fields_constant.fields[fields]
     let params = {};
     const adset_data = await facebook_get_adSet(id, fields, params);
     if (adset_data.status == "success") {
@@ -132,8 +134,8 @@ const create_creative = async (req, res, next) => {
 const get_creative = async (req, res, next) => {
   try {
     let {id, fields} = req.query;
-     fields = JSON.parse(fields);
-     id = JSON.parse(id);
+    fields = fields_constant.fields[fields]
+     id = JSON.parse(id);  //ad_account_id
     let params = {};
     const creative_data =await facebook_get_creative(id, fields, params);
     if (creative_data.status == "success") {

@@ -10,8 +10,7 @@ const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 
-const access_token =
-  "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
+const access_token = "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 
@@ -266,7 +265,7 @@ const facebook_create_creative = async (
     //   },
     // };
 
-
+    //Change Params according to the input(image/video)
 
     let result = await facebook_get_image_hash(imagePath, imageName);
     let {hash,url,name}= result.images[`${imageName}`]
@@ -305,7 +304,6 @@ const facebook_create_creative = async (
 const facebook_get_creative = async (id,fields,params) => {
   try {
     const adcreativess = await new AdAccount(id).getAdCreatives(fields, params);
-    // console.log("data+++++++++++++",adcreativess)
     logApiCallResult("adcreativess api call complete.", adcreativess);
     if (adcreativess[0]._data) {
       let arr = [];
@@ -326,7 +324,6 @@ const facebook_get_creative = async (id,fields,params) => {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    console.log("catch in platform+++++++++++++")
     return {
       status: "error",
       data: error.message ? error.message : error,
