@@ -10,6 +10,7 @@ const {
   facebook_get_user_account_id,
   facebook_get_accounts_pages,
   facebook_get_location,
+  facebook_create_creative_video
 } = require("../platform/facebook");
 const { StatusCodes } = require("http-status-codes");
 const multer = require("multer");
@@ -19,15 +20,20 @@ const { APIResponse } = require("facebook-nodejs-business-sdk");
 //multer for file upload
 let storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    console.log("--------dest",req)
     cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
+    console.log("--------file",file)
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
 
 let upload = multer({ storage: storage });
-const uploadFile = upload.single("hasImage");
+const uploadVideo = upload.fields([{name: 'source', maxCount: 1}, {name: 'thumb', maxCount: 1}]);
+const uploadImage = upload.single("hasImage");
+
+
 
 //Create a Campaign
 const create_campaign = async (req, res, next) => {
@@ -103,10 +109,13 @@ const get_adSet = async (req, res, next) => {
 //Create creative
 const create_creative = async (req, res, next) => {
   try {
-    uploadFile(req, res, async function (err) {
+    uploadImage(req, res, async function (err) {
+     // console.log("-------------------try")
       if (err instanceof multer.MulterError || !req.file || err) {
+       // console.log("-------------------err",err,req.file,!req.file)
         return responseApi.ErrorResponse(res, "error", err, StatusCodes.BAD_REQUEST);
       } else {
+        //console.log("-------------------req.body",req.body)
         let { id, fields, params } = req.body;
         let {path,filename,originalname,fieldname}=req.file;
         id = JSON.parse(id);
@@ -117,6 +126,44 @@ const create_creative = async (req, res, next) => {
           return responseApi.successResponseWithData(res, "success", adcreatives.data, StatusCodes.CREATED);
         } else {
           return responseApi.ErrorResponse(res, "error", adcreatives.data, StatusCodes.BAD_REQUEST);
+        }
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+  }
+};
+
+const create_creative_video = async (req, res, next) => {
+  try {
+    uploadVideo(req, res, async function (err) {
+      if (err instanceof multer.MulterError || !req.files || err) {
+        return responseApi.ErrorResponse(res, "error", err, StatusCodes.BAD_REQUEST);
+      } else {
+        let thumbFieldname=req.files.thumb[0].fieldname;
+        let thumbFileName = req.files.thumb[0].filename;
+        let thumbPath = req.files.thumb[0].path;
+        let sourceFieldname=req.files.source[0].fieldname;
+        let videoPath=req.files.source[0].path;
+        // return
+        let { id, fields, params } = req.body;
+        // let {path,filename,originalname,fieldname}=req.file;
+        // console.log("=========++++",req.file)
+        id = JSON.parse(id);
+        fields = JSON.parse(fields);
+        params = JSON.parse(params);
+       // console.log("---------------params",params)
+        //console.log("thumbFieldname--",thumbFieldname,"thumbFileName--",thumbFileName,"thumbPath===",thumbPath,"sourceFieldname==",sourceFieldname,"videoPath+++",videoPath)
+        const result = await facebook_create_creative_video(thumbPath,thumbFieldname,thumbFileName,videoPath,sourceFieldname,id, fields, params);
+        //console.log("video data-----result",result)
+        if (result.status == "success") {
+          return responseApi.successResponseWithData(res, "success", result, StatusCodes.CREATED);
+        } else {
+          //console.log("result=====error==========",result)
+          return responseApi.ErrorResponse(res, "error", result, StatusCodes.BAD_REQUEST);
         }
       }
     });
@@ -217,6 +264,7 @@ module.exports = {
   create_adSet,
   get_adSet,
   create_creative,
+  create_creative_video,
   get_creative,
   create_ad,
   get_account_pages,
