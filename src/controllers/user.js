@@ -9,6 +9,8 @@ const generateAccessToken = (response) => {
       _id: response._id,
       email: response.email,
       username: response.username,
+      roles: response.roles
+
     },
     process.env.JWT_SEC,
     { expiresIn: "30m" }
@@ -23,6 +25,8 @@ const register = async (req, res, next) => {
       req.body.password,
       process.env.PASS_SECRET
     ).toString(),
+    organization: req.body.organization,
+    roles: req.body.roles
   };
   try {
     let userData = await User.create(newUser);
@@ -35,13 +39,13 @@ const register = async (req, res, next) => {
     console.log(err);
     err.code === 11000
       ? next({
-          status: StatusCodes.BAD_REQUEST,
-          message: "User already exist",
-        })
+        status: StatusCodes.BAD_REQUEST,
+        message: "User already exist",
+      })
       : next({
-          status: StatusCodes.BAD_REQUEST,
-          message: err.message,
-        });
+        status: StatusCodes.BAD_REQUEST,
+        message: err.message,
+      });
   }
 };
 
@@ -53,6 +57,8 @@ const login = async (req, res, next) => {
         response.password,
         process.env.PASS_SECRET
       );
+      console.log(bytes)
+
       let decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
       if (req.body.password === decryptedPassword) {
         const token1 = generateAccessToken(response);
@@ -89,9 +95,10 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    let { _id, email, username } = req.auth;
+    let { _id, email, username, roles } = req.auth;
     let token = req.headers.authorization.split(" ")[1];
     const response = await User.find({ email: email });
+
     if (response.length !== 0 && response[0].token === token) {
       await User.updateOne({ token: token }, { token: "" }, { new: true });
       next({

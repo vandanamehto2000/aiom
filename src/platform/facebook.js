@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 const bizSdk = require("facebook-nodejs-business-sdk");
 const { StatusCodes } = require("http-status-codes");
 const AdAccount = bizSdk.AdAccount;
@@ -9,9 +9,25 @@ const User = bizSdk.User;
 const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
+const facebook = require('../models/facebook')
 
-const access_token =
-  "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
+// // global.Token;
+// // let obj = {}
+// let globalToken;
+// const access_details_fun = async()=>{
+//   const details = await facebook.find()
+//   // console.log(details)
+//   return details[0].token
+// }
+
+// const handleAccess = async()=>{
+// let token = await access_details_fun()
+//   globalToken= token
+// }
+
+
+
+const access_token = "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 const video_access_token =
@@ -267,15 +283,19 @@ const facebook_create_creative = async (
     //     },
     //   },
     // };
-  let result = await facebook_get_image_hash(imagePath, imageName);
-  let { hash, url, name } = result.images[`${imageName}`];
-  params.image_hash = hash;
-  params.object_story_spec.link_data.link = url;
-  params.object_story_spec.link_data.image_hash = hash;
- let adcreatives = await new AdAccount(id).createAdCreative(
-    fields,
-    params
-  );
+
+    //Change Params according to the input(image/video)
+
+    let result = await facebook_get_image_hash(imagePath, imageName);
+    let { hash, url, name } = result.images[`${imageName}`]
+
+    params.image_hash = hash;
+    params.object_story_spec.link_data.link = url;
+    params.object_story_spec.link_data.image_hash = hash;
+    const adcreatives = await new AdAccount(id).createAdCreative(
+      fields,
+      params
+    );
     logApiCallResult("adcreatives api call complete.", adcreatives);
     if (adcreatives._data) {
       return {
@@ -300,11 +320,16 @@ const facebook_create_creative = async (
 };
 
 //get Creative
-const facebook_get_creative = async (id, fields, params) => {
+const facebook_get_creative = async (id, fields, params,page_id) => {
   try {
     const adcreativess = await new AdAccount(id).getAdCreatives(fields, params);
-    // console.log("data+++++++++++++",adcreativess)
-    logApiCallResult("adcreativess api call complete.", adcreativess);
+    const video_data = await facebook_get_video(page_id)
+    if(video_data.status!=="success"){
+      return {
+        status:"error",
+        data:video_data.data
+      }
+    }
     if (adcreativess[0]._data) {
       let arr = [];
       for (let i = 0; i < adcreativess.length; i++) {
@@ -312,7 +337,10 @@ const facebook_get_creative = async (id, fields, params) => {
       }
       return {
         status: "success",
-        data: arr,
+        data: {
+         video :video_data.data,
+         images: arr
+        }
       };
     } else {
       return {
@@ -324,7 +352,6 @@ const facebook_get_creative = async (id, fields, params) => {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    console.log("catch in platform+++++++++++++");
     return {
       status: "error",
       data: error.message ? error.message : error,
@@ -397,21 +424,22 @@ const facebook_get_user_account_id = async () => {
       method: "get",
       maxBodyLength: Infinity,
       url: `https://graph.facebook.com/v16.0/me?fields=id,name&access_token=${access_token}`,
-      headers: {},
+      headers: {}
     };
 
-    const response = await axios.request(config);
+    const response = await axios.request(config)
     if (response.data) {
       return {
         status: "success",
-        data: response.data,
-      };
+        data: response.data
+      }
     } else {
       return {
         status: "error",
-        data: response.message ? response.message : response,
-      };
+        data: response.message ? response.message : response
+      }
     }
+
   } catch (error) {
     return {
       status: "error",
@@ -423,12 +451,12 @@ const facebook_get_user_account_id = async () => {
 //pages related to the user account id
 const facebook_get_accounts_pages = async () => {
   try {
-    const user_details = await facebook_get_user_account_id();
+    const user_details = await facebook_get_user_account_id()
     if (user_details.status !== "success") {
       return {
         status: "error",
-        data: user_details.data,
-      };
+        data: user_details.data
+      }
     }
     let fields, params;
     fields = ["id", "name", "description"];
@@ -536,7 +564,7 @@ const facebook_get_interest = async () => {
         console.log(error);
       });
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
 };
 
@@ -563,9 +591,38 @@ const facebook_get_demographics = async () => {
         console.log(error);
       });
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
 };
+
+const facebook_get_video = async (id) => {
+  let config = {
+    method: 'get',
+    maxBodyLength: Infinity,
+    url: `https://graph.facebook.com/v16.0/${id}/videos?fields=thumbnails&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
+    headers: { }
+  };
+  
+  const video_data = await axios.request(config)
+  if (video_data.data) {
+    let arr = [];
+    for (let i = 0; i < video_data.data.data.length; i++) {
+      arr.push(video_data.data.data[i]);
+    }
+    return {
+      status: "success",
+      data: arr,
+    };
+  } else {
+    return {
+      status: "unsuccessfull",
+      data: video_data,
+    };
+  }
+}
+
+// facebook_get_video(106284349116205)
+
 
 const logApiCallResult = (apiCallName, data) => {
   //   console.log(apiCallName);

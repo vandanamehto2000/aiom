@@ -1,9 +1,12 @@
 const Joi = require("joi");
 
 const registerUser = Joi.object({
-    username : Joi.string().required(),
-    email : Joi.string().required().email(),
-    password : Joi.string().required().min(3)
+  username: Joi.string().required(),
+  email: Joi.string().required().email(),
+  password: Joi.string().required().min(3),
+  organization: Joi.string().required(),
+  roles: Joi.string().required()
+
 })
 
 const loginUser = Joi.object({
@@ -12,4 +15,4 @@ const loginUser = Joi.object({
   password: Joi.string().required().min(3),
 });
 
-module.exports = {registerUser, loginUser };
+module.exports = { registerUser, loginUser };
