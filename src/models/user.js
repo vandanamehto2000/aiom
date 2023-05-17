@@ -8,7 +8,8 @@ const UserSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     token: { type: String, default: '' },
-    roles: { type: Schema.Types.ObjectId, ref: "Role" }
+    organization: { type: String, required: true },
+    roles: { type: String, required: true, enum: ["admin", "business_owner", "employee"] }
   },
   { timestamps: true }
 );
