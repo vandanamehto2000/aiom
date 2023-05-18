@@ -45,7 +45,6 @@ const create_campaign = async (req, res, next) => {
     }
 
     const facebook_result = await facebook_create_campaign(id, fields, params);
-    console.log(facebook_result, "++++++++++++++++++++++++++++++++++")
     if (facebook_result.status == "success") {
       return responseApi.successResponseWithData(res, "success", facebook_result.data, StatusCodes.CREATED);
     } else {
@@ -147,11 +146,11 @@ const create_creative = async (req, res, next) => {
 //get Creative
 const get_creative = async (req, res, next) => {
   try {
-    let {id, fields} = req.query;
+    let {id, fields,page_id} = req.query;
     fields = fields_constant.fields[fields]
      id = JSON.parse(id);  //ad_account_id
     let params = {};
-    const creative_data = await facebook_get_creative(id, fields, params);
+    const creative_data = await facebook_get_creative(id, fields, params,page_id);
     if (creative_data.status == "success") {
       return responseApi.successResponseWithData(res, "success", creative_data.data, StatusCodes.OK);
     } else {
