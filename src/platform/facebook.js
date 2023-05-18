@@ -31,7 +31,7 @@ const access_token = "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstE
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 const video_access_token =
-  "EAARmX2NDin4BAPTO3DpRxYnHLfzN192cXrdZBf3jMZCeoV2kAhZBsXLNTZBYryXw8as37xP5wdSZAyzac7uUzHNMragN84nxLvw8gO6XiozYNnSCUWsZBBVbwVDZAxFjCgwvKzydFYht2CSOiXcURwyPN0rLw8fiSaleJmzPeBJxsTluPZBZBQvoanjEx3zDNOd35UsihqiDr6Y48hFHNkRAd";
+  "EAARmX2NDin4BAGWnIZCDZAsBvOwDjgZAlT4KqJ9yWAI1DgwjPpDiwT5hR74tu2CGDvKr2ZC5qG1l1DX0sfPVvZCFJZCS6K0guL1FD1l1UVBn24FG0BJVI3zBnL2hdz40pfPdLUMecyDLSUTJ1Qc0m6OpFZAHnjlLp9dGII1fv2JagQ5LZBTutOdZBnQ06SFQ3BHCsckiEpQylZCvqL1omMpzXV";
 const pageId = "106284349116205";
 const id = "act_1239957706633747"; //local
 const api = bizSdk.FacebookAdsApi.init(access_token);
@@ -339,7 +339,7 @@ const facebook_get_creative = async (id, fields, params,page_id) => {
         status: "success",
         data: {
          video :video_data.data,
-         images: arr
+         creatives: arr
         }
       };
     } else {
