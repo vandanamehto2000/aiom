@@ -31,7 +31,7 @@ const access_token = "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstE
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 const video_access_token =
-  "EAARmX2NDin4BAAQaeZCjZAfcsmb2S6DYc54QO66oyD6q2P7EZBlgbxZCRirznZBP0NAjjfQybuzsxXAH2j33LC8QJ8UrF0rDh1vBgdEJWkIiv3PsCl7YhE7mS1pE46ugcPPlAa6YCCefL5YMrfyROAVvke0W7NpmB2R2MiTb2fcDo1qrmH1L3JMZB2PlMhmoWCxeEtSyaXldVwv6c5cCKZC";
+  "EAARmX2NDin4BAOwg0MNnFsDdcM5dLrvUdEe4YItKySYmjStY96lqvZABbIdDOxg44XXQIuSlZC1MQrXfvOpKHDdVDGDv8efLgE309iE8LBZBYjG7twR4ZC0IrQzIBCy8SrGVynGMb4uWeUjwsIOlGw5bikFEOFAt9ZCghvZAVHmwROaPMZAkuHFjZBJRgUdnGQyuZAcjVGtdp63SJO6AH0sSh";
 const pageId = "106284349116205";
 const id = "act_1239957706633747"; //local
 const api = bizSdk.FacebookAdsApi.init(access_token);
