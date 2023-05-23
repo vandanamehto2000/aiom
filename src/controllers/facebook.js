@@ -19,15 +19,12 @@ const multer = require("multer");
 const responseApi = require("../utils/apiresponse");
 const { APIResponse } = require("facebook-nodejs-business-sdk");
 
-console.log()
 //multer for file upload
 let storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    console.log("--------dest",req)
     cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    console.log("--------file",file)
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
@@ -43,11 +40,11 @@ const create_campaign = async (req, res, next) => {
   try {
     const { id, fields, params } = req.body;
     if (!(id && fields && params)) {
-      return responseApi.ErrorResponse(res, "All input is required", StatusCodes.BAD_REQUEST)
+      return responseApi.ErrorResponse(res, "All input is required","", StatusCodes.BAD_REQUEST)
     }
 
     if (!(params.name && params.objective && params.special_ad_categories)) {
-      return responseApi.ErrorResponse(res, "One of the fields is missing-(name, objective, special_ad_categories)", StatusCodes.BAD_REQUEST)
+      return responseApi.ErrorResponse(res, "One of the fields is missing-(name, objective, special_ad_categories)", "",StatusCodes.BAD_REQUEST)
     }
 
     const facebook_result = await facebook_create_campaign(id, fields, params);
@@ -87,7 +84,7 @@ const create_adSet = async (req, res, next) => {
   try {
     const { id, fields, params } = req.body;
     if (!(id && fields && params)) {
-      return responseApi.ErrorResponse(res, "All input is required, One of the fields is missing-(id, fields, params)", StatusCodes.BAD_REQUEST)
+      return responseApi.ErrorResponse(res, "All input is required, One of the fields is missing-(id, fields, params)","", StatusCodes.BAD_REQUEST)
     }
 
     const adsets = await facebook_create_adSet(id, fields, params);
@@ -164,15 +161,17 @@ const create_creative_video = async (req, res, next) => {
         let sourceFieldname=req.files.source[0].fieldname;
         let videoPath=req.files.source[0].path;
         // return
-        let { id, fields, params } = req.body;
+        let { id, fields, params,page_id } = req.body; 
+        if(!page_id){
+          return responseApi.ErrorResponse(res, "page_id id required", "", StatusCodes.BAD_REQUEST);
+        }
         // let {path,filename,originalname,fieldname}=req.file;
         // console.log("=========++++",req.file)
-        id = JSON.parse(id);
         fields = JSON.parse(fields);
         params = JSON.parse(params);
        // console.log("---------------params",params)
         //console.log("thumbFieldname--",thumbFieldname,"thumbFileName--",thumbFileName,"thumbPath===",thumbPath,"sourceFieldname==",sourceFieldname,"videoPath+++",videoPath)
-        const result = await facebook_create_creative_video(thumbPath,thumbFieldname,thumbFileName,videoPath,sourceFieldname,id, fields, params);
+        const result = await facebook_create_creative_video(thumbPath,thumbFieldname,thumbFileName,videoPath,sourceFieldname,id, fields, params,page_id);
         //console.log("video data-----result",result)
         if (result.status == "success") {
           return responseApi.successResponseWithData(res, "success", result, StatusCodes.CREATED);
@@ -182,7 +181,7 @@ const create_creative_video = async (req, res, next) => {
         }
       }
     });
-  } catch (error) {
+  } catch (error) {  
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
