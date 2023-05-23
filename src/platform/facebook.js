@@ -41,6 +41,12 @@ if (showDebugingInfo) {
 //Create a Campaign
 const facebook_create_campaign = async (id, fields, params) => {
   try {
+    if(params.daily_budget ){
+      params.daily_budget *= 100 
+    }
+    if(params.lifetime_budget){
+      params.lifetime_budget*=100
+    }
     const campaigns = await new AdAccount(id).createCampaign(fields, params);
     if (campaigns._data) {
       return {
@@ -151,6 +157,12 @@ const facebook_create_adSet = async (id, fields, params) => {
     //     ],
     //   },
     // };
+    if(params.daily_budget ){
+      params.daily_budget *= 100 
+    }
+    if(params.lifetime_budget){
+      params.lifetime_budget*=100
+    }
     const adsets = await new AdAccount(id).createAdSet(fields, params);
     if (adsets._data) {
       return {
@@ -337,7 +349,7 @@ const facebook_get_creative = async (id, fields, params,page_id) => {
         status: "success",
         data: {
          video :video_data.data,
-         images: arr
+         creatives: arr
         }
       };
     } else {
