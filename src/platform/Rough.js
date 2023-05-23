@@ -52,7 +52,8 @@
 
   Objectives:[
     APP_INSTALLS, BRAND_AWARENESS, EVENT_RESPONSES, LEAD_GENERATION, LINK_CLICKS, LOCAL_AWARENESS, MESSAGES, OFFER_CLAIMS, PAGE_LIKES, POST_ENGAGEMENT, PRODUCT_CATALOG_SALES, REACH, STORE_VISITS, VIDEO_VIEWS, OUTCOME_AWARENESS, OUTCOME_ENGAGEMENT, OUTCOME_LEADS, OUTCOME_SALES, OUTCOME_TRAFFIC, OUTCOME_APP_PROMOTION, CONVERSIONS
-  ] 
+  ]
+  goals:[ NONE, APP_INSTALLS, AD_RECALL_LIFT, ENGAGED_USERS, EVENT_RESPONSES, IMPRESSIONS, LEAD_GENERATION, QUALITY_LEAD, LINK_CLICKS, OFFSITE_CONVERSIONS, PAGE_LIKES, POST_ENGAGEMENT, QUALITY_CALL, REACH, LANDING_PAGE_VIEWS, VISIT_INSTAGRAM_PROFILE, VALUE, THRUPLAY, DERIVED_EVENTS, APP_INSTALLS_AND_OFFSITE_CONVERSIONS, CONVERSATIONS, IN_APP_VALUE, MESSAGING_PURCHASE_CONVERSION, MESSAGING_APPOINTMENT_CONVERSION, SUBSCRIBERS] 
 
 
   // (#100) billing_event must be one of the following values: APP_INSTALLS, CLICKS, IMPRESSIONS, LINK_CLICKS, NONE, OFFER_CLAIMS, PAGE_LIKES, POST_ENGAGEMENT, THRUPLAY, PURCHASE, LISTING_INTERACTION
@@ -428,3 +429,9 @@
 // adworkposition - Autocomplete values for job title
 
  /////////////////////////////////////////////////////////////////////////
+
+
+
+
+  adsetfield00 :["account_id","adlabels","adset_schedule","asset_feed_id","attribution_spec","bid_adjustments","bid_amount","bid_constraints","bid_info","bid_strategy","billing_event","budget_remaining","campaign","campaign_attribution","campaign_id","configured_status","created_time","creative_sequence","daily_budget","daily_min_spend_target","daily_spend_cap","destination_type","effective_status","end_time","id","instagram_actor_id","is_dynamic_creative","issues_info","learning_stage_info","lifetime_budget","lifetime_imps","lifetime_min_spend_target","lifetime_spend_cap","multi_optimization_goal_weight","name","optimization_goal","optimization_sub_event","pacing_type","promoted_object","recommendations","recurring_budget_semantics","review_feedback","rf_prediction_id","source_adset","source_adset_id","start_time","status","targeting","targeting_optimization_types","time_based_ad_rotation_id_blocks","time_based_ad_rotation_intervals","updated_time","use_new_app_click"];
+campaign :["account_id","ad_strategy_group_id","ad_strategy_id","adlabels","bid_strategy","boosted_object_id","brand_lift_studies","budget_rebalance_flag","budget_remaining","buying_type","can_create_brand_lift_study","can_use_spend_cap","configured_status","created_time","daily_budget","effective_status","has_secondary_skadnetwork_reporting","id","is_skadnetwork_attribution","issues_info","last_budget_toggling_time","lifetime_budget","name","objective","pacing_type","primary_attribution","promoted_object","recommendations","smart_promotion_type","source_campaign","source_campaign_id","special_ad_categories","special_ad_category","special_ad_category_country","spend_cap","start_time","status","stop_time","topline_id","updated_time"]

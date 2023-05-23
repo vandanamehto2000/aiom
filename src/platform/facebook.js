@@ -30,7 +30,9 @@ const facebook = require('../models/facebook')
 const access_token = "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
-
+const video_access_token =
+  "EAARmX2NDin4BAAQaeZCjZAfcsmb2S6DYc54QO66oyD6q2P7EZBlgbxZCRirznZBP0NAjjfQybuzsxXAH2j33LC8QJ8UrF0rDh1vBgdEJWkIiv3PsCl7YhE7mS1pE46ugcPPlAa6YCCefL5YMrfyROAVvke0W7NpmB2R2MiTb2fcDo1qrmH1L3JMZB2PlMhmoWCxeEtSyaXldVwv6c5cCKZC";
+const pageId = "106284349116205";
 const id = "act_1239957706633747"; //local
 const api = bizSdk.FacebookAdsApi.init(access_token);
 const showDebugingInfo = true; // Setting this to true shows more debugging info.
@@ -337,7 +339,7 @@ const facebook_get_creative = async (id, fields, params,page_id) => {
         status: "success",
         data: {
          video :video_data.data,
-         images: arr
+         creatives: arr
         }
       };
     } else {
@@ -404,7 +406,7 @@ const facebook_get_image_hash = async (imagePath, imageName) => {
     return axios
       .request(config)
       .then((response) => {
-        return response.data;;
+        return response.data;
       })
       .catch((error) => {
         console.log(error);
@@ -419,7 +421,7 @@ const facebook_get_image_hash = async (imagePath, imageName) => {
 const facebook_get_user_account_id = async () => {
   try {
     let config = {
-      method: 'get',
+      method: "get",
       maxBodyLength: Infinity,
       url: `https://graph.facebook.com/v16.0/me?fields=id,name&access_token=${access_token}`,
       headers: {}
@@ -444,9 +446,7 @@ const facebook_get_user_account_id = async () => {
       data: error.message ? error.message : error,
     };
   }
-}
-
-
+};
 
 //pages related to the user account id
 const facebook_get_accounts_pages = async () => {
@@ -510,30 +510,29 @@ const facebook_generate_previews = async () => {
 
 const facebook_get_location = async (params) => {
   try {
-  const url = "https://graph.facebook.com/v16.0/search";
-  let config = {
-    method: "get",
-    maxBodyLength: Infinity,
-    url: `${url}?location_types=${params.location_types}&type=${params.type}&q=${params.q}&limit=1000&access_token=${access_token}`,
-    headers: {},
-  };
+    const url = "https://graph.facebook.com/v16.0/search";
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${url}?location_types=${params.location_types}&type=${params.type}&q=${params.q}&limit=1000&access_token=${access_token}`,
+      headers: {},
+    };
 
-  const result = await axios.request(config)
+    const result = await axios.request(config);
 
-  if(result.data){
-    return {
-      status:"success",
-      data: result.data
+    if (result.data) {
+      return {
+        status: "success",
+        data: result.data,
+      };
+    } else {
+      return {
+        status: "error",
+        data: result.message ? result.message : result,
+      };
     }
-  }else{
-    return{
-      status:"error",
-      data: result.message?result.message:result
-    }
-  }
-    
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return {
       status: "error",
       data: error.message ? error.message : error,
@@ -547,7 +546,7 @@ const facebook_get_interest = async () => {
     let params = {
       type: "adinterest",
       q: "cricket",
-    }
+    };
     const url = "https://graph.facebook.com/v16.0/search";
 
     let config = {
@@ -574,7 +573,7 @@ const facebook_get_demographics = async () => {
     let params = {
       type: "adeducationschool",
       q: "DELHi",
-    }
+    };
     const url = "https://graph.facebook.com/v16.0/search";
 
     let config = {
@@ -635,6 +634,106 @@ const logApiCallResult = (apiCallName, data) => {
   }
 };
 
+const facebook_get_video_id = async (
+  thumbPath,thumbFieldname,thumbFileName,videoPath,sourceFieldname,id, fields, params
+) => {
+  try {
+    let data = new FormData();
+    data.append("access_token", video_access_token);
+    data.append(sourceFieldname, fs.createReadStream(videoPath));
+    data.append(thumbFieldname, fs.createReadStream(thumbPath));
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `https://graph-video.facebook.com/v16.0/${pageId}/videos`,
+      headers: {
+        ...data.getHeaders(),
+      },
+      data: data,
+    };
+    return axios
+      .request(config)
+      .then((response) => {
+        return {
+          status: "success",
+          data: response.data.id,
+        };
+      })
+      .catch((error) => {
+        return {
+          status: "unsuccessfull",
+          data: error,
+        };
+      });
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+};
+
+const facebook_create_creative_video = async (
+  thumbPath,
+  thumbFieldname,
+  thumbFileName,
+  videoPath,
+  sourceFieldname,
+  id,
+  fields,
+  params
+) => {
+  try {
+    let fields;
+    fields = [];
+    let result = await facebook_get_video_id(
+      thumbPath,
+      thumbFieldname,
+      thumbFileName,
+      videoPath,
+      sourceFieldname,
+      id,
+      fields,
+      params
+    );
+    console.log("====================result",result)
+    let video_id = result.data;
+    let imageURL = "https://scontent.fdel27-4.fna.fbcdn.net/v/t15.5256-10/343759621_289413966748240_3223617081243889490_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=f2c4d5&_nc_ohc=2fkFOpkHZhQAX_7L_cK&_nc_ht=scontent.fdel27-4.fna&edm=AGz5Y0wEAAAA&oh=00_AfBJ0Vr23YXTdnbm1AOazdrNWEvN-EXFdwYLRRAFviBz2w&oe=6469D403";
+    //params = {"name":"Sample Creative video1","object_story_spec":{"page_id":"106284349116205","video_data":{"image_url":"","video_id":"","call_to_action":{"type":"LIKE_PAGE","value":{"page":"106284349116205"} },},},}
+    // params.image_hash = hash;
+    // params.object_story_spec.link_data.link = url;
+    // params.object_story_spec.link_data.image_hash = hash;
+    params.object_story_spec.video_data.image_url=imageURL;
+    params.object_story_spec.video_data.video_id=video_id;
+    console.log("params--------platform",params)
+    const adcreatives = await new AdAccount(id).createAdCreative(
+      fields,
+      params
+    );
+    logApiCallResult("adcreatives api call complete.", adcreatives);
+    if (adcreatives._data) {
+      return {
+        status: "success",
+        data: adcreatives._data.id,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: adcreatives,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+};
+
 module.exports = {
   facebook_create_campaign,
   facebook_get_campaign,
@@ -646,7 +745,8 @@ module.exports = {
   facebook_create_creative,
   facebook_get_user_account_id,
   facebook_get_accounts_pages,
-  facebook_get_location
+  facebook_get_location,
+  facebook_create_creative_video,
 };
 
 // facebook_create_campaign()
