@@ -689,7 +689,19 @@ const facebook_get_video_id = async (
 ) => {
   try {
     let user_id_details = await facebook_get_user_account_id()
+    if(user_id_details.status !=="success"){
+      return {
+        status: user_id_details.status,
+        data: user_id_details.data
+      }
+    }
     let page_access_token = await facebook_get_page_access_token(user_id_details.data.id,page_id)
+    if(page_access_token.status !=="success"){
+      return {
+        status: page_access_token.status,
+        data: page_access_token.data
+      }
+    }
     let data = new FormData();
     data.append("access_token", page_access_token.data);
     data.append(sourceFieldname, fs.createReadStream(videoPath));
@@ -751,8 +763,14 @@ const facebook_create_creative_video = async (
       params,
       page_id
     );
+    if(result.status!=="success"){
+      return {
+        status:result.status,
+        data:result.data
+      }
+    }
     let video_id = result.data;
-    let imageURL = "https://scontent.fdel27-4.fna.fbcdn.net/v/t15.5256-10/343759621_289413966748240_3223617081243889490_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=f2c4d5&_nc_ohc=2fkFOpkHZhQAX_7L_cK&_nc_ht=scontent.fdel27-4.fna&edm=AGz5Y0wEAAAA&oh=00_AfBJ0Vr23YXTdnbm1AOazdrNWEvN-EXFdwYLRRAFviBz2w&oe=6469D403";
+    let imageURL = "https://cdn.explorecams.com/storage/photos/LEFEikw0MR_1600.jpg";
     //params = {"name":"Sample Creative video1","object_story_spec":{"page_id":"106284349116205","video_data":{"image_url":"","video_id":"","call_to_action":{"type":"LIKE_PAGE","value":{"page":"106284349116205"} },},},}
     // params.image_hash = hash;
     // params.object_story_spec.link_data.link = url;

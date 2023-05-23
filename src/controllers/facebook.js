@@ -54,8 +54,7 @@ const create_campaign = async (req, res, next) => {
       return responseApi.ErrorResponse(res, "error", facebook_result.data, StatusCodes.BAD_REQUEST);
     }
   } catch (error) {
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
+    console.log("error",error)
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
@@ -73,6 +72,7 @@ const get_campaign = async (req, res, next) => {
       return responseApi.ErrorResponse(res, "error", campaignss.data, StatusCodes.BAD_REQUEST);
     }
   } catch (error) {
+    console.log("error",error)
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
@@ -94,8 +94,7 @@ const create_adSet = async (req, res, next) => {
       return responseApi.ErrorResponse(res, "error", adsets.data, StatusCodes.BAD_REQUEST);
     }
   } catch (error) {
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
+    console.log("Error", error)
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
@@ -112,8 +111,7 @@ const get_adSet = async (req, res, next) => {
       return responseApi.ErrorResponse(res, "error", adset_data.data, StatusCodes.BAD_REQUEST);
     }
   } catch (error) {
-    console.log("Error Message: controller" + error);
-    console.log("Error Stack:" + error.stack);
+    console.log("Error" , error);
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
@@ -143,8 +141,6 @@ const create_creative = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
@@ -160,31 +156,22 @@ const create_creative_video = async (req, res, next) => {
         let thumbPath = req.files.thumb[0].path;
         let sourceFieldname=req.files.source[0].fieldname;
         let videoPath=req.files.source[0].path;
-        // return
         let { id, fields, params,page_id } = req.body; 
         if(!page_id){
-          return responseApi.ErrorResponse(res, "page_id id required", "", StatusCodes.BAD_REQUEST);
+          return responseApi.ErrorResponse(res, "page_id is required", "", StatusCodes.BAD_REQUEST);
         }
-        // let {path,filename,originalname,fieldname}=req.file;
-        // console.log("=========++++",req.file)
         fields = JSON.parse(fields);
         params = JSON.parse(params);
-       // console.log("---------------params",params)
-        //console.log("thumbFieldname--",thumbFieldname,"thumbFileName--",thumbFileName,"thumbPath===",thumbPath,"sourceFieldname==",sourceFieldname,"videoPath+++",videoPath)
         const result = await facebook_create_creative_video(thumbPath,thumbFieldname,thumbFileName,videoPath,sourceFieldname,id, fields, params,page_id);
-        //console.log("video data-----result",result)
         if (result.status == "success") {
           return responseApi.successResponseWithData(res, "success", result, StatusCodes.CREATED);
         } else {
-          //console.log("result=====error==========",result)
           return responseApi.ErrorResponse(res, "error", result, StatusCodes.BAD_REQUEST);
         }
       }
     });
   } catch (error) {  
     console.log(error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
