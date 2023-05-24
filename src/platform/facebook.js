@@ -4,6 +4,7 @@ const { StatusCodes } = require("http-status-codes");
 const AdAccount = bizSdk.AdAccount;
 const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
+const Ad = bizSdk.Ad
 // const Ad = bizSdk.Ad;
 const User = bizSdk.User;
 const axios = require("axios");
@@ -217,45 +218,34 @@ const facebook_get_adSet = async (id, fields, params) => {
 };
 
 //Get Ad
-const facebook_get_ad = async () => {
+const facebook_get_ads = async (id,fields,params) => {
   try {
-    let fields, params;
-    fields = [
-      "impressions",
-      "account_currency",
-      "account_id",
-      "account_name",
-      "action_values",
-      "actions",
-      "ad_bid_value",
-      "ad_click_actions",
-      "ad_id",
-      "ad_impression_actions",
-      "ad_name",
-      "adset_bid_value",
-      "adset_end",
-      "adset_id",
-      "adset_name",
-      "adset_start",
-      "age_targeting",
-      "attribution_setting",
-      "auction_bid",
-    ];
-    params = {
-      breakdown: "publisher_platform",
-    };
-    const insightss = await new AdSet("23853878290130580").getInsights(
+    const insightss = await new AdSet(id).getAds(                 //id here is AdSet_id
       fields,
       params
     );
-    console.log(insightss);
-    logApiCallResult("insightss api call complete.", insightss);
-  } catch (error) {
+    if (insightss[0]._data) {
+      let arr = [];
+      for (let i = 0; i < insightss.length; i++) {
+        arr.push(insightss[i]._data);
+      }
+      return {
+        status: "success",
+        data: arr,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: insightss,
+      };
+    }
+  } catch (error) { 
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
   }
 };
+// facebook_get_ad()
 
 //page ID -106284349116205
 //Create creative
@@ -603,33 +593,56 @@ const facebook_get_demographics = async () => {
   }
 };
 
-const facebook_get_video = async (id) => {
-  let config = {
-    method: "get",
-    maxBodyLength: Infinity,
-    url: `https://graph.facebook.com/v16.0/${id}/videos?fields=thumbnails&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
-    headers: {},
-  };
-
-  const video_data = await axios.request(config);
-  if (video_data.data) {
-    let arr = [];
-    for (let i = 0; i < video_data.data.data.length; i++) {
-      arr.push(video_data.data.data[i]);
-    }
-    return {
-      status: "success",
-      data: arr,
+const facebook_get_video = async (id,video_id=null) => {
+  try {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `https://graph.facebook.com/v16.0/${id}/videos?fields=thumbnails&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
+      headers: { }
     };
-  } else {
+    
+    const video_data = await axios.request(config)
+    console.log(video_data.data.data)
+    if (video_data.data) {
+      if(video_id==null){
+        let arr = [];
+        for (let i = 0; i < video_data.data.data.length; i++) {
+          arr.push(video_data.data.data[i]);
+        }
+        return {
+          status: "success",
+          data: arr,
+        };
+      }else{
+       let arr=[]
+       for (let i = 0; i < video_data.data.data.length; i++) {
+        if(video_data.data.data[i].id == video_id){
+          arr.push(video_data.data.data[i]);
+        }
+      }
+      return {
+        status: "success",
+        data: arr,
+      };  
+      }
+     
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: video_data,
+      };
+    }
+  } catch (error) {
+    console.log(error);
     return {
-      status: "unsuccessfull",
-      data: video_data,
+      status: "error",
+      data: error.message ? error.message : error,
     };
   }
 };
 
-// facebook_get_video(106284349116205)
+// facebook_get_video(106284349116205,256814676855358)
 
 const logApiCallResult = (apiCallName, data) => {
   //   console.log(apiCallName);
@@ -641,8 +654,7 @@ const logApiCallResult = (apiCallName, data) => {
   }
 };
 
-// 113796205024659 106284349116205 user----------------
-const facebook_get_page_access_token = async (user_id, page_id) => {
+const facebook_get_page_access_token = async (user_id,page_id)=>{
   try {
     page_id;
     let config = {
@@ -691,11 +703,20 @@ const facebook_get_video_id = async (
   page_id
 ) => {
   try {
-    let user_id_details = await facebook_get_user_account_id();
-    let page_access_token = await facebook_get_page_access_token(
-      user_id_details.data.id,
-      page_id
-    );
+    let user_id_details = await facebook_get_user_account_id()
+    if(user_id_details.status !=="success"){
+      return {
+        status: user_id_details.status,
+        data: user_id_details.data
+      }
+    }
+    let page_access_token = await facebook_get_page_access_token(user_id_details.data.id,page_id)
+    if(page_access_token.status !=="success"){
+      return {
+        status: page_access_token.status,
+        data: page_access_token.data
+      }
+    }
     let data = new FormData();
     data.append("access_token", page_access_token.data);
     data.append(sourceFieldname, fs.createReadStream(videoPath));
@@ -757,6 +778,12 @@ const facebook_create_creative_video = async (
       params,
       page_id
     );
+    if(result.status!=="success"){
+      return {
+        status:result.status,
+        data:result.data
+      }
+    }
     let video_id = result.data;
     let imageHash = await facebook_get_image_hash(thumbPath, thumbFileName);
     let { hash, url, name } = imageHash.images[`${thumbFileName}`];
@@ -780,8 +807,6 @@ const facebook_create_creative_video = async (
     }
   } catch (error) {
     console.log(error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
     return {
       status: "error",
       data: error.message ? error.message : error,
@@ -794,7 +819,7 @@ module.exports = {
   facebook_get_campaign,
   facebook_create_adSet,
   facebook_get_adSet,
-  facebook_get_ad,
+  facebook_get_ads,
   facebook_create_ad,
   facebook_get_creative,
   facebook_create_creative,
