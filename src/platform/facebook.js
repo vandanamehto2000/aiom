@@ -4,6 +4,7 @@ const { StatusCodes } = require("http-status-codes");
 const AdAccount = bizSdk.AdAccount;
 const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
+const Ad = bizSdk.Ad
 // const Ad = bizSdk.Ad;
 const User = bizSdk.User;
 const axios = require("axios");
@@ -218,45 +219,34 @@ const facebook_get_adSet = async (id, fields, params) => {
 };
 
 //Get Ad
-const facebook_get_ad = async () => {
+const facebook_get_ads = async (id,fields,params) => {
   try {
-    let fields, params;
-    fields = [
-      "impressions",
-      "account_currency",
-      "account_id",
-      "account_name",
-      "action_values",
-      "actions",
-      "ad_bid_value",
-      "ad_click_actions",
-      "ad_id",
-      "ad_impression_actions",
-      "ad_name",
-      "adset_bid_value",
-      "adset_end",
-      "adset_id",
-      "adset_name",
-      "adset_start",
-      "age_targeting",
-      "attribution_setting",
-      "auction_bid",
-    ];
-    params = {
-      breakdown: "publisher_platform",
-    };
-    const insightss = await new AdSet("23853878290130580").getInsights(
+    const insightss = await new AdSet(id).getAds(                 //id here is AdSet_id
       fields,
       params
     );
-    console.log(insightss);
-    logApiCallResult("insightss api call complete.", insightss);
-  } catch (error) {
+    if (insightss[0]._data) {
+      let arr = [];
+      for (let i = 0; i < insightss.length; i++) {
+        arr.push(insightss[i]._data);
+      }
+      return {
+        status: "success",
+        data: arr,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: insightss,
+      };
+    }
+  } catch (error) { 
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
   }
 };
+// facebook_get_ad()
 
 //page ID -106284349116205
 //Create creative
@@ -646,7 +636,6 @@ const logApiCallResult = (apiCallName, data) => {
   }
 };
 
-// 113796205024659 106284349116205 user----------------
 const facebook_get_page_access_token = async (user_id,page_id)=>{
   try {
     page_id
@@ -689,7 +678,19 @@ const facebook_get_video_id = async (
 ) => {
   try {
     let user_id_details = await facebook_get_user_account_id()
+    if(user_id_details.status !=="success"){
+      return {
+        status: user_id_details.status,
+        data: user_id_details.data
+      }
+    }
     let page_access_token = await facebook_get_page_access_token(user_id_details.data.id,page_id)
+    if(page_access_token.status !=="success"){
+      return {
+        status: page_access_token.status,
+        data: page_access_token.data
+      }
+    }
     let data = new FormData();
     data.append("access_token", page_access_token.data);
     data.append(sourceFieldname, fs.createReadStream(videoPath));
@@ -751,8 +752,14 @@ const facebook_create_creative_video = async (
       params,
       page_id
     );
+    if(result.status!=="success"){
+      return {
+        status:result.status,
+        data:result.data
+      }
+    }
     let video_id = result.data;
-    let imageURL = "https://scontent.fdel27-4.fna.fbcdn.net/v/t15.5256-10/343759621_289413966748240_3223617081243889490_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=f2c4d5&_nc_ohc=2fkFOpkHZhQAX_7L_cK&_nc_ht=scontent.fdel27-4.fna&edm=AGz5Y0wEAAAA&oh=00_AfBJ0Vr23YXTdnbm1AOazdrNWEvN-EXFdwYLRRAFviBz2w&oe=6469D403";
+    let imageURL = "https://cdn.explorecams.com/storage/photos/LEFEikw0MR_1600.jpg";
     //params = {"name":"Sample Creative video1","object_story_spec":{"page_id":"106284349116205","video_data":{"image_url":"","video_id":"","call_to_action":{"type":"LIKE_PAGE","value":{"page":"106284349116205"} },},},}
     // params.image_hash = hash;
     // params.object_story_spec.link_data.link = url;
@@ -791,7 +798,7 @@ module.exports = {
   facebook_get_campaign,
   facebook_create_adSet,
   facebook_get_adSet,
-  facebook_get_ad,
+  facebook_get_ads,
   facebook_create_ad,
   facebook_get_creative,
   facebook_create_creative,
