@@ -10,7 +10,8 @@ const {
   facebook_get_user_account_id,
   facebook_get_accounts_pages,
   facebook_get_location,
-  facebook_create_creative_video
+  facebook_create_creative_video,
+  facebook_get_ads
 } = require("../platform/facebook");
 
 const fields_constant = require('../utils/constant')
@@ -218,6 +219,29 @@ const create_ad = async (req, res, next) => {
     });
   }
 };
+
+const get_ads = async (req,res,next) => {
+  try {
+    let { id, fields } = req.query;
+    fields = fields_constant.fields[fields]
+    let params = {}
+    const ad_data = await facebook_get_ads(id,fields,params)          //id here is Adset_id 
+    if (ad_data.status == "success") {
+      return responseApi.successResponseWithData(res, "ad data found", ad_data.data, StatusCodes.OK);
+    } else {
+      return responseApi.ErrorResponse(res, "unable to find ad data", ad_data.data, StatusCodes.BAD_REQUEST);
+    }
+  } catch (error) {
+    console.log(error);
+    return next({
+      status: StatusCodes.BAD_REQUEST,
+      message: "error",
+      data: error,
+    });
+  }
+
+}
+
 
 const get_account_pages = async (req, res, next) => {
   try {
