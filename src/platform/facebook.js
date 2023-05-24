@@ -597,33 +597,56 @@ const facebook_get_demographics = async () => {
   }
 };
 
-const facebook_get_video = async (id) => {
-  let config = {
-    method: 'get',
-    maxBodyLength: Infinity,
-    url: `https://graph.facebook.com/v16.0/${id}/videos?fields=thumbnails&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
-    headers: { }
-  };
-  
-  const video_data = await axios.request(config)
-  if (video_data.data) {
-    let arr = [];
-    for (let i = 0; i < video_data.data.data.length; i++) {
-      arr.push(video_data.data.data[i]);
-    }
-    return {
-      status: "success",
-      data: arr,
+const facebook_get_video = async (id,video_id=null) => {
+  try {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `https://graph.facebook.com/v16.0/${id}/videos?fields=thumbnails&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
+      headers: { }
     };
-  } else {
+    
+    const video_data = await axios.request(config)
+    console.log(video_data.data.data)
+    if (video_data.data) {
+      if(video_id==null){
+        let arr = [];
+        for (let i = 0; i < video_data.data.data.length; i++) {
+          arr.push(video_data.data.data[i]);
+        }
+        return {
+          status: "success",
+          data: arr,
+        };
+      }else{
+       let arr=[]
+       for (let i = 0; i < video_data.data.data.length; i++) {
+        if(video_data.data.data[i].id == video_id){
+          arr.push(video_data.data.data[i]);
+        }
+      }
+      return {
+        status: "success",
+        data: arr,
+      };  
+      }
+     
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: video_data,
+      };
+    }
+  } catch (error) {
+    console.log(error);
     return {
-      status: "unsuccessfull",
-      data: video_data,
+      status: "error",
+      data: error.message ? error.message : error,
     };
   }
 }
 
-// facebook_get_video(106284349116205)
+// facebook_get_video(106284349116205,256814676855358)
 
 
 const logApiCallResult = (apiCallName, data) => {
@@ -784,8 +807,6 @@ const facebook_create_creative_video = async (
     }
   } catch (error) {
     console.log(error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
     return {
       status: "error",
       data: error.message ? error.message : error,
