@@ -876,8 +876,7 @@ const facebook_create_creative_video = async (id,fields,params) => {
     // params.object_story_spec.video_data.image_url = url;
     // params.object_story_spec.video_data.video_id = video_id;
     const adcreatives = await new AdAccount(id).createAdCreative(fields,params);
-    logApiCallResult("adcreatives api call complete.", adcreatives);
-    
+    console.log("upload data--res",adcreatives)
     if (adcreatives._data) {
       return {
         status: "success",
