@@ -21,7 +21,7 @@ app.use(commonErrorHandler);
 app.get("/", (req, res) => {
   res.send("Welcome To AIOM");
 });
-app.use("/assets", express.static(path.join(__dirname, ".", "uploads")));
+app.use('/uploads', express.static('./uploads'));
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
 });
