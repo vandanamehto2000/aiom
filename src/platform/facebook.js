@@ -11,6 +11,7 @@ const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 const facebook = require('../models/facebook')
+const Page = bizSdk.Page;
 
 // // global.Token;
 // // let obj = {}
@@ -31,7 +32,6 @@ const facebook = require('../models/facebook')
 const access_token = "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
-// const video_access_token = "EAARmX2NDin4BAAQaeZCjZAfcsmb2S6DYc54QO66oyD6q2P7EZBlgbxZCRirznZBP0NAjjfQybuzsxXAH2j33LC8QJ8UrF0rDh1vBgdEJWkIiv3PsCl7YhE7mS1pE46ugcPPlAa6YCCefL5YMrfyROAVvke0W7NpmB2R2MiTb2fcDo1qrmH1L3JMZB2PlMhmoWCxeEtSyaXldVwv6c5cCKZC";
 // const pageId = "106284349116205";
 const id = "act_1239957706633747"; //local
 const api = bizSdk.FacebookAdsApi.init(access_token);
@@ -449,6 +449,7 @@ const facebook_get_user_account_id = async () => {
   }
 };
 
+// facebook_get_user_account_id()
 
 //pages related to the user account id
 const facebook_get_accounts_pages = async () => {
@@ -609,7 +610,7 @@ const facebook_get_video = async (id,video_id=null) => {
     const video_data = await axios.request(config)
     console.log(video_data.data.data)
     if (video_data.data) {
-      if(video_id==null){
+      if(video_id==null){     //All video data
         let arr = [];
         for (let i = 0; i < video_data.data.data.length; i++) {
           arr.push(video_data.data.data[i]);
@@ -618,7 +619,7 @@ const facebook_get_video = async (id,video_id=null) => {
           status: "success",
           data: arr,
         };
-      }else{
+      }else{                // video data of only 1 video
        let arr=[]
        for (let i = 0; i < video_data.data.data.length; i++) {
         if(video_data.data.data[i].id == video_id){
@@ -646,7 +647,7 @@ const facebook_get_video = async (id,video_id=null) => {
   }
 }
 
-// facebook_get_video(106284349116205,256814676855358)
+// facebook_get_video(106284349116205)       
 
 
 const logApiCallResult = (apiCallName, data) => {
@@ -813,6 +814,8 @@ const facebook_create_creative_video = async (
     };
   }
 };
+
+
 
 module.exports = {
   facebook_create_campaign,

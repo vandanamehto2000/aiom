@@ -121,23 +121,27 @@ const get_adSet = async (req, res, next) => {
 const create_creative = async (req, res, next) => {
   try {
     uploadImage(req, res, async function (err) {
-     // console.log("-------------------try")
-      if (err instanceof multer.MulterError || !req.file || err) {
-       // console.log("-------------------err",err,req.file,!req.file)
+      if (err instanceof multer.MulterError || err) {
         return responseApi.ErrorResponse(res, "error", err, StatusCodes.BAD_REQUEST);
       } else {
-        //console.log("-------------------req.body",req.body)
-        let { id, fields, params } = req.body;
-        let { path, filename, originalname, fieldname } = req.file;
-        id = JSON.parse(id);
-        fields = JSON.parse(fields);
-        params = JSON.parse(params);
-        const adcreatives = await facebook_create_creative(path, filename, id, fields, params);
-        if (adcreatives.status == "success") {
-          return responseApi.successResponseWithData(res, "success", adcreatives.data, StatusCodes.CREATED);
-        } else {
-          return responseApi.ErrorResponse(res, "error", adcreatives.data, StatusCodes.BAD_REQUEST);
+        if(req.file){
+          let { id, fields, params } = req.body;
+          let { path, filename, originalname, fieldname } = req.file;
+          id = JSON.parse(id);
+          fields = JSON.parse(fields);
+          params = JSON.parse(params);
+
+          const adcreatives = await facebook_create_creative(path, filename, id, fields, params);
+
+          if (adcreatives.status == "success") {
+            return responseApi.successResponseWithData(res, "success", adcreatives.data, StatusCodes.CREATED);
+          } else {
+            return responseApi.ErrorResponse(res, "error", adcreatives.data, StatusCodes.BAD_REQUEST);
+          }
+        }else{
+          
         }
+        
       }
     });
   } catch (error) {
