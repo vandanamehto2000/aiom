@@ -139,7 +139,8 @@ const create_creative = async (req, res, next) => {
           return responseApi.ErrorResponse(res, "unable to create creative data", adcreatives.data, StatusCodes.BAD_REQUEST);
         }
       }
-    });
+    }
+  })
   } catch (error) {
     console.log(error);
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
@@ -184,7 +185,8 @@ const create_creative_video_upload = async (req, res, next) => {
           return responseApi.ErrorResponse(res, "unable to create creative video data", result, StatusCodes.BAD_REQUEST);
         }
       }
-    });
+    }
+  })
   } catch (error) {
     console.log(error);
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
