@@ -807,35 +807,29 @@ const facebook_create_creative_video_upload = async (
       setTimeout(async () => {
         try {
           let data = await getVideoData();
-          resolve(data);
+          resolve({
+            status:"success",
+            data:data});
         } catch (error) {
-          reject(error);
+          reject({
+            status:"error",
+            data:error
+          });
         }
       }, 15000);
     });
     
-  
-    return {
-      status: "success",
-      data: video_data
-    };
-   
-
-    
-    // let video_id = result.data;
-    // let imageHash = await facebook_get_image_hash(thumbPath, thumbFileName);
-    // let { hash, url, name } = imageHash.images[`${thumbFileName}`];
-    // params.object_story_spec.video_data.image_url = url;
-    // params.object_story_spec.video_data.video_id = video_id;
-    // const adcreatives = await new AdAccount(id).createAdCreative(
-    //   fields,
-    //   params
-    // );
-    // logApiCallResult("adcreatives api call complete.", adcreatives);
-    // return {
-    //   status: "unsuccessfull",
-    //   data: "video_data",
-    // };
+    if(video_data.status=="success"){
+      return {
+        status: "success",
+        data: video_data.data
+      };
+    }else{
+      return {
+        status: video_data.status,
+        data: video_data
+      };
+    }
 
   } catch (error) {
     console.log(error);
@@ -845,36 +839,9 @@ const facebook_create_creative_video_upload = async (
     };
   }
 };
-
+// after uploading video
 const facebook_create_creative_video = async (id,fields,params) => {
   try {
-    // let fields;
-    // fields = [];
-    // let result = await facebook_get_video_id(
-    //   thumbPath,
-    //   thumbFieldname,
-    //   thumbFileName,
-    //   videoPath,
-    //   sourceFieldname,
-    //   id,
-    //   fields,
-    //   params,
-    //   page_id
-    // );
-    // console.log("-----------result",result)
-    // if(result.status!=="success"){
-    //   return {
-    //     status:result.status,
-    //     data:result.data
-    //   }
-    // }
-    // let video_data = await facebook_get_video(page_id,result.data)
-    // console.log("++++++++++++++++++++++++result",video_data)
-    // let video_id = result.data;
-    // let imageHash = await facebook_get_image_hash(thumbPath, thumbFileName);
-    // let { hash, url, name } = imageHash.images[`${thumbFileName}`];
-    // params.object_story_spec.video_data.image_url = url;
-    // params.object_story_spec.video_data.video_id = video_id;
     const adcreatives = await new AdAccount(id).createAdCreative(fields,params);
     console.log("upload data--res",adcreatives)
     if (adcreatives._data) {
