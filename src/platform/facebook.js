@@ -28,7 +28,7 @@ const Page = bizSdk.Page;
 // }
 
 const access_token =
-  "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
+  "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 // const pageId = "106284349116205";
@@ -365,21 +365,23 @@ const facebook_get_creative = async (id, fields, params, page_id) => {
   }
 };
 
-//AdSet id - 23853907338140580
-//creative id - 23853908495800580
+
 //Create Ad
 const facebook_create_ad = async (id, fields, params) => {
   try {
-    let fields, params;
-    fields = [];
-    params = {
-      name: "My Ad 1",
-      adset_id: "23853907338140580",
-      creative: { creative_id: "23853908495800580" },
-      status: "PAUSED",
-    };
+
     const ads = await new AdAccount(id).createAd(fields, params);
-    return ads;
+    if (ads._data) {
+      return {
+        status: "success",
+        data: ads._data,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: ads,
+      };
+    }
   } catch (error) {
     console.log("catch error", error);
     console.log("Error Message:" + error);
@@ -808,18 +810,30 @@ const facebook_create_creative_video_upload = async (
       setTimeout(async () => {
         try {
           let data = await getVideoData();
-          resolve(data);
+          resolve({
+            status:"success",
+            data:data});
         } catch (error) {
-          reject(error);
+          reject({
+            status:"error",
+            data:error
+          });
         }
       }, 15000);
     });
     
-  
-    return {
-      status: "success",
-      data: video_data
-    };
+    if(video_data.status=="success"){
+      return {
+        status: "success",
+        data: video_data
+      };
+    }else{
+      return {
+        status: video_data.status,
+        data: video_data.data
+      };
+    }
+    
    
 
     

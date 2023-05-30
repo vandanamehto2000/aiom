@@ -227,20 +227,14 @@ const create_ad = async (req, res, next) => {
   try {
     let { id, fields, params } = req.body;
     const ads = await facebook_create_ad(id, fields, params);
-    return next({
-      status: StatusCodes.CREATED,
-      message: "success",
-      data: ads,
-    });
+    if (ads.status === "success") {
+      return responseApi.successResponseWithData(res, "Ad created successfully", ads.data, StatusCodes.CREATED);
+    } else {
+      return responseApi.ErrorResponse(res, "error while creating ad", ads.data, StatusCodes.BAD_REQUEST);
+    }
   } catch (error) {
     console.log(error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
-    return next({
-      status: StatusCodes.BAD_REQUEST,
-      message: "error",
-      data: error,
-    });
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
 
