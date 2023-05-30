@@ -42,7 +42,8 @@ const roles_auth = (roles) => {
     console.log(req.auth);
 
     if (!roles.includes(req.auth.roles)) {
-      return responseApi.ErrorResponse(res, "role does not have access to this endpoint");
+      return responseApi.ErrorResponse(res, "role does not have access to this endpoint", "");
+      
     }
 
     next();

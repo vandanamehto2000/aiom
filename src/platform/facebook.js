@@ -30,6 +30,7 @@ const Page = bizSdk.Page;
 const access_token =
   "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD";
 const app_secret = "<APP_SECRET>";
+
 const app_id = "1238459780139646";
 // const pageId = "106284349116205";
 const id = "act_1239957706633747"; //local
@@ -218,7 +219,7 @@ const facebook_get_adSet = async (id, fields, params) => {
 };
 
 //Get Ad
-const facebook_get_ads = async (id,fields,params) => {
+const facebook_get_ads = async (id, fields, params) => {
   try {
     const insightss = await new AdSet(id).getAds(                 //id here is AdSet_id
       fields,
@@ -239,7 +240,7 @@ const facebook_get_ads = async (id,fields,params) => {
         data: insightss,
       };
     }
-  } catch (error) { 
+  } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
@@ -286,19 +287,19 @@ const facebook_create_creative = async (
 
     //Change Params according to the input(image/video)
     let adcreatives;
-    if(imagePath==null && imageName== null && "object_story_id" in params){
-       adcreatives = await new AdAccount(id).createAdCreative(
+    if (imagePath == null && imageName == null && "object_story_id" in params) {
+      adcreatives = await new AdAccount(id).createAdCreative(
         fields,
         params
       );
     }
-    else{
+    else {
       let result = await facebook_get_image_hash(imagePath, imageName);
       let { hash, url, name } = result.images[`${imageName}`];
       params.image_hash = hash;
       params.object_story_spec.link_data.link = url;
       params.object_story_spec.link_data.image_hash = hash;
-       adcreatives = await new AdAccount(id).createAdCreative(
+      adcreatives = await new AdAccount(id).createAdCreative(
         fields,
         params
       );
@@ -551,7 +552,7 @@ const facebook_get_interest = async () => {
   try {
     let params = {
       type: "adinterest",
-      q: "cricket",
+      q: "hockey",
     };
     const url = "https://graph.facebook.com/v16.0/search";
 
@@ -561,24 +562,25 @@ const facebook_get_interest = async () => {
       url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
       headers: {},
     };
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+
+    const interests = await axios.request(config)
+
+    return {
+      status: "success",
+      data: interests.data.data
+    }
+
   } catch (error) {
     console.log(error);
   }
 };
+// facebook_get_interest();
 
 const facebook_get_demographics = async () => {
   try {
     let params = {
       type: "adeducationschool",
-      q: "DELHi",
+      q: "hockey",
     };
     const url = "https://graph.facebook.com/v16.0/search";
 
@@ -588,30 +590,31 @@ const facebook_get_demographics = async () => {
       url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
       headers: {},
     };
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+
+    const demographics = await axios.request(config)
+    return {
+      status: "success",
+      data: demographics.data.data
+    }
   } catch (error) {
     console.log(error);
   }
 };
 
-const facebook_get_video = async (id,video_id=null) => {
+// facebook_get_demographics()
+
+
+const facebook_get_video = async (id, video_id = null) => {
   try {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
       url: `https://graph.facebook.com/v16.0/${id}/videos?fields=thumbnails&limit=1000&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
-      headers: { }
+      headers: {}
     };
-   let  video_data= await axios.request(config);
+    let video_data = await axios.request(config);
     if (video_data && video_data.data) {
-      if(video_id==null){
+      if (video_id == null) {
         let arr = [];
         for (let i = 0; i < video_data.data.data.length; i++) {
           arr.push(video_data.data.data[i]);
@@ -632,7 +635,7 @@ const facebook_get_video = async (id,video_id=null) => {
         data: arr,
       };  
       }
-     
+
     } else {
       return {
         status: "unsuccessfull",
@@ -660,7 +663,7 @@ const logApiCallResult = (apiCallName, data) => {
   }
 };
 
-const facebook_get_page_access_token = async (user_id,page_id)=>{
+const facebook_get_page_access_token = async (user_id, page_id) => {
   try {
     page_id;
     let config = {
@@ -709,14 +712,14 @@ const facebook_get_video_id = async (
 ) => {
   try {
     let user_id_details = await facebook_get_user_account_id()
-    if(user_id_details.status !=="success"){
+    if (user_id_details.status !== "success") {
       return {
         status: user_id_details.status,
         data: user_id_details.data
       }
     }
-    let page_access_token = await facebook_get_page_access_token(user_id_details.data.id,page_id)
-    if(page_access_token.status !=="success"){
+    let page_access_token = await facebook_get_page_access_token(user_id_details.data.id, page_id)
+    if (page_access_token.status !== "success") {
       return {
         status: page_access_token.status,
         data: page_access_token.data
@@ -724,11 +727,11 @@ const facebook_get_video_id = async (
     }
     let data = new FormData();
     data.append("access_token", page_access_token.data);
-    if(thumbFieldname){
+    if (thumbFieldname) {
       data.append(sourceFieldname, fs.createReadStream(videoPath));
       data.append(thumbFieldname, fs.createReadStream(thumbPath));
     }
-    else{
+    else {
       data.append(sourceFieldname, fs.createReadStream(videoPath));
     }
 
@@ -789,10 +792,10 @@ const facebook_create_creative_video_upload = async (
       params,
       page_id
     );
-    if(result.status!=="success"){
+    if (result.status !== "success") {
       return {
-        status:result.status,
-        data:result.data
+        status: result.status,
+        data: result.data
       }
     }
     const getVideoData = () => {
@@ -805,7 +808,7 @@ const facebook_create_creative_video_upload = async (
         }
       });
     };
-  
+
     let video_data = await new Promise((resolve, reject) => {
       setTimeout(async () => {
         try {
@@ -836,7 +839,7 @@ const facebook_create_creative_video_upload = async (
     
    
 
-    
+
     // let video_id = result.data;
     // let imageHash = await facebook_get_image_hash(thumbPath, thumbFileName);
     // let { hash, url, name } = imageHash.images[`${thumbFileName}`];
@@ -861,7 +864,7 @@ const facebook_create_creative_video_upload = async (
   }
 };
 
-const facebook_create_creative_video = async (id,fields,params) => {
+const facebook_create_creative_video = async (id, fields, params) => {
   try {
     // let fields;
     // fields = [];
@@ -890,8 +893,9 @@ const facebook_create_creative_video = async (id,fields,params) => {
     // let { hash, url, name } = imageHash.images[`${thumbFileName}`];
     // params.object_story_spec.video_data.image_url = url;
     // params.object_story_spec.video_data.video_id = video_id;
-    const adcreatives = await new AdAccount(id).createAdCreative(fields,params);
-    console.log("upload data--res",adcreatives)
+    const adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+    logApiCallResult("adcreatives api call complete.", adcreatives);
+
     if (adcreatives._data) {
       return {
         status: "success",
@@ -912,6 +916,60 @@ const facebook_create_creative_video = async (id,fields,params) => {
   }
 };
 
+let obj = {};
+
+
+const facebook_get_interest_and_demographics = async () => {
+  try {
+
+    const interest_data = await facebook_get_interest();
+    // console.log( interest_data.data)
+  
+    const demographics_data = await facebook_get_demographics();
+    // console.log(demographics_data.data )
+
+    const combinedObj ={
+      interests:interest_data.data,
+      demographics: demographics_data.data
+    }
+
+
+    console.log(combinedObj)
+
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+facebook_get_interest_and_demographics();
+
+
+
+const facebook_get_interest_behavior = async () => {
+  try {
+    let params = {
+      type: "adTargetingCategory",
+      class: "behaviors",
+    }
+    console.log(params, "params")
+    const url = "https://graph.facebook.com/v16.0/search";
+
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
+      headers: {},
+    };
+    const behavior = await axios.request(config)
+    console.log(behavior.data, "...............")
+
+
+  } catch (error) {
+    console.log(error)
+  }
+};
+// facebook_get_interest_behavior()
 
 
 module.exports = {
