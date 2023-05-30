@@ -391,7 +391,6 @@ const facebook_create_ad = async (id, fields, params) => {
   }
 };
 
-// image HAsh -69b1f27b22e5cbf02f03d5663318604c
 // const imagePath =
 //   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
 const facebook_get_image_hash = async (imagePath, imageName) => {
