@@ -11,6 +11,7 @@ const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 const facebook = require("../models/facebook");
+const { fields } = require("../utils/constant");
 const Page = bizSdk.Page;
 
 // // global.Token;
@@ -602,7 +603,7 @@ const facebook_get_demographics = async () => {
 
 // facebook_get_demographics()
 
-
+// Get video data from page_id
 const facebook_get_video = async (id, video_id = null) => {
   try {
     let config = {
@@ -649,6 +650,27 @@ const facebook_get_video = async (id, video_id = null) => {
     };
   }
 };
+
+const facebook_get_images = async (id)=>{
+  try {
+    let fields =["link","name"]
+    let params = { }
+    const photoss = await(new Page(id)).getPhotos(
+      fields,
+      params
+    );
+    console.log(photoss)
+    return
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+}
+// facebook_get_images(106284349116205)
+
 
 // facebook_get_video(106284349116205)
 
@@ -941,8 +963,6 @@ const facebook_get_interest_and_demographics = async () => {
   }
 }
 
-facebook_get_interest_and_demographics();
-
 
 
 const facebook_get_interest_behavior = async () => {
@@ -971,6 +991,8 @@ const facebook_get_interest_behavior = async () => {
 // facebook_get_interest_behavior()
 
 
+
+
 module.exports = {
   facebook_create_campaign,
   facebook_get_campaign,
@@ -984,5 +1006,6 @@ module.exports = {
   facebook_get_accounts_pages,
   facebook_get_location,
   facebook_create_creative_video_upload,
-  facebook_create_creative_video
+  facebook_create_creative_video,
+  facebook_get_video
 };

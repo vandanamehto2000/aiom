@@ -12,7 +12,8 @@ const {
   facebook_get_location,
   facebook_create_creative_video_upload,
   facebook_create_creative_video,
-  facebook_get_ads
+  facebook_get_ads,
+  facebook_get_video
 } = require("../platform/facebook");
 
 const fields_constant = require('../utils/constant')
@@ -315,6 +316,30 @@ const create_creative_video = async (req, res, next) => {
   }
 };
 
+const get_page_video = async (req,res,next) => {
+  try {
+    let { page_id,thumbnail } = req.query;
+    const video_data = await facebook_get_video(page_id)
+    if(video_data.status=="success"){
+      let result= {}
+      for(let i=0;i<video_data.data.length;i++){
+        if(thumbnail=="single"){
+          result[video_data.data[i].id] = video_data.data[i].thumbnails.data[0]
+        }else{
+          result[video_data.data[i].id] = video_data.data[i].thumbnails.data
+        }
+      }
+      return responseApi.successResponseWithData(res,"Video data found",result)
+    }else{
+      return responseApi.ErrorResponse(res, "unable to find creative data", video_data.data, StatusCodes.BAD_REQUEST);
+    }
+    
+  } catch (error) {
+    console.log("Error", error)
+    return responseApi.ErrorResponse(res, error.message ? error.message : "error",error );
+  }
+}
+
 module.exports = {
   create_campaign,
   get_campaign,
@@ -326,5 +351,6 @@ module.exports = {
   create_ad,
   get_account_pages,
   get_location_keys,
-  create_creative_video_upload
+  create_creative_video_upload,
+  get_page_video
 };
