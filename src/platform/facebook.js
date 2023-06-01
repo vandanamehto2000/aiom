@@ -27,7 +27,7 @@ const facebook = require("../models/facebook");
 // }
 
 const access_token =
-  "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
+  "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD";
 const app_secret = "<APP_SECRET>";
 const app_id = "1238459780139646";
 // const video_access_token = "EAARmX2NDin4BAAQaeZCjZAfcsmb2S6DYc54QO66oyD6q2P7EZBlgbxZCRirznZBP0NAjjfQybuzsxXAH2j33LC8QJ8UrF0rDh1vBgdEJWkIiv3PsCl7YhE7mS1pE46ugcPPlAa6YCCefL5YMrfyROAVvke0W7NpmB2R2MiTb2fcDo1qrmH1L3JMZB2PlMhmoWCxeEtSyaXldVwv6c5cCKZC";
@@ -294,7 +294,7 @@ const facebook_create_creative = async (
     }
     else{
       let result = await facebook_get_image_hash(imagePath, imageName);
-      let { hash, url, name } = result.images[`${imageName}`];
+      let { hash, url, name } = result.data.images[`${imageName}`];
       params.image_hash = hash;
       params.object_story_spec.link_data.link = url;
       params.object_story_spec.link_data.image_hash = hash;
@@ -406,15 +406,19 @@ const facebook_get_image_hash = async (imagePath, imageName) => {
       },
       data: data,
     };
+    const response = await axios.request(config);
 
-    return axios
-      .request(config)
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (response.data) {
+      return {
+        status: "success",
+        data: response.data,
+      };
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response,
+      };
+    }
   } catch (error) {
     console.log(error);
   }
@@ -738,20 +742,32 @@ const facebook_get_video_id = async (
       },
       data: data,
     };
-    return await axios
-      .request(config)
-      .then((response) => {
-        return {
-          status: "success",
-          data: response.data.id,
-        };
-      })
-      .catch((error) => {
-        return {
-          status: "unsuccessfull",
-          data: error,
-        };
-      });
+    const response = await axios.request(config);
+    if (response.data) {
+      return {
+        status: "success",
+        data: response.data.id,
+      };
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response,
+      };
+    }
+    // return await axios
+    //   .request(config)
+    //   .then((response) => {
+    //     return {
+    //       status: "success",
+    //       data: response.data.id,
+    //     };
+    //   })
+    //   .catch((error) => {
+    //     return {
+    //       status: "unsuccessfull",
+    //       data: error,
+    //     };
+    //   });
   } catch (error) {
     console.log(error);
     return {
