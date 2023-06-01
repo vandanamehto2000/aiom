@@ -194,6 +194,7 @@ const facebook_create_adSet = async (id, fields, params) => {
 //Get AdSet
 const facebook_get_adSet = async (id, fields, params) => {
   try {
+    params.limit = 100000
     const adsetss = await new Campaign(id).getAdSets(fields, params);
     if (adsetss[0]._data) {
       let arr = [];
