@@ -11,6 +11,8 @@ const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 const facebook = require("../models/facebook");
+const { fields } = require("../utils/constant");
+const Page = bizSdk.Page;
 
 // // global.Token;
 // // let obj = {}
@@ -29,8 +31,8 @@ const facebook = require("../models/facebook");
 const access_token =
   "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD";
 const app_secret = "<APP_SECRET>";
+
 const app_id = "1238459780139646";
-// const video_access_token = "EAARmX2NDin4BAAQaeZCjZAfcsmb2S6DYc54QO66oyD6q2P7EZBlgbxZCRirznZBP0NAjjfQybuzsxXAH2j33LC8QJ8UrF0rDh1vBgdEJWkIiv3PsCl7YhE7mS1pE46ugcPPlAa6YCCefL5YMrfyROAVvke0W7NpmB2R2MiTb2fcDo1qrmH1L3JMZB2PlMhmoWCxeEtSyaXldVwv6c5cCKZC";
 // const pageId = "106284349116205";
 const id = "act_1239957706633747"; //local
 const api = bizSdk.FacebookAdsApi.init(access_token);
@@ -218,7 +220,7 @@ const facebook_get_adSet = async (id, fields, params) => {
 };
 
 //Get Ad
-const facebook_get_ads = async (id,fields,params) => {
+const facebook_get_ads = async (id, fields, params) => {
   try {
     const insightss = await new AdSet(id).getAds(                 //id here is AdSet_id
       fields,
@@ -239,7 +241,7 @@ const facebook_get_ads = async (id,fields,params) => {
         data: insightss,
       };
     }
-  } catch (error) { 
+  } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
@@ -286,19 +288,19 @@ const facebook_create_creative = async (
 
     //Change Params according to the input(image/video)
     let adcreatives;
-    if(imagePath==null && imageName== null && "object_story_id" in params){
-       adcreatives = await new AdAccount(id).createAdCreative(
+    if (imagePath == null && imageName == null && "object_story_id" in params) {
+      adcreatives = await new AdAccount(id).createAdCreative(
         fields,
         params
       );
     }
-    else{
+    else {
       let result = await facebook_get_image_hash(imagePath, imageName);
       let { hash, url, name } = result.data.images[`${imageName}`];
       params.image_hash = hash;
       params.object_story_spec.link_data.link = url;
       params.object_story_spec.link_data.image_hash = hash;
-       adcreatives = await new AdAccount(id).createAdCreative(
+      adcreatives = await new AdAccount(id).createAdCreative(
         fields,
         params
       );
@@ -365,21 +367,23 @@ const facebook_get_creative = async (id, fields, params, page_id) => {
   }
 };
 
-//AdSet id - 23853907338140580
-//creative id - 23853908495800580
+
 //Create Ad
 const facebook_create_ad = async (id, fields, params) => {
   try {
-    let fields, params;
-    fields = [];
-    params = {
-      name: "My Ad 1",
-      adset_id: "23853907338140580",
-      creative: { creative_id: "23853908495800580" },
-      status: "PAUSED",
-    };
+
     const ads = await new AdAccount(id).createAd(fields, params);
-    return ads;
+    if (ads._data) {
+      return {
+        status: "success",
+        data: ads._data,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: ads,
+      };
+    }
   } catch (error) {
     console.log("catch error", error);
     console.log("Error Message:" + error);
@@ -388,7 +392,6 @@ const facebook_create_ad = async (id, fields, params) => {
   }
 };
 
-// image HAsh -69b1f27b22e5cbf02f03d5663318604c
 // const imagePath =
 //   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
 const facebook_get_image_hash = async (imagePath, imageName) => {
@@ -454,6 +457,7 @@ const facebook_get_user_account_id = async () => {
     };
   }
 };
+
 
 //pages related to the user account id
 const facebook_get_accounts_pages = async () => {
@@ -552,7 +556,7 @@ const facebook_get_interest = async () => {
   try {
     let params = {
       type: "adinterest",
-      q: "cricket",
+      q: "hockey",
     };
     const url = "https://graph.facebook.com/v16.0/search";
 
@@ -562,24 +566,25 @@ const facebook_get_interest = async () => {
       url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
       headers: {},
     };
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+
+    const interests = await axios.request(config)
+
+    return {
+      status: "success",
+      data: interests.data.data
+    }
+
   } catch (error) {
     console.log(error);
   }
 };
+// facebook_get_interest();
 
 const facebook_get_demographics = async () => {
   try {
     let params = {
       type: "adeducationschool",
-      q: "DELHi",
+      q: "hockey",
     };
     const url = "https://graph.facebook.com/v16.0/search";
 
@@ -589,30 +594,31 @@ const facebook_get_demographics = async () => {
       url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
       headers: {},
     };
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+
+    const demographics = await axios.request(config)
+    return {
+      status: "success",
+      data: demographics.data.data
+    }
   } catch (error) {
     console.log(error);
   }
 };
 
-const facebook_get_video = async (id,video_id=null) => {
+// facebook_get_demographics()
+
+// Get video data from page_id
+const facebook_get_video = async (id, video_id = null) => {
   try {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
       url: `https://graph.facebook.com/v16.0/${id}/videos?fields=thumbnails&limit=1000&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
-      headers: { }
+      headers: {}
     };
-   let  video_data= await axios.request(config);
+    let video_data = await axios.request(config);
     if (video_data && video_data.data) {
-      if(video_id==null){
+      if (video_id == null) {
         let arr = [];
         for (let i = 0; i < video_data.data.data.length; i++) {
           arr.push(video_data.data.data[i]);
@@ -621,7 +627,7 @@ const facebook_get_video = async (id,video_id=null) => {
           status: "success",
           data: arr,
         };
-      }else{
+      }else{                // video data of only 1 video
        let arr=[]
        for (let i = 0; i < video_data.data.data.length; i++) {
         if(video_data.data.data[i].id == video_id){
@@ -633,7 +639,7 @@ const facebook_get_video = async (id,video_id=null) => {
         data: arr,
       };  
       }
-     
+
     } else {
       return {
         status: "unsuccessfull",
@@ -649,6 +655,27 @@ const facebook_get_video = async (id,video_id=null) => {
   }
 };
 
+const facebook_get_images = async (id)=>{
+  try {
+    let fields =["link","name"]
+    let params = { }
+    const photoss = await(new Page(id)).getPhotos(
+      fields,
+      params
+    );
+    console.log(photoss)
+    return
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+}
+// facebook_get_images(106284349116205)
+
+
 // facebook_get_video(106284349116205)
 
 const logApiCallResult = (apiCallName, data) => {
@@ -661,7 +688,7 @@ const logApiCallResult = (apiCallName, data) => {
   }
 };
 
-const facebook_get_page_access_token = async (user_id,page_id)=>{
+const facebook_get_page_access_token = async (user_id, page_id) => {
   try {
     page_id;
     let config = {
@@ -710,14 +737,14 @@ const facebook_get_video_id = async (
 ) => {
   try {
     let user_id_details = await facebook_get_user_account_id()
-    if(user_id_details.status !=="success"){
+    if (user_id_details.status !== "success") {
       return {
         status: user_id_details.status,
         data: user_id_details.data
       }
     }
-    let page_access_token = await facebook_get_page_access_token(user_id_details.data.id,page_id)
-    if(page_access_token.status !=="success"){
+    let page_access_token = await facebook_get_page_access_token(user_id_details.data.id, page_id)
+    if (page_access_token.status !== "success") {
       return {
         status: page_access_token.status,
         data: page_access_token.data
@@ -725,11 +752,11 @@ const facebook_get_video_id = async (
     }
     let data = new FormData();
     data.append("access_token", page_access_token.data);
-    if(thumbFieldname){
+    if (thumbFieldname) {
       data.append(sourceFieldname, fs.createReadStream(videoPath));
       data.append(thumbFieldname, fs.createReadStream(thumbPath));
     }
-    else{
+    else {
       data.append(sourceFieldname, fs.createReadStream(videoPath));
     }
 
@@ -802,10 +829,10 @@ const facebook_create_creative_video_upload = async (
       params,
       page_id
     );
-    if(result.status!=="success"){
+    if (result.status !== "success") {
       return {
-        status:result.status,
-        data:result.data
+        status: result.status,
+        data: result.data
       }
     }
     const getVideoData = () => {
@@ -818,7 +845,7 @@ const facebook_create_creative_video_upload = async (
         }
       });
     };
-  
+
     let video_data = await new Promise((resolve, reject) => {
       setTimeout(async () => {
         try {
@@ -838,14 +865,32 @@ const facebook_create_creative_video_upload = async (
     if(video_data.status=="success"){
       return {
         status: "success",
-        data: video_data.data
+        data: video_data
       };
     }else{
       return {
         status: video_data.status,
-        data: video_data
+        data: video_data.data
       };
     }
+    
+   
+
+
+    // let video_id = result.data;
+    // let imageHash = await facebook_get_image_hash(thumbPath, thumbFileName);
+    // let { hash, url, name } = imageHash.images[`${thumbFileName}`];
+    // params.object_story_spec.video_data.image_url = url;
+    // params.object_story_spec.video_data.video_id = video_id;
+    // const adcreatives = await new AdAccount(id).createAdCreative(
+    //   fields,
+    //   params
+    // );
+    // logApiCallResult("adcreatives api call complete.", adcreatives);
+    // return {
+    //   status: "unsuccessfull",
+    //   data: "video_data",
+    // };
 
   } catch (error) {
     console.log(error);
@@ -855,11 +900,39 @@ const facebook_create_creative_video_upload = async (
     };
   }
 };
-// after uploading video
-const facebook_create_creative_video = async (id,fields,params) => {
+
+const facebook_create_creative_video = async (id, fields, params) => {
   try {
-    const adcreatives = await new AdAccount(id).createAdCreative(fields,params);
-    console.log("upload data--res",adcreatives)
+    // let fields;
+    // fields = [];
+    // let result = await facebook_get_video_id(
+    //   thumbPath,
+    //   thumbFieldname,
+    //   thumbFileName,
+    //   videoPath,
+    //   sourceFieldname,
+    //   id,
+    //   fields,
+    //   params,
+    //   page_id
+    // );
+    // console.log("-----------result",result)
+    // if(result.status!=="success"){
+    //   return {
+    //     status:result.status,
+    //     data:result.data
+    //   }
+    // }
+    // let video_data = await facebook_get_video(page_id,result.data)
+    // console.log("++++++++++++++++++++++++result",video_data)
+    // let video_id = result.data;
+    // let imageHash = await facebook_get_image_hash(thumbPath, thumbFileName);
+    // let { hash, url, name } = imageHash.images[`${thumbFileName}`];
+    // params.object_story_spec.video_data.image_url = url;
+    // params.object_story_spec.video_data.video_id = video_id;
+    const adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+    logApiCallResult("adcreatives api call complete.", adcreatives);
+
     if (adcreatives._data) {
       return {
         status: "success",
@@ -880,6 +953,62 @@ const facebook_create_creative_video = async (id,fields,params) => {
   }
 };
 
+let obj = {};
+
+
+const facebook_get_interest_and_demographics = async () => {
+  try {
+
+    const interest_data = await facebook_get_interest();
+    // console.log( interest_data.data)
+  
+    const demographics_data = await facebook_get_demographics();
+    // console.log(demographics_data.data )
+
+    const combinedObj ={
+      interests:interest_data.data,
+      demographics: demographics_data.data
+    }
+
+
+    console.log(combinedObj)
+
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+
+const facebook_get_interest_behavior = async () => {
+  try {
+    let params = {
+      type: "adTargetingCategory",
+      class: "behaviors",
+    }
+    console.log(params, "params")
+    const url = "https://graph.facebook.com/v16.0/search";
+
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
+      headers: {},
+    };
+    const behavior = await axios.request(config)
+    console.log(behavior.data, "...............")
+
+
+  } catch (error) {
+    console.log(error)
+  }
+};
+// facebook_get_interest_behavior()
+
+
+
+
 module.exports = {
   facebook_create_campaign,
   facebook_get_campaign,
@@ -893,5 +1022,6 @@ module.exports = {
   facebook_get_accounts_pages,
   facebook_get_location,
   facebook_create_creative_video_upload,
-  facebook_create_creative_video
+  facebook_create_creative_video,
+  facebook_get_video
 };
