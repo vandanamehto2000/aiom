@@ -28,7 +28,7 @@ const Page = bizSdk.Page;
 //   globalToken= token
 // }
 
-const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
+// const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
 const app_secret = "<APP_SECRET>";
 
 const app_id = "1238459780139646";
@@ -327,10 +327,12 @@ const facebook_create_creative = async (
 };
 
 //get Creative
-const facebook_get_creative = async (id, fields, params, page_id) => {
+const facebook_get_creative = async (id, fields, params, page_id, access_token) => {
+  // console.log(access_token, "uuuuuuuu")
   try {
     const adcreativess = await new AdAccount(id).getAdCreatives(fields, params);
-    const video_data = await facebook_get_video(page_id);
+    const video_data = await facebook_get_video(page_id, access_token);
+    console.log(access_token, "..........")
     if (video_data.status !== "success") {
       return {
         status: "error",
@@ -603,7 +605,7 @@ const facebook_get_demographics = async () => {
 // facebook_get_demographics()
 
 // Get video data from page_id
-const facebook_get_video = async (id, video_id = null) => {
+const facebook_get_video = async (id, access_token,video_id = null) => {
   try {
     let config = {
       method: 'get',

@@ -50,7 +50,7 @@ const create_campaign = async (req, res, next) => {
       return responseApi.ErrorResponse(res, "One of the fields is missing-(name, objective, special_ad_categories)", "", StatusCodes.BAD_REQUEST)
     }
 
-    const facebook_result = await facebook_create_campaign(id, fields, params);
+    const facebook_result = await facebook_create_campaign(id, fields, params );
     if (facebook_result.status == "success") {
       return responseApi.successResponseWithData(res, "create campaign data", facebook_result.data, StatusCodes.CREATED);
     } else {
@@ -196,13 +196,15 @@ const create_creative_video_upload = async (req, res, next) => {
 
 //get Creative
 const get_creative = async (req, res, next) => {
+  // console.log(req.facebook_token);
   try {
     let { id, fields, page_id } = req.query;
     fields = fields_constant.fields[fields]
      //id = JSON.parse(id);  //ad_account_id
     // id = JSON.parse(id);  //ad_account_id
     let params = {};
-    const creative_data = await facebook_get_creative(id, fields, params, page_id);
+    const creative_data = await facebook_get_creative(id, fields, params, page_id, req.facebook_token);
+    console.log(req.facebook_token)
     if (creative_data.status == "success") {
       return responseApi.successResponseWithData(res, "creative data found", creative_data.data, StatusCodes.OK);
     } else {

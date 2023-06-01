@@ -10,6 +10,6 @@ router.post("/register", commonValidator(registerUser), register);
 router.post("/login", login);
 router.post("/logout", authenticateToken, fb_middleware, roles_auth(["admin", "business_owner"]), logout);
 
-router.post("/welcome", authenticateToken, fb_middleware, welcome)
+// router.post("/welcome", authenticateToken, fb_middleware, welcome)
 
 module.exports = router;
