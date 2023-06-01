@@ -162,7 +162,7 @@ const create_creative = async (req, res, next) => {
     console.log(error);
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
-};
+};  
 
 const create_creative_video_upload = async (req, res, next) => {
   try {
@@ -172,6 +172,7 @@ const create_creative_video_upload = async (req, res, next) => {
       } else {
         let thumbFieldname,thumbFileName,thumbPath,sourceFieldname,videoPath;
         if("thumb" in req.files){
+          console.log(req.files)
            thumbFieldname=req.files.thumb[0].fieldname;
            thumbFileName = req.files.thumb[0].filename;
            thumbPath = req.files.thumb[0].path;
