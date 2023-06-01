@@ -13,7 +13,8 @@ const {
   facebook_create_creative_video_upload,
   facebook_create_creative_video,
   facebook_get_ads,
-  facebook_get_video
+  facebook_get_video,
+  facebook_get_images
 } = require("../platform/facebook");
 
 const fields_constant = require('../utils/constant')
@@ -125,28 +126,43 @@ const create_creative = async (req, res, next) => {
     uploadImage(req, res, async function (err) {
       if (err instanceof multer.MulterError || err) {
        // console.log("-------------------err",err,req.file,!req.file)
-      // console.log("-------------------try")
-      if (err instanceof multer.MulterError || !req.file || err) {
-        // console.log("-------------------err",err,req.file,!req.file)
         return responseApi.ErrorResponse(res, "error", err, StatusCodes.BAD_REQUEST);
       } else {
         let { id, fields, params } = req.body;
         fields = JSON.parse(fields);
         params = JSON.parse(params);
-        const adcreatives = await facebook_create_creative(path, filename, id, fields, params);
-        if (adcreatives.status == "success") {
-          return responseApi.successResponseWithData(res, "create creative data", adcreatives.data, StatusCodes.CREATED);
-        } else {
-          return responseApi.ErrorResponse(res, "unable to create creative data", adcreatives.data, StatusCodes.BAD_REQUEST);
+        if(req.file){
+          let { path, filename, originalname, fieldname } = req.file;
+          // id = JSON.parse(id);
+          const adcreatives = await facebook_create_creative(path, filename, id, fields, params);
+          if (adcreatives.status == "success") {
+            return responseApi.successResponseWithData(res, "New creative image data post Successfully", adcreatives.data, StatusCodes.CREATED);
+          } else {
+            return responseApi.ErrorResponse(res, "error", adcreatives.data, StatusCodes.BAD_REQUEST);
+          }
+        }
+        else{
+          // existing code
+          console.log("existing post-------",params)
+          if("object_story_id" in params){
+            const adcreatives = await facebook_create_creative(null, null, id, fields, params);
+            if (adcreatives.status == "success") {
+              return responseApi.successResponseWithData(res, "Existing data post successfully", adcreatives.data, StatusCodes.CREATED);
+            } else {
+              return responseApi.ErrorResponse(res, "error", adcreatives.data, StatusCodes.BAD_REQUEST);
+            }
+          }
+          else{
+            return responseApi.ErrorResponse(res, " Error in existing video or image", adcreatives.data, StatusCodes.BAD_REQUEST);
+          }
         }
       }
-    }
-  })
+    });
   } catch (error) {
     console.log(error);
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
-};
+};  
 
 const create_creative_video_upload = async (req, res, next) => {
   try {
@@ -156,6 +172,7 @@ const create_creative_video_upload = async (req, res, next) => {
       } else {
         let thumbFieldname,thumbFileName,thumbPath,sourceFieldname,videoPath;
         if("thumb" in req.files){
+          console.log(req.files)
            thumbFieldname=req.files.thumb[0].fieldname;
            thumbFileName = req.files.thumb[0].filename;
            thumbPath = req.files.thumb[0].path;
@@ -168,27 +185,20 @@ const create_creative_video_upload = async (req, res, next) => {
         }
         let { id, fields, params,page_id } = req.body;
         if(!page_id){
-        let thumbFieldname = req.files.thumb[0].fieldname;
-        let thumbFileName = req.files.thumb[0].filename;
-        let thumbPath = req.files.thumb[0].path;
-        let sourceFieldname = req.files.source[0].fieldname;
-        let videoPath = req.files.source[0].path;
-        let { id, fields, params, page_id } = req.body;
-        if (!page_id) {
           return responseApi.ErrorResponse(res, "page_id is required", "", StatusCodes.BAD_REQUEST);
         }
         fields = JSON.parse(fields);
         params = JSON.parse(params);
-        const result = await facebook_create_creative_video(thumbPath, thumbFieldname, thumbFileName, videoPath, sourceFieldname, id, fields, params, page_id);
+        const result = await facebook_create_creative_video_upload(thumbPath,thumbFieldname,thumbFileName,videoPath,sourceFieldname,id, fields, params,page_id);
+       
         if (result.status == "success") {
-          return responseApi.successResponseWithData(res, "create creative video data", result, StatusCodes.CREATED);
+          return responseApi.successResponseWithData(res, "Video uploaded successfully", result.data, StatusCodes.CREATED);
         } else {
-          return responseApi.ErrorResponse(res, "unable to create creative video data", result, StatusCodes.BAD_REQUEST);
+          return responseApi.ErrorResponse(res, "error", result, StatusCodes.BAD_REQUEST);
         }
       }
-    }
-  })
-  } catch (error) {
+    });
+  } catch (error) {  
     console.log(error);
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
@@ -200,8 +210,6 @@ const get_creative = async (req, res, next) => {
   try {
     let { id, fields, page_id } = req.query;
     fields = fields_constant.fields[fields]
-     //id = JSON.parse(id);  //ad_account_id
-    // id = JSON.parse(id);  //ad_account_id
     let params = {};
     const creative_data = await facebook_get_creative(id, fields, params, page_id, req.facebook_token);
     console.log(req.facebook_token)
@@ -247,11 +255,7 @@ const get_ads = async (req, res, next) => {
     }
   } catch (error) {
     console.log(error);
-    return next({
-      status: StatusCodes.BAD_REQUEST,
-      message: "error",
-      data: error,
-    });
+    return responseApi.ErrorResponse(res,ad_data.data , error)
   }
 
 }
@@ -321,15 +325,14 @@ const get_page_video = async (req,res,next) => {
     let { page_id,thumbnail } = req.query;
     const video_data = await facebook_get_video(page_id)
     if(video_data.status=="success"){
-      let result= {}
       for(let i=0;i<video_data.data.length;i++){
         if(thumbnail=="single"){
-          result[video_data.data[i].id] = video_data.data[i].thumbnails.data[0]
+          video_data.data[i].thumbnails = video_data.data[i].thumbnails.data[0]
         }else{
-          result[video_data.data[i].id] = video_data.data[i].thumbnails.data
+          video_data.data[i].thumbnails = video_data.data[i].thumbnails.data
         }
       }
-      return responseApi.successResponseWithData(res,"Video data found",result)
+      return responseApi.successResponseWithData(res,"Video data found",video_data.data)
     }else{
       return responseApi.ErrorResponse(res, "unable to find creative data", video_data.data, StatusCodes.BAD_REQUEST);
     }
@@ -337,6 +340,22 @@ const get_page_video = async (req,res,next) => {
   } catch (error) {
     console.log("Error", error)
     return responseApi.ErrorResponse(res, error.message ? error.message : "error",error );
+  }
+}
+
+const get_page_images = async (req,res,next) => {
+  try {
+    let {page_id} = req.query;
+    if(!page_id){
+      return responseApi.ErrorResponse(res, "Page ID is required", "", StatusCodes.BAD_REQUEST);
+    }
+    let images = await facebook_get_images(page_id)
+    if(images.status="success"){
+      return responseApi.successResponseWithData(res,"Image data found",images.data)
+    }
+  } catch (error) {
+    console.log(error)
+    return responseApi.ErrorResponse(res, "Internal server Error", error);
   }
 }
 
@@ -352,5 +371,6 @@ module.exports = {
   get_account_pages,
   get_location_keys,
   create_creative_video_upload,
-  get_page_video
+  get_page_video,
+  get_ads
 };
