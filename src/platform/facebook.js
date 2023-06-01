@@ -11,6 +11,8 @@ const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 const facebook = require("../models/facebook");
+const { fields } = require("../utils/constant");
+const Page = bizSdk.Page;
 
 // // global.Token;
 // // let obj = {}
@@ -27,11 +29,9 @@ const facebook = require("../models/facebook");
 // }
 
 const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
-// const access_token = "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
 const app_secret = "<APP_SECRET>";
 
 const app_id = "1238459780139646";
-// const video_access_token = "EAARmX2NDin4BAAQaeZCjZAfcsmb2S6DYc54QO66oyD6q2P7EZBlgbxZCRirznZBP0NAjjfQybuzsxXAH2j33LC8QJ8UrF0rDh1vBgdEJWkIiv3PsCl7YhE7mS1pE46ugcPPlAa6YCCefL5YMrfyROAVvke0W7NpmB2R2MiTb2fcDo1qrmH1L3JMZB2PlMhmoWCxeEtSyaXldVwv6c5cCKZC";
 // const pageId = "106284349116205";
 const id = "act_1239957706633747"; //local
 // const api = bizSdk.FacebookAdsApi.init(access_token);
@@ -366,21 +366,23 @@ const facebook_get_creative = async (id, fields, params, page_id) => {
   }
 };
 
-//AdSet id - 23853907338140580
-//creative id - 23853908495800580
+
 //Create Ad
 const facebook_create_ad = async (id, fields, params) => {
   try {
-    let fields, params;
-    fields = [];
-    params = {
-      name: "My Ad 1",
-      adset_id: "23853907338140580",
-      creative: { creative_id: "23853908495800580" },
-      status: "PAUSED",
-    };
+
     const ads = await new AdAccount(id).createAd(fields, params);
-    return ads;
+    if (ads._data) {
+      return {
+        status: "success",
+        data: ads._data,
+      };
+    } else {
+      return {
+        status: "unsuccessfull",
+        data: ads,
+      };
+    }
   } catch (error) {
     console.log("catch error", error);
     console.log("Error Message:" + error);
@@ -389,7 +391,6 @@ const facebook_create_ad = async (id, fields, params) => {
   }
 };
 
-// image HAsh -69b1f27b22e5cbf02f03d5663318604c
 // const imagePath =
 //   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
 const facebook_get_image_hash = async (imagePath, imageName) => {
@@ -451,6 +452,7 @@ const facebook_get_user_account_id = async (access_token) => {
     };
   }
 };
+
 
 //pages related to the user account id
 const facebook_get_accounts_pages = async (access_token) => {
@@ -600,7 +602,7 @@ const facebook_get_demographics = async () => {
 
 // facebook_get_demographics()
 
-
+// Get video data from page_id
 const facebook_get_video = async (id, video_id = null) => {
   try {
     let config = {
@@ -620,17 +622,17 @@ const facebook_get_video = async (id, video_id = null) => {
           status: "success",
           data: arr,
         };
-      } else {
-        let arr = []
-        for (let i = 0; i < video_data.data.data.length; i++) {
-          if (video_data.data.data[i].id == video_id) {
-            arr.push(video_data.data.data[i]);
-          }
+      }else{                // video data of only 1 video
+       let arr=[]
+       for (let i = 0; i < video_data.data.data.length; i++) {
+        if(video_data.data.data[i].id == video_id){
+          arr.push(video_data.data.data[i]);
         }
-        return {
-          status: "success",
-          data: arr,
-        };
+      }
+      return {
+        status: "success",
+        data: arr,
+      };  
       }
 
     } else {
@@ -647,6 +649,27 @@ const facebook_get_video = async (id, video_id = null) => {
     };
   }
 };
+
+const facebook_get_images = async (id)=>{
+  try {
+    let fields =["link","name"]
+    let params = { }
+    const photoss = await(new Page(id)).getPhotos(
+      fields,
+      params
+    );
+    console.log(photoss)
+    return
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+}
+// facebook_get_images(106284349116205)
+
 
 // facebook_get_video(106284349116205)
 
@@ -810,19 +833,31 @@ const facebook_create_creative_video_upload = async (
       setTimeout(async () => {
         try {
           let data = await getVideoData();
-          resolve(data);
+          resolve({
+            status:"success",
+            data:data});
         } catch (error) {
-          reject(error);
+          reject({
+            status:"error",
+            data:error
+          });
         }
       }, 15000);
     });
-
-
-    return {
-      status: "success",
-      data: video_data
-    };
-
+    
+    if(video_data.status=="success"){
+      return {
+        status: "success",
+        data: video_data
+      };
+    }else{
+      return {
+        status: video_data.status,
+        data: video_data.data
+      };
+    }
+    
+   
 
 
     // let video_id = result.data;
@@ -901,8 +936,6 @@ const facebook_create_creative_video = async (id, fields, params) => {
   }
 };
 
-let obj = {};
-
 
 const facebook_get_interest_and_demographics = async () => {
   try {
@@ -958,6 +991,8 @@ const facebook_get_interest_behavior = async () => {
 // facebook_get_interest_behavior()
 
 
+
+
 module.exports = {
   facebook_create_campaign,
   facebook_get_campaign,
@@ -971,5 +1006,6 @@ module.exports = {
   facebook_get_accounts_pages,
   facebook_get_location,
   facebook_create_creative_video_upload,
-  facebook_create_creative_video
+  facebook_create_creative_video,
+  facebook_get_video
 };

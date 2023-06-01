@@ -5,4 +5,5 @@ node_modules
 package-lock.json/*
 Rough.js
 uploads/
+src/platform/test.js
 behavior.txt
