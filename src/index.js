@@ -21,6 +21,9 @@ app.use(commonErrorHandler);
 app.get("/", (req, res) => {
   res.send("Welcome To AIOM");
 });
+
+process.on('warning', e => console.warn(e.stack));
+
 app.use('/uploads', express.static('./uploads'));
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
