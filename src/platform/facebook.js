@@ -76,6 +76,7 @@ const facebook_create_campaign = async (id, fields, params) => {
 //Get a Campaign
 const facebook_get_campaign = async (id, fields, params) => {
   try {
+    params.limit = 100000
     const campaignss = await new AdAccount(id).getCampaigns(fields, params);
     if (campaignss[0]._data) {
       let result = [];
