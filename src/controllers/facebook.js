@@ -199,7 +199,7 @@ const get_creative = async (req, res, next) => {
     let { id, fields, page_id } = req.query;
     fields = fields_constant.fields[fields]
      //id = JSON.parse(id);  //ad_account_id
-    id = JSON.parse(id);  //ad_account_id
+    // id = JSON.parse(id);  //ad_account_id
     let params = {};
     const creative_data = await facebook_get_creative(id, fields, params, page_id);
     if (creative_data.status == "success") {
@@ -262,7 +262,7 @@ const get_ads = async (req, res, next) => {
 
 const get_account_pages = async (req, res, next) => {
   try {
-    const account_pages = await facebook_get_accounts_pages()
+    const account_pages = await facebook_get_accounts_pages(req.facebook_token);
     if (account_pages.status !== "success") {
       return responseApi.ErrorResponse(res, "unable to find account page data", account_pages.data, StatusCodes.BAD_REQUEST);
     }
@@ -277,14 +277,12 @@ const get_account_pages = async (req, res, next) => {
 
 const get_location_keys = async (req, res, next) => {
   try {
-    let { location, country_code } = req.query
-    console.log(location, country_code, "...............")
+    let { location, country_code } = req.query;
     location = JSON.parse(location)
-    console.log(location, "...............")
     if (!location) {
       return responseApi.ErrorResponse(res, "Location Params is required ", "", StatusCodes.BAD_REQUEST)
     }
-    const location_details = await facebook_get_location(location)
+    const location_details = await facebook_get_location(location,req.facebook_token)
     let filtered_location = location_details.data
     if (country_code) {
       filtered_location = location_details.data.data.filter((item) => {

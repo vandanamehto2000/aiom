@@ -26,19 +26,19 @@ const facebook = require("../models/facebook");
 //   globalToken= token
 // }
 
-
-const access_token = "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
+const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
+// const access_token = "EAARmX2NDin4BAOOOjtVVWzqtCymFzz4rkqatnviWh6TGOmkT5o8ZArstEtv1aaGw8ZA0jPFGFvq65now8vXYTVZAjJb9FgQCbKXlGRXdhIWuCIrZBFEcFh8EPXh3QKPNm5Shh5ZBkZCb8jJWgnDQJZCghlMRL2Ab917jdDskJuyFBXN4Rn7QEQo";
 const app_secret = "<APP_SECRET>";
 
 const app_id = "1238459780139646";
 // const video_access_token = "EAARmX2NDin4BAAQaeZCjZAfcsmb2S6DYc54QO66oyD6q2P7EZBlgbxZCRirznZBP0NAjjfQybuzsxXAH2j33LC8QJ8UrF0rDh1vBgdEJWkIiv3PsCl7YhE7mS1pE46ugcPPlAa6YCCefL5YMrfyROAVvke0W7NpmB2R2MiTb2fcDo1qrmH1L3JMZB2PlMhmoWCxeEtSyaXldVwv6c5cCKZC";
 // const pageId = "106284349116205";
 const id = "act_1239957706633747"; //local
-const api = bizSdk.FacebookAdsApi.init(access_token);
+// const api = bizSdk.FacebookAdsApi.init(access_token);
 const showDebugingInfo = true; // Setting this to true shows more debugging info.
-if (showDebugingInfo) {
-  api.setDebug(true);
-}
+// if (showDebugingInfo) {
+//   api.setDebug(true);
+// }
 
 //Create a Campaign
 const facebook_create_campaign = async (id, fields, params) => {
@@ -423,7 +423,7 @@ const facebook_get_image_hash = async (imagePath, imageName) => {
 
 //User account_id - 113796205024659
 //GET User account ID
-const facebook_get_user_account_id = async () => {
+const facebook_get_user_account_id = async (access_token) => {
   try {
     let config = {
       method: "get",
@@ -453,9 +453,9 @@ const facebook_get_user_account_id = async () => {
 };
 
 //pages related to the user account id
-const facebook_get_accounts_pages = async () => {
+const facebook_get_accounts_pages = async (access_token) => {
   try {
-    const user_details = await facebook_get_user_account_id();
+    const user_details = await facebook_get_user_account_id(access_token);
     if (user_details.status !== "success") {
       return {
         status: "error",
@@ -512,7 +512,7 @@ const facebook_generate_previews = async () => {
   logApiCallResult("generatepreviewss api call complete.", generatepreviewss);
 };
 
-const facebook_get_location = async (params) => {
+const facebook_get_location = async (params,access_token) => {
   try {
     const url = "https://graph.facebook.com/v16.0/search";
     let config = {
@@ -909,25 +909,22 @@ const facebook_get_interest_and_demographics = async () => {
 
     const interest_data = await facebook_get_interest();
     // console.log( interest_data.data)
-  
+
     const demographics_data = await facebook_get_demographics();
     // console.log(demographics_data.data )
 
-    const combinedObj ={
-      interests:interest_data.data,
+    const combinedObj = {
+      interests: interest_data.data,
       demographics: demographics_data.data
     }
 
-
     console.log(combinedObj)
-
-
   } catch (error) {
     console.log(error)
   }
 }
 
-facebook_get_interest_and_demographics();
+// facebook_get_interest_and_demographics();
 
 
 
@@ -946,10 +943,14 @@ const facebook_get_interest_behavior = async () => {
       url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
       headers: {},
     };
-    const behavior = await axios.request(config)
-    console.log(behavior.data, "...............")
+    const behavior = await axios.request(config);
+    // console.log(behavior.data, "pppppppp")
 
-
+    fs.writeFileSync("behavior.txt", JSON.stringify(behavior.data));
+    
+    // let readData = fs.readFileSync("behavior.txt");
+    // readData = JSON.parse(readData);
+    // console.log(readData)
   } catch (error) {
     console.log(error)
   }

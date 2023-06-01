@@ -9,7 +9,8 @@ const generateAccessToken = (response) => {
       _id: response._id,
       email: response.email,
       username: response.username,
-      roles: response.roles
+      roles: response.roles,
+      organization:response.organization
 
     },
     process.env.JWT_SEC,
@@ -27,7 +28,7 @@ const register = async (req, res, next) => {
     ).toString(),
     organization: req.body.organization,
     roles: req.body.roles
-  };
+    };
   try {
     let userData = await User.create(newUser);
     return next({
@@ -70,7 +71,7 @@ const login = async (req, res, next) => {
         next({
           status: StatusCodes.OK,
           message: "User login successfully",
-          data: data,
+          data: data
         });
       } else {
         next({
@@ -95,7 +96,7 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    let { _id, email, username, roles } = req.auth;
+    let { _id, email, username, roles, organization } = req.auth;
     let token = req.headers.authorization.split(" ")[1];
     const response = await User.find({ email: email });
 
@@ -126,4 +127,14 @@ const logout = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, logout };
+
+
+const welcome = async (req, res) => {
+  console.log(req.auth, "+++++++++++++++++++++")
+  console.log(req.facebook_token, "_____________")
+
+  res.status(200).send("welcome");
+
+}
+
+module.exports = { register, login, logout,welcome };

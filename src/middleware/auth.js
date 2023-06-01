@@ -2,6 +2,8 @@ const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const { TOKEN_NOT_FOUND, UNAUTHORIZED_USER } = require("../utils/message");
 const responseApi = require("../utils/apiresponse");
+const User = require("../models/user");
+const bizSdk = require("facebook-nodejs-business-sdk");
 
 
 function authenticateToken(req, res, next) {
@@ -23,8 +25,8 @@ function authenticateToken(req, res, next) {
           message: UNAUTHORIZED_USER,
         });
       }
-
       req.auth = decoded;
+
       next();
     });
   } else {
@@ -35,6 +37,22 @@ function authenticateToken(req, res, next) {
   }
 }
 
+// facebook_token middleware
+
+const fb_middleware = async (req, res, next) => {
+  // console.log("---------------------",req.auth)
+  let userDataById = await User.findById(req.auth._id);
+  if (userDataById.facebook_token) {
+    let api = bizSdk.FacebookAdsApi.init(userDataById.facebook_token);
+    req.facebook_token = userDataById.facebook_token;
+
+  } else {
+    return responseApi.ErrorResponse(res, "facebook_token does not find", "");
+  }
+
+  next();
+}
+
 // check_role
 const roles_auth = (roles) => {
   return (req, res, next) => {
@@ -43,12 +61,10 @@ const roles_auth = (roles) => {
 
     if (!roles.includes(req.auth.roles)) {
       return responseApi.ErrorResponse(res, "role does not have access to this endpoint", "");
-      
     }
-
     next();
   }
 }
 
 
-module.exports = { authenticateToken, roles_auth }
+module.exports = { authenticateToken, fb_middleware, roles_auth }
