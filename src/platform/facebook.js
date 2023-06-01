@@ -288,19 +288,19 @@ const facebook_create_creative = async (
 
     //Change Params according to the input(image/video)
     let adcreatives;
-    if (imagePath == null && imageName == null && "object_story_id" in params) {
-      adcreatives = await new AdAccount(id).createAdCreative(
+    if(imagePath==null && imageName== null && "object_story_id" in params){
+       adcreatives = await new AdAccount(id).createAdCreative(
         fields,
         params
       );
     }
-    else {
+    else{
       let result = await facebook_get_image_hash(imagePath, imageName);
-      let { hash, url, name } = result.images[`${imageName}`];
+      let { hash, url, name } = result.data.images[`${imageName}`];
       params.image_hash = hash;
       params.object_story_spec.link_data.link = url;
       params.object_story_spec.link_data.image_hash = hash;
-      adcreatives = await new AdAccount(id).createAdCreative(
+       adcreatives = await new AdAccount(id).createAdCreative(
         fields,
         params
       );
@@ -409,15 +409,19 @@ const facebook_get_image_hash = async (imagePath, imageName) => {
       },
       data: data,
     };
+    const response = await axios.request(config);
 
-    return axios
-      .request(config)
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => {
-        return (error);
-      });
+    if (response.data) {
+      return {
+        status: "success",
+        data: response.data,
+      };
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response,
+      };
+    }
   } catch (error) {
     console.log(error);
   }
@@ -698,7 +702,7 @@ const facebook_get_images = async (id)=>{
 //   }
 // };
 
-const facebook_get_page_access_token = async (user_id, page_id) => {
+const facebook_get_page_access_token = async (user_id,page_id)=>{
   try {
     page_id;
     let config = {
@@ -747,14 +751,14 @@ const facebook_get_video_id = async (
 ) => {
   try {
     let user_id_details = await facebook_get_user_account_id()
-    if (user_id_details.status !== "success") {
+    if(user_id_details.status !=="success"){
       return {
         status: user_id_details.status,
         data: user_id_details.data
       }
     }
-    let page_access_token = await facebook_get_page_access_token(user_id_details.data.id, page_id)
-    if (page_access_token.status !== "success") {
+    let page_access_token = await facebook_get_page_access_token(user_id_details.data.id,page_id)
+    if(page_access_token.status !=="success"){
       return {
         status: page_access_token.status,
         data: page_access_token.data
@@ -762,11 +766,11 @@ const facebook_get_video_id = async (
     }
     let data = new FormData();
     data.append("access_token", page_access_token.data);
-    if (thumbFieldname) {
+    if(thumbFieldname){
       data.append(sourceFieldname, fs.createReadStream(videoPath));
       data.append(thumbFieldname, fs.createReadStream(thumbPath));
     }
-    else {
+    else{
       data.append(sourceFieldname, fs.createReadStream(videoPath));
     }
 
@@ -779,20 +783,32 @@ const facebook_get_video_id = async (
       },
       data: data,
     };
-    return await axios
-      .request(config)
-      .then((response) => {
-        return {
-          status: "success",
-          data: response.data.id,
-        };
-      })
-      .catch((error) => {
-        return {
-          status: "unsuccessfull",
-          data: error,
-        };
-      });
+    const response = await axios.request(config);
+    if (response.data) {
+      return {
+        status: "success",
+        data: response.data.id,
+      };
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response,
+      };
+    }
+    // return await axios
+    //   .request(config)
+    //   .then((response) => {
+    //     return {
+    //       status: "success",
+    //       data: response.data.id,
+    //     };
+    //   })
+    //   .catch((error) => {
+    //     return {
+    //       status: "unsuccessfull",
+    //       data: error,
+    //     };
+    //   });
   } catch (error) {
     console.log(error);
     return {
@@ -827,10 +843,10 @@ const facebook_create_creative_video_upload = async (
       params,
       page_id
     );
-    if (result.status !== "success") {
+    if(result.status!=="success"){
       return {
-        status: result.status,
-        data: result.data
+        status:result.status,
+        data:result.data
       }
     }
     const getVideoData = () => {
@@ -843,7 +859,7 @@ const facebook_create_creative_video_upload = async (
         }
       });
     };
-
+  
     let video_data = await new Promise((resolve, reject) => {
       setTimeout(async () => {
         try {
@@ -863,32 +879,14 @@ const facebook_create_creative_video_upload = async (
     if(video_data.status=="success"){
       return {
         status: "success",
-        data: video_data
+        data: video_data.data
       };
     }else{
       return {
         status: video_data.status,
-        data: video_data.data
+        data: video_data
       };
     }
-    
-   
-
-
-    // let video_id = result.data;
-    // let imageHash = await facebook_get_image_hash(thumbPath, thumbFileName);
-    // let { hash, url, name } = imageHash.images[`${thumbFileName}`];
-    // params.object_story_spec.video_data.image_url = url;
-    // params.object_story_spec.video_data.video_id = video_id;
-    // const adcreatives = await new AdAccount(id).createAdCreative(
-    //   fields,
-    //   params
-    // );
-    // logApiCallResult("adcreatives api call complete.", adcreatives);
-    // return {
-    //   status: "unsuccessfull",
-    //   data: "video_data",
-    // };
 
   } catch (error) {
     console.log(error);
@@ -899,38 +897,11 @@ const facebook_create_creative_video_upload = async (
   }
 };
 
-const facebook_create_creative_video = async (id, fields, params) => {
+// after uploading video
+const facebook_create_creative_video = async (id,fields,params) => {
   try {
-    // let fields;
-    // fields = [];
-    // let result = await facebook_get_video_id(
-    //   thumbPath,
-    //   thumbFieldname,
-    //   thumbFileName,
-    //   videoPath,
-    //   sourceFieldname,
-    //   id,
-    //   fields,
-    //   params,
-    //   page_id
-    // );
-    // console.log("-----------result",result)
-    // if(result.status!=="success"){
-    //   return {
-    //     status:result.status,
-    //     data:result.data
-    //   }
-    // }
-    // let video_data = await facebook_get_video(page_id,result.data)
-    // console.log("++++++++++++++++++++++++result",video_data)
-    // let video_id = result.data;
-    // let imageHash = await facebook_get_image_hash(thumbPath, thumbFileName);
-    // let { hash, url, name } = imageHash.images[`${thumbFileName}`];
-    // params.object_story_spec.video_data.image_url = url;
-    // params.object_story_spec.video_data.video_id = video_id;
-    const adcreatives = await new AdAccount(id).createAdCreative(fields, params);
-    logApiCallResult("adcreatives api call complete.", adcreatives);
-
+    const adcreatives = await new AdAccount(id).createAdCreative(fields,params);
+    console.log("upload data--res",adcreatives)
     if (adcreatives._data) {
       return {
         status: "success",
