@@ -296,7 +296,7 @@ const facebook_create_creative = async (
     }
     else {
       let result = await facebook_get_image_hash(imagePath, imageName);
-      let { hash, url, name } = result.images[`${imageName}`];
+      let { hash, url, name } = result.data.images[`${imageName}`];
       params.image_hash = hash;
       params.object_story_spec.link_data.link = url;
       params.object_story_spec.link_data.image_hash = hash;
@@ -409,15 +409,19 @@ const facebook_get_image_hash = async (imagePath, imageName) => {
       },
       data: data,
     };
+    const response = await axios.request(config);
 
-    return axios
-      .request(config)
-      .then((response) => {
-        return response.data;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (response.data) {
+      return {
+        status: "success",
+        data: response.data,
+      };
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response,
+      };
+    }
   } catch (error) {
     console.log(error);
   }
@@ -765,20 +769,32 @@ const facebook_get_video_id = async (
       },
       data: data,
     };
-    return await axios
-      .request(config)
-      .then((response) => {
-        return {
-          status: "success",
-          data: response.data.id,
-        };
-      })
-      .catch((error) => {
-        return {
-          status: "unsuccessfull",
-          data: error,
-        };
-      });
+    const response = await axios.request(config);
+    if (response.data) {
+      return {
+        status: "success",
+        data: response.data.id,
+      };
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response,
+      };
+    }
+    // return await axios
+    //   .request(config)
+    //   .then((response) => {
+    //     return {
+    //       status: "success",
+    //       data: response.data.id,
+    //     };
+    //   })
+    //   .catch((error) => {
+    //     return {
+    //       status: "unsuccessfull",
+    //       data: error,
+    //     };
+    //   });
   } catch (error) {
     console.log(error);
     return {
