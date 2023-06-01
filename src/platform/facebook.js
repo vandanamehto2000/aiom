@@ -416,7 +416,7 @@ const facebook_get_image_hash = async (imagePath, imageName) => {
         return response.data;
       })
       .catch((error) => {
-        console.log(error);
+        return (error);
       });
   } catch (error) {
     console.log(error);
@@ -609,7 +609,7 @@ const facebook_get_video = async (id, video_id = null) => {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v16.0/${id}/videos?fields=thumbnails&limit=1000&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
+      url: `https://graph.facebook.com/v16.0/${id}/videos?fields=id,source,updated_time,views,description,title,thumbnails&limit=1000&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
       headers: {}
     };
     let video_data = await axios.request(config);
@@ -653,14 +653,28 @@ const facebook_get_video = async (id, video_id = null) => {
 
 const facebook_get_images = async (id)=>{
   try {
-    let fields =["link","name"]
+    let fields =["id","link","name"]
     let params = { }
     const photoss = await(new Page(id)).getPhotos(
       fields,
       params
     );
-    console.log(photoss)
-    return
+    if(photoss[0]._data){
+      let result=[]
+      for(let i=0;i<photoss.length;i++){
+        result.push(photoss[i]._data)
+      }
+      return {
+        status: "success",
+        data: result,
+      };
+    }else{
+      return {
+        status: "unsuccessfull",
+        data: photoss,
+      };
+    }
+    
   } catch (error) {
     console.log(error);
     return {
@@ -674,15 +688,15 @@ const facebook_get_images = async (id)=>{
 
 // facebook_get_video(106284349116205)
 
-const logApiCallResult = (apiCallName, data) => {
-  //   console.log(apiCallName);
-  if (showDebugingInfo) {
-    // fs.writeFile('src/platform/test.js',`${data}`,(err)=>{
-    //   console.log(err)
-    // })
-    console.log("Data:" + JSON.stringify(data));
-  }
-};
+// const logApiCallResult = (apiCallName, data) => {
+//   //   console.log(apiCallName);
+//   if (showDebugingInfo) {
+//     // fs.writeFile('src/platform/test.js',`${data}`,(err)=>{
+//     //   console.log(err)
+//     // })
+//     console.log("Data:" + JSON.stringify(data));
+//   }
+// };
 
 const facebook_get_page_access_token = async (user_id, page_id) => {
   try {
@@ -1007,5 +1021,6 @@ module.exports = {
   facebook_get_location,
   facebook_create_creative_video_upload,
   facebook_create_creative_video,
-  facebook_get_video
+  facebook_get_video,
+  facebook_get_images
 };

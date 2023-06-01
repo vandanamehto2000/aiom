@@ -13,7 +13,8 @@ const {
   facebook_create_creative_video_upload,
   facebook_create_creative_video,
   facebook_get_ads,
-  facebook_get_video
+  facebook_get_video,
+  facebook_get_images
 } = require("../platform/facebook");
 
 const fields_constant = require('../utils/constant')
@@ -245,11 +246,7 @@ const get_ads = async (req, res, next) => {
     }
   } catch (error) {
     console.log(error);
-    return next({
-      status: StatusCodes.BAD_REQUEST,
-      message: "error",
-      data: error,
-    });
+    return responseApi.ErrorResponse(res,ad_data.data , error)
   }
 
 }
@@ -321,15 +318,14 @@ const get_page_video = async (req,res,next) => {
     let { page_id,thumbnail } = req.query;
     const video_data = await facebook_get_video(page_id)
     if(video_data.status=="success"){
-      let result= {}
       for(let i=0;i<video_data.data.length;i++){
         if(thumbnail=="single"){
-          result[video_data.data[i].id] = video_data.data[i].thumbnails.data[0]
+          video_data.data[i].thumbnails = video_data.data[i].thumbnails.data[0]
         }else{
-          result[video_data.data[i].id] = video_data.data[i].thumbnails.data
+          video_data.data[i].thumbnails = video_data.data[i].thumbnails.data
         }
       }
-      return responseApi.successResponseWithData(res,"Video data found",result)
+      return responseApi.successResponseWithData(res,"Video data found",video_data.data)
     }else{
       return responseApi.ErrorResponse(res, "unable to find creative data", video_data.data, StatusCodes.BAD_REQUEST);
     }
@@ -337,6 +333,22 @@ const get_page_video = async (req,res,next) => {
   } catch (error) {
     console.log("Error", error)
     return responseApi.ErrorResponse(res, error.message ? error.message : "error",error );
+  }
+}
+
+const get_page_images = async (req,res,next) => {
+  try {
+    let {page_id} = req.query;
+    if(!page_id){
+      return responseApi.ErrorResponse(res, "Page ID is required", "", StatusCodes.BAD_REQUEST);
+    }
+    let images = await facebook_get_images(page_id)
+    if(images.status="success"){
+      return responseApi.successResponseWithData(res,"Image data found",images.data)
+    }
+  } catch (error) {
+    console.log(error)
+    return responseApi.ErrorResponse(res, "Internal server Error", error);
   }
 }
 
@@ -352,5 +364,6 @@ module.exports = {
   get_account_pages,
   get_location_keys,
   create_creative_video_upload,
-  get_page_video
+  get_page_video,
+  get_ads
 };
