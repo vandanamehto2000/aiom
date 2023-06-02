@@ -41,7 +41,8 @@ const showDebugingInfo = true; // Setting this to true shows more debugging info
 // }
 
 //Create a Campaign
-const facebook_create_campaign = async (id, fields, params) => {
+const facebook_create_campaign = async (id, fields, params, access_token) => {
+  // console.log(access_token, "token")
   try {
     if (params.daily_budget) {
       params.daily_budget *= 100;
@@ -73,7 +74,7 @@ const facebook_create_campaign = async (id, fields, params) => {
 };
 
 //Get a Campaign
-const facebook_get_campaign = async (id, fields, params) => {
+const facebook_get_campaign = async (id, fields, params, access_token) => {
   try {
     const campaignss = await new AdAccount(id).getCampaigns(fields, params);
     if (campaignss[0]._data) {
@@ -107,7 +108,7 @@ const facebook_get_campaign = async (id, fields, params) => {
 //"23853823531720580",  //conversions campaign ID
 
 //Create AdSET
-const facebook_create_adSet = async (id, fields, params) => {
+const facebook_create_adSet = async (id, fields, params, access_token) => {
   try {
     // let fields, params;
     // fields = [];
@@ -219,7 +220,7 @@ const facebook_get_adSet = async (id, fields, params) => {
 };
 
 //Get Ad
-const facebook_get_ads = async (id, fields, params) => {
+const facebook_get_ads = async (id, fields, params, access_token) => {
   try {
     const insightss = await new AdSet(id).getAds(                 //id here is AdSet_id
       fields,
@@ -899,7 +900,7 @@ const facebook_create_creative_video_upload = async (
 };
 
 // after uploading video
-const facebook_create_creative_video = async (id,fields,params) => {
+const facebook_create_creative_video = async (id,fields,params, access_token) => {
   try {
     const adcreatives = await new AdAccount(id).createAdCreative(fields,params);
     console.log("upload data--res",adcreatives)

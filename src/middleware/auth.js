@@ -40,25 +40,19 @@ function authenticateToken(req, res, next) {
 // facebook_token middleware
 
 const fb_middleware = async (req, res, next) => {
-  // console.log("---------------------",req.auth)
   let userDataById = await User.findById(req.auth._id);
   if (userDataById.facebook_token) {
     let api = bizSdk.FacebookAdsApi.init(userDataById.facebook_token);
     req.facebook_token = userDataById.facebook_token;
-
   } else {
     return responseApi.ErrorResponse(res, "facebook_token does not find", "");
   }
-
   next();
 }
 
 // check_role
 const roles_auth = (roles) => {
   return (req, res, next) => {
-
-    console.log(req.auth);
-
     if (!roles.includes(req.auth.roles)) {
       return responseApi.ErrorResponse(res, "role does not have access to this endpoint", "");
     }
