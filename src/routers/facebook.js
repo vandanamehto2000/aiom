@@ -10,7 +10,7 @@ router.post("/ad-set/create", create_adSet);
 router.get("/ad-set/get", get_adSet);
 router.get("/ad/get", get_ads);
 
-router.post("/ad-creative/create-image-existing", create_creative);
+router.post("/ad-creative/create-image-existing",uploadImage, create_creative);
 router.get("/ad-creative/get", get_creative);
 router.post("/ad/create", create_ad);
 router.get("/user/account/pages",get_account_pages);
