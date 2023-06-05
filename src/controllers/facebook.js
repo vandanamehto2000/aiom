@@ -372,5 +372,6 @@ module.exports = {
   get_location_keys,
   create_creative_video_upload,
   get_page_video,
-  get_ads
+  get_ads,
+  get_page_images
 };
