@@ -9,7 +9,8 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     token: { type: String, default: '' },
     organization: { type: String, required: true },
-    roles: { type: String, required: true, enum: ["admin", "business_owner", "employee"] }
+    roles: { type: String, required: true, enum: ["admin", "business_owner", "employee"] },
+    facebook_token: { type: String, default: '' }
   },
   { timestamps: true }
 );
