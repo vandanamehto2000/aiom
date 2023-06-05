@@ -105,15 +105,12 @@ const get_adSet = async (req, res, next) => {
 
 //Create creative
 const create_creative = async (req, res, next) => {
-  console.log("request data+++++++++++",req.body,req.file)
   try {
         let { id, fields, params } = req.body;
         fields = JSON.parse(fields);
         params = JSON.parse(params);
         if(req.file){
           let { path, filename, originalname, fieldname } = req.file;
-          // id = JSON.parse(id);
-          return
           const adcreatives = await facebook_create_creative(path, filename, id, fields, params);
           if (adcreatives.status == "success") {
             return responseApi.successResponseWithData(res, "New creative image data post Successfully", adcreatives.data, StatusCodes.CREATED);
@@ -123,10 +120,7 @@ const create_creative = async (req, res, next) => {
         }
         else{
           // existing code
-          console.log("existing post-------",params)
           if("object_story_id" in params){
-            console.log("object_story_id------")
-            return
             const adcreatives = await facebook_create_creative(null, null, id, fields, params);
             if (adcreatives.status == "success") {
               return responseApi.successResponseWithData(res, "Existing data post successfully", adcreatives.data, StatusCodes.CREATED);
@@ -146,10 +140,8 @@ const create_creative = async (req, res, next) => {
 
 const create_creative_video_upload = async (req, res, next) => {
   try {
-    console.log("request data in upload video---",req.body,req.files)
         let thumbFieldname,thumbFileName,thumbPath,sourceFieldname,videoPath;
         if("thumb" in req.files){
-          console.log("thumb available",req.files)
            thumbFieldname=req.files.thumb[0].fieldname;
            thumbFileName = req.files.thumb[0].filename;
            thumbPath = req.files.thumb[0].path;
@@ -157,7 +149,6 @@ const create_creative_video_upload = async (req, res, next) => {
            videoPath=req.files.source[0].path;
         }
         else{
-          console.log("thumb not available",req.files)
           sourceFieldname=req.files.source[0].fieldname;
           videoPath=req.files.source[0].path;
         }
@@ -167,7 +158,6 @@ const create_creative_video_upload = async (req, res, next) => {
         }
         fields = JSON.parse(fields);
         params = JSON.parse(params);
-        return
         const result = await facebook_create_creative_video_upload(thumbPath,thumbFieldname,thumbFileName,videoPath,sourceFieldname,id, fields, params,page_id);
        
         if (result.status == "success") {
