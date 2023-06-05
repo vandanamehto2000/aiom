@@ -128,13 +128,4 @@ const logout = async (req, res, next) => {
 };
 
 
-
-// const welcome = async (req, res) => {
-//   console.log(req.auth, "+++++++++++++++++++++")
-//   console.log(req.facebook_token, "_____________")
-
-//   res.status(200).send("welcome");
-
-// }
-
 module.exports = { register, login, logout };

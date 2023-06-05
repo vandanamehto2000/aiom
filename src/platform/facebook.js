@@ -41,8 +41,7 @@ const showDebugingInfo = true; // Setting this to true shows more debugging info
 // }
 
 //Create a Campaign
-const facebook_create_campaign = async (id, fields, params, access_token) => {
-  // console.log(access_token, "token")
+const facebook_create_campaign = async (id, fields, params) => {
   try {
     if (params.daily_budget) {
       params.daily_budget *= 100;
@@ -74,7 +73,7 @@ const facebook_create_campaign = async (id, fields, params, access_token) => {
 };
 
 //Get a Campaign
-const facebook_get_campaign = async (id, fields, params, access_token) => {
+const facebook_get_campaign = async (id, fields, params) => {
   try {
     params.limit = 100000
     const campaignss = await new AdAccount(id).getCampaigns(fields, params);
@@ -109,7 +108,7 @@ const facebook_get_campaign = async (id, fields, params, access_token) => {
 //"23853823531720580",  //conversions campaign ID
 
 //Create AdSET
-const facebook_create_adSet = async (id, fields, params, access_token) => {
+const facebook_create_adSet = async (id, fields, params) => {
   try {
     // let fields, params;
     // fields = [];
@@ -222,7 +221,7 @@ const facebook_get_adSet = async (id, fields, params) => {
 };
 
 //Get Ad
-const facebook_get_ads = async (id, fields, params, access_token) => {
+const facebook_get_ads = async (id, fields, params) => {
   try {
     const insightss = await new AdSet(id).getAds(                 //id here is AdSet_id
       fields,
@@ -247,6 +246,10 @@ const facebook_get_ads = async (id, fields, params, access_token) => {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 // facebook_get_ad()
@@ -258,7 +261,8 @@ const facebook_create_creative = async (
   imageName,
   id,
   fields,
-  params
+  params,
+  access_token
 ) => {
   try {
     // let fields, params;
@@ -290,19 +294,19 @@ const facebook_create_creative = async (
 
     //Change Params according to the input(image/video)
     let adcreatives;
-    if(imagePath==null && imageName== null && "object_story_id" in params){
-       adcreatives = await new AdAccount(id).createAdCreative(
+    if (imagePath == null && imageName == null && "object_story_id" in params) {
+      adcreatives = await new AdAccount(id).createAdCreative(
         fields,
         params
       );
     }
-    else{
-      let result = await facebook_get_image_hash(imagePath, imageName);
+    else {
+      let result = await facebook_get_image_hash(imagePath, imageName, access_token);
       let { hash, url, name } = result.data.images[`${imageName}`];
       params.image_hash = hash;
       params.object_story_spec.link_data.link = url;
       params.object_story_spec.link_data.image_hash = hash;
-       adcreatives = await new AdAccount(id).createAdCreative(
+      adcreatives = await new AdAccount(id).createAdCreative(
         fields,
         params
       );
@@ -331,11 +335,9 @@ const facebook_create_creative = async (
 
 //get Creative
 const facebook_get_creative = async (id, fields, params, page_id, access_token) => {
-  // console.log(access_token, "uuuuuuuu")
   try {
     const adcreativess = await new AdAccount(id).getAdCreatives(fields, params);
     const video_data = await facebook_get_video(page_id, access_token);
-    console.log(access_token, "..........")
     if (video_data.status !== "success") {
       return {
         status: "error",
@@ -392,13 +394,16 @@ const facebook_create_ad = async (id, fields, params) => {
     console.log("catch error", error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return error;
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 
 // const imagePath =
 //   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
-const facebook_get_image_hash = async (imagePath, imageName) => {
+const facebook_get_image_hash = async (imagePath, imageName, access_token) => {
   try {
     let data = new FormData();
     data.append(imageName, fs.createReadStream(imagePath));
@@ -428,6 +433,13 @@ const facebook_get_image_hash = async (imagePath, imageName) => {
     }
   } catch (error) {
     console.log(error);
+    console.log("error part1", error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 
@@ -523,7 +535,7 @@ const facebook_generate_previews = async () => {
   logApiCallResult("generatepreviewss api call complete.", generatepreviewss);
 };
 
-const facebook_get_location = async (params,access_token) => {
+const facebook_get_location = async (params, access_token) => {
   try {
     const url = "https://graph.facebook.com/v16.0/search";
     let config = {
@@ -580,6 +592,13 @@ const facebook_get_interest = async () => {
 
   } catch (error) {
     console.log(error);
+    console.log("error part1", error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 // facebook_get_interest();
@@ -605,14 +624,20 @@ const facebook_get_demographics = async () => {
       data: demographics.data.data
     }
   } catch (error) {
-    console.log(error);
+    console.log("error part1", error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 
 // facebook_get_demographics()
 
 // Get video data from page_id
-const facebook_get_video = async (id, access_token,video_id = null) => {
+const facebook_get_video = async (id, access_token, video_id = null) => {
   try {
     let config = {
       method: 'get',
@@ -631,17 +656,17 @@ const facebook_get_video = async (id, access_token,video_id = null) => {
           status: "success",
           data: arr,
         };
-      }else{                // video data of only 1 video
-       let arr=[]
-       for (let i = 0; i < video_data.data.data.length; i++) {
-        if(video_data.data.data[i].id == video_id){
-          arr.push(video_data.data.data[i]);
+      } else {                // video data of only 1 video
+        let arr = []
+        for (let i = 0; i < video_data.data.data.length; i++) {
+          if (video_data.data.data[i].id == video_id) {
+            arr.push(video_data.data.data[i]);
+          }
         }
-      }
-      return {
-        status: "success",
-        data: arr,
-      };  
+        return {
+          status: "success",
+          data: arr,
+        };
       }
 
     } else {
@@ -659,30 +684,30 @@ const facebook_get_video = async (id, access_token,video_id = null) => {
   }
 };
 
-const facebook_get_images = async (id)=>{
+const facebook_get_images = async (id) => {
   try {
-    let fields =["id","link","name"]
-    let params = { }
-    const photoss = await(new Page(id)).getPhotos(
+    let fields = ["id", "link", "name"]
+    let params = {}
+    const photoss = await (new Page(id)).getPhotos(
       fields,
       params
     );
-    if(photoss[0]._data){
-      let result=[]
-      for(let i=0;i<photoss.length;i++){
+    if (photoss[0]._data) {
+      let result = []
+      for (let i = 0; i < photoss.length; i++) {
         result.push(photoss[i]._data)
       }
       return {
         status: "success",
         data: result,
       };
-    }else{
+    } else {
       return {
         status: "unsuccessfull",
         data: photoss,
       };
     }
-    
+
   } catch (error) {
     console.log(error);
     return {
@@ -706,7 +731,7 @@ const facebook_get_images = async (id)=>{
 //   }
 // };
 
-const facebook_get_page_access_token = async (user_id,page_id)=>{
+const facebook_get_page_access_token = async (user_id, page_id, access_token) => {
   try {
     page_id;
     let config = {
@@ -751,18 +776,21 @@ const facebook_get_video_id = async (
   id,
   fields,
   params,
-  page_id
+  page_id,
+  access_token
 ) => {
   try {
-    let user_id_details = await facebook_get_user_account_id()
-    if(user_id_details.status !=="success"){
+    let user_id_details = await facebook_get_user_account_id(access_token)
+    console.log(user_id_details, "iiiiiiiii")
+    if (user_id_details.status !== "success") {
       return {
         status: user_id_details.status,
         data: user_id_details.data
       }
     }
-    let page_access_token = await facebook_get_page_access_token(user_id_details.data.id,page_id)
-    if(page_access_token.status !=="success"){
+    let page_access_token = await facebook_get_page_access_token(user_id_details.data.id, page_id, access_token)
+    console.log(page_access_token, "oooooooo");
+    if (page_access_token.status !== "success") {
       return {
         status: page_access_token.status,
         data: page_access_token.data
@@ -770,11 +798,11 @@ const facebook_get_video_id = async (
     }
     let data = new FormData();
     data.append("access_token", page_access_token.data);
-    if(thumbFieldname){
+    if (thumbFieldname) {
       data.append(sourceFieldname, fs.createReadStream(videoPath));
       data.append(thumbFieldname, fs.createReadStream(thumbPath));
     }
-    else{
+    else {
       data.append(sourceFieldname, fs.createReadStream(videoPath));
     }
 
@@ -831,7 +859,8 @@ const facebook_create_creative_video_upload = async (
   id,
   fields,
   params,
-  page_id
+  page_id,
+  access_token
 ) => {
   try {
     let fields;
@@ -845,17 +874,18 @@ const facebook_create_creative_video_upload = async (
       id,
       fields,
       params,
-      page_id
+      page_id,
+      access_token
     );
-    if(result.status!=="success"){
+    if (result.status !== "success") {
       return {
-        status:result.status,
-        data:result.data
+        status: result.status,
+        data: result.data
       }
     }
     const getVideoData = () => {
       return new Promise(async (resolve, reject) => {
-        let video_data = await facebook_get_video(page_id, result.data);
+        let video_data = await facebook_get_video(page_id, access_token,result.data);
         if (video_data) {
           resolve(video_data.data);
         } else {
@@ -863,29 +893,30 @@ const facebook_create_creative_video_upload = async (
         }
       });
     };
-  
+
     let video_data = await new Promise((resolve, reject) => {
       setTimeout(async () => {
         try {
           let data = await getVideoData();
           resolve({
-            status:"success",
-            data:data});
+            status: "success",
+            data: data
+          });
         } catch (error) {
           reject({
-            status:"error",
-            data:error
+            status: "error",
+            data: error
           });
         }
-      }, 15000);
+      }, 20000);
     });
-    
-    if(video_data.status=="success"){
+
+    if (video_data.status == "success") {
       return {
         status: "success",
         data: video_data.data
       };
-    }else{
+    } else {
       return {
         status: video_data.status,
         data: video_data
@@ -902,10 +933,10 @@ const facebook_create_creative_video_upload = async (
 };
 
 // after uploading video
-const facebook_create_creative_video = async (id,fields,params, access_token) => {
+const facebook_create_creative_video = async (id, fields, params) => {
   try {
-    const adcreatives = await new AdAccount(id).createAdCreative(fields,params);
-    console.log("upload data--res",adcreatives)
+    const adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+    console.log("upload data--res", adcreatives)
     if (adcreatives._data) {
       return {
         status: "success",
@@ -942,8 +973,19 @@ const facebook_get_interest_and_demographics = async () => {
     }
 
     console.log(combinedObj)
+    return {
+      status: "unsuccessfull",
+      data: combinedObj,
+    };
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    console.log("error part1", error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 }
 
@@ -970,12 +1012,22 @@ const facebook_get_interest_behavior = async () => {
     // console.log(behavior.data, "pppppppp")
 
     fs.writeFileSync("behavior.txt", JSON.stringify(behavior.data));
-    
+    return {
+      status: "unsuccessfull",
+      data: behavior.data,
+    };
+
     // let readData = fs.readFileSync("behavior.txt");
     // readData = JSON.parse(readData);
     // console.log(readData)
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
   }
 };
 // facebook_get_interest_behavior()
