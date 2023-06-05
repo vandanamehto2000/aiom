@@ -875,7 +875,7 @@ const facebook_create_creative_video_upload = async (
             data:error
           });
         }
-      }, 15000);
+      }, 25000);
     });
     
     if(video_data.status=="success"){
