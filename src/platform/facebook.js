@@ -78,20 +78,28 @@ const facebook_get_campaign = async (id, fields, params) => {
   try {
     params.limit = 100000
     const campaignss = await new AdAccount(id).getCampaigns(fields, params);
-    if (campaignss[0]._data) {
-      let result = [];
-      for (let i = 0; i < campaignss.length; i++) {
-        result.push(campaignss[i]._data);
+
+    if(campaignss.length>0){
+      if (campaignss[0]._data) {
+        let result = [];
+        for (let i = 0; i < campaignss.length; i++) {
+          result.push(campaignss[i]._data);
+        }
+        return {
+          status: "success",
+          data: result,
+        };
+      } else {
+        return {
+          status: "unsuccessfull",
+          data: campaignss,
+        };
       }
+    }else{
       return {
-        status: "success",
-        data: result,
-      };
-    } else {
-      return {
-        status: "unsuccessfull",
-        data: campaignss,
-      };
+        status:"success",
+        data: []
+      }
     }
   } catch (error) {
     console.log(error);
@@ -196,21 +204,29 @@ const facebook_get_adSet = async (id, fields, params) => {
   try {
     params.limit = 100000
     const adsetss = await new Campaign(id).getAdSets(fields, params);
-    if (adsetss[0]._data) {
-      let arr = [];
-      for (let i = 0; i < adsetss.length; i++) {
-        arr.push(adsetss[i]._data);
+    if(adsetss.length>0){
+      if (adsetss[0]._data) {
+        let arr = [];
+        for (let i = 0; i < adsetss.length; i++) {
+          arr.push(adsetss[i]._data);
+        }
+        return {
+          status: "success",
+          data: arr,
+        };
+      } else {
+        return {
+          status: "unsuccessfull",
+          data: adsetss,
+        };
       }
+    }else{
       return {
         status: "success",
-        data: arr,
-      };
-    } else {
-      return {
-        status: "unsuccessfull",
-        data: adsetss,
+        data: [],
       };
     }
+    
   } catch (error) {
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
@@ -224,24 +240,32 @@ const facebook_get_adSet = async (id, fields, params) => {
 //Get Ad
 const facebook_get_ads = async (id, fields, params) => {
   try {
+    params.limit = 100000
     const insightss = await new AdSet(id).getAds(                 //id here is AdSet_id
       fields,
       params
     );
-    if (insightss[0]._data) {
-      let arr = [];
-      for (let i = 0; i < insightss.length; i++) {
-        arr.push(insightss[i]._data);
+    if(insightss.length>0){
+      if (insightss[0]._data) {
+        let arr = [];
+        for (let i = 0; i < insightss.length; i++) {
+          arr.push(insightss[i]._data);
+        }
+        return {
+          status: "success",
+          data: arr,
+        };
+      } else {
+        return {
+          status: "unsuccessfull",
+          data: insightss,
+        };
       }
+    }else{
       return {
-        status: "success",
-        data: arr,
-      };
-    } else {
-      return {
-        status: "unsuccessfull",
-        data: insightss,
-      };
+        status:"success",
+        data: []
+      }
     }
   } catch (error) {
     console.log(error);
@@ -615,7 +639,7 @@ const facebook_get_video = async (id, video_id = null) => {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v16.0/${id}/videos?fields=id,source,updated_time,views,description,title,thumbnails&limit=1000&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
+      url: `https://graph.facebook.com/v16.0/${id}/videos?fields=id,source,updated_time,views,description,title,length,thumbnails&limit=1000&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
       headers: {}
     };
     let video_data = await axios.request(config);
@@ -924,7 +948,6 @@ const facebook_create_creative_video = async (id,fields,params) => {
   }
 };
 
-let obj = {};
 
 
 const facebook_get_interest_and_demographics = async () => {
@@ -977,6 +1000,41 @@ const facebook_get_interest_behavior = async () => {
 };
 // facebook_get_interest_behavior()
 
+
+
+const facebook_get_businesses = async (access_token)=>{
+  try {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `https://graph.facebook.com/v16.0/me/businesses?fields=id,name,created_by,owned_ad_accounts{name}&access_token=${access_token}`,
+      headers: { 
+        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
+      }
+    };
+    
+    const businesses = await axios.request(config)
+
+    if(businesses.data){
+      return {
+        status:"success",
+         data:businesses.data
+      }
+    }else{
+      return {
+        status:"unsuccesfull",
+        data:businesses
+      }
+    }
+
+  } catch (error) {
+     console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+}
 
 
 
