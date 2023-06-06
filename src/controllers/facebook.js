@@ -20,7 +20,6 @@ const {
 const fields_constant = require('../utils/constant')
 const { StatusCodes } = require("http-status-codes");
 const responseApi = require("../utils/apiresponse");
-const { APIResponse } = require("facebook-nodejs-business-sdk");
 
 //Create a Campaign
 const create_campaign = async (req, res, next) => {
