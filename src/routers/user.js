@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.post("/register", commonValidator(registerUser), register);
 router.post("/login", login);
-router.post("/logout", authenticateToken, fb_middleware, roles_auth(["admin", "business_owner"]), logout);
+router.post("/logout", authenticateToken, logout);
 
 
 module.exports = router;

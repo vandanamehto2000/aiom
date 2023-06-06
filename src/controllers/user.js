@@ -13,8 +13,7 @@ const generateAccessToken = (response) => {
       organization:response.organization
 
     },
-    process.env.JWT_SEC,
-    { expiresIn: "30m" }
+    process.env.JWT_SEC
   );
 };
 
