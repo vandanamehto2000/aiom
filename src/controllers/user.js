@@ -14,7 +14,6 @@ const generateAccessToken = (response) => {
 
     },
     process.env.JWT_SEC,
-    { expiresIn: "30m" }
   );
 };
 
