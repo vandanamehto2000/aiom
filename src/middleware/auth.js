@@ -40,10 +40,10 @@ function authenticateToken(req, res, next) {
 // facebook_token middleware
 
 const fb_middleware = async (req, res, next) => {
-  let userDataById = await User.findById(req.auth._id);
-  if (userDataById.facebook_token) {
-    let api = bizSdk.FacebookAdsApi.init(userDataById.facebook_token);
-    req.facebook_token = userDataById.facebook_token;
+  let userDataByEmail = await User.findOne({email:req.auth.email});
+  if (userDataByEmail?.facebook_token) {
+    let api = bizSdk.FacebookAdsApi.init(userDataByEmail.facebook_token);
+    req.facebook_token = userDataByEmail.facebook_token;
   } else {
     return responseApi.ErrorResponse(res, "Unable to find facebook_token!!", "");
   }

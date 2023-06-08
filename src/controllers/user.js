@@ -13,7 +13,7 @@ const generateAccessToken = (response) => {
       organization:response.organization
 
     },
-    process.env.JWT_SEC,
+    process.env.JWT_SEC
   );
 };
 
