@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
   res.send("Welcome To AIOM");
 });
 
-process.on('warning', e => console.warn(e.stack));
+process.on('warning', e => console.warn(e.stack,"-------------"));
 
 app.use('/uploads', express.static('./uploads'));
 app.listen(port, () => {

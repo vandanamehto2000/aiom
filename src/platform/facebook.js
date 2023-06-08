@@ -592,73 +592,6 @@ const facebook_get_location = async (params, access_token) => {
 };
 // facebook_get_location()
 
-const facebook_get_interest = async () => {
-  try {
-    let params = {
-      type: "adinterest",
-      q: "hockey",
-    };
-    const url = "https://graph.facebook.com/v16.0/search";
-
-    let config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
-      headers: {},
-    };
-
-    const interests = await axios.request(config)
-
-    return {
-      status: "success",
-      data: interests.data.data
-    }
-
-  } catch (error) {
-    console.log(error);
-    console.log("error part1", error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
-    return {
-      status: "error",
-      data: error.message ? error.message : error,
-    };
-  }
-};
-// facebook_get_interest();
-
-const facebook_get_demographics = async () => {
-  try {
-    let params = {
-      type: "adeducationschool",
-      q: "hockey",
-    };
-    const url = "https://graph.facebook.com/v16.0/search";
-
-    let config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
-      headers: {},
-    };
-
-    const demographics = await axios.request(config)
-    return {
-      status: "success",
-      data: demographics.data.data
-    }
-  } catch (error) {
-    console.log("error part1", error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
-    return {
-      status: "error",
-      data: error.message ? error.message : error,
-    };
-  }
-};
-
-// facebook_get_demographics()
 
 // Get video data from page_id
 const facebook_get_video = async (id, access_token, video_id = null) => {
@@ -710,7 +643,7 @@ const facebook_get_video = async (id, access_token, video_id = null) => {
 
 const facebook_get_images = async (id) => {
   try {
-    let fields = ["id", "link", "name"]
+    let fields = ["id", "link", "name","hash"]
     let params = {}
     const photoss = await (new Page(id)).getPhotos(
       fields,
@@ -721,6 +654,7 @@ const facebook_get_images = async (id) => {
       for (let i = 0; i < photoss.length; i++) {
         result.push(photoss[i]._data)
       }
+      console.log(result)
       return {
         status: "success",
         data: result,
@@ -982,88 +916,13 @@ const facebook_create_creative_video = async (id, fields, params) => {
 };
 
 
-const facebook_get_interest_and_demographics = async () => {
-  try {
-
-    const interest_data = await facebook_get_interest();
-    // console.log( interest_data.data)
-
-    const demographics_data = await facebook_get_demographics();
-    // console.log(demographics_data.data )
-
-    const combinedObj = {
-      interests: interest_data.data,
-      demographics: demographics_data.data
-    }
-
-    console.log(combinedObj)
-    return {
-      status: "unsuccessfull",
-      data: combinedObj,
-    };
-  } catch (error) {
-    console.log(error);
-    console.log("error part1", error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
-    return {
-      status: "error",
-      data: error.message ? error.message : error,
-    };
-  }
-}
-
-// facebook_get_interest_and_demographics();
-
-
-
-const facebook_get_interest_behavior = async () => {
-  try {
-    let params = {
-      type: "adTargetingCategory",
-      class: "behaviors",
-    }
-    console.log(params, "params")
-    const url = "https://graph.facebook.com/v16.0/search";
-
-    let config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
-      headers: {},
-    };
-    const behavior = await axios.request(config);
-    // console.log(behavior.data, "pppppppp")
-
-    fs.writeFileSync("behavior.txt", JSON.stringify(behavior.data));
-    return {
-      status: "unsuccessfull",
-      data: behavior.data,
-    };
-
-    // let readData = fs.readFileSync("behavior.txt");
-    // readData = JSON.parse(readData);
-    // console.log(readData)
-  } catch (error) {
-    console.log(error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
-    return {
-      status: "error",
-      data: error.message ? error.message : error,
-    };
-  }
-};
-// facebook_get_interest_behavior()
-
-
 
 const facebook_get_businesses = async (access_token)=>{
   try {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v16.0/me/businesses?fields=id,name,created_by,owned_ad_accounts{name}&access_token=${access_token}`,
+      url: `https://graph.facebook.com/v16.0/me/businesses?fields=id,name,created_by,owned_ad_accounts{name},owned_pages,owned_apps&access_token=${access_token}`,
       headers: { 
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
@@ -1109,5 +968,6 @@ module.exports = {
   facebook_create_creative_video_upload,
   facebook_create_creative_video,
   facebook_get_video,
-  facebook_get_images
+  facebook_get_images,
+  facebook_get_businesses
 };

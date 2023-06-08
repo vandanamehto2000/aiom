@@ -14,7 +14,8 @@ const {
   facebook_create_creative_video,
   facebook_get_ads,
   facebook_get_video,
-  facebook_get_images
+  facebook_get_images,
+  facebook_get_businesses
 } = require("../platform/facebook");
 
 const fields_constant = require('../utils/constant')
@@ -158,10 +159,8 @@ const create_creative_video_upload = async (req, res, next) => {
         fields = JSON.parse(fields);
         params = JSON.parse(params);
         const result = await facebook_create_creative_video_upload(thumbPath,thumbFieldname,thumbFileName,videoPath,sourceFieldname,id, fields, params,page_id,req.facebook_token);
-        console.log("result ==========", result)
        
         if (result.status == "success") {
-          console.log("data------------",result.data)
           return responseApi.successResponseWithData(res, "Video uploaded successfully", result.data, StatusCodes.CREATED);
         } else {
           return responseApi.ErrorResponse(res, "error", result, StatusCodes.BAD_REQUEST);
@@ -318,6 +317,23 @@ const get_page_images = async (req,res,next) => {
     let images = await facebook_get_images(page_id)
     if(images.status="success"){
       return responseApi.successResponseWithData(res,"Image data found",images.data)
+    }else{
+      return responseApi.ErrorResponse(res, "unable to find image data", images.data, StatusCodes.BAD_REQUEST);
+    }
+  } catch (error) {
+    console.log(error)
+    return responseApi.ErrorResponse(res, "Internal server Error", error);
+  }
+}
+
+const get_businesses = async (req,res,next)=>{
+  try {
+    const businesses = await facebook_get_businesses(req.facebook_token)
+
+    if(businesses.status==="success"){
+      return responseApi.successResponseWithData(res,"Businessses Found",businesses.data)
+    }else{
+      return responseApi.ErrorResponse(res, "unable to find businesses data", businesses.data, StatusCodes.BAD_REQUEST);
     }
   } catch (error) {
     console.log(error)
@@ -339,5 +355,6 @@ module.exports = {
   create_creative_video_upload,
   get_page_video,
   get_ads,
-  get_page_images
+  get_page_images,
+  get_businesses
 };
