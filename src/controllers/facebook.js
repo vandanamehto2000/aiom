@@ -1,7 +1,7 @@
 "use strict";
 const {
   facebook_create_campaign,
-  facebook_get_campaign,
+  facebook_get_Insights,
   facebook_create_adSet,
   facebook_get_adSet,
   facebook_create_creative,
@@ -46,16 +46,16 @@ const create_campaign = async (req, res, next) => {
 };
 
 //Get a Campaign
-const get_campaign = async (req, res, next) => {
+const get_Insights = async (req, res, next) => {
   try {
-    let { id, fields, params } = req.query;
+    let { object_id, fields, level,params} = req.query;
     fields = fields_constant.fields[fields]
     params = JSON.parse(params);
-    const campaignss = await facebook_get_campaign(id, fields, params);
-    if (campaignss.status == "success") {
-      return responseApi.successResponseWithData(res, "campaign data found", campaignss.data, StatusCodes.OK);
+    const insights = await facebook_get_Insights(object_id, fields, level,req.facebook_token,params);
+    if (insights.status == "success") {
+      return responseApi.successResponseWithData(res, "insights data found", insights.data, StatusCodes.OK);
     } else {
-      return responseApi.ErrorResponse(res, "unable to find campaign data", campaignss.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(res, "unable to find insights data", insights.data, StatusCodes.BAD_REQUEST);
     }
   } catch (error) {
     console.log("error", error)
@@ -327,7 +327,7 @@ const get_page_images = async (req,res,next) => {
 
 module.exports = {
   create_campaign,
-  get_campaign,
+  get_Insights,
   create_adSet,
   get_adSet,
   create_creative,
