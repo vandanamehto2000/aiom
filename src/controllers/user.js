@@ -29,6 +29,7 @@ const register = async (req, res, next) => {
     roles: req.body.roles
     };
   try {
+    console.log("data-",newUser)
     let userData = await User.create(newUser);
     return next({
       status: StatusCodes.CREATED,

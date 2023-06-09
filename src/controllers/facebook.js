@@ -15,12 +15,14 @@ const {
   facebook_get_ads,
   facebook_get_video,
   facebook_get_images,
+  facebook_create_carousel,
   facebook_get_businesses
 } = require("../platform/facebook");
 
 const fields_constant = require('../utils/constant')
 const { StatusCodes } = require("http-status-codes");
 const responseApi = require("../utils/apiresponse");
+const { APIResponse } = require("facebook-nodejs-business-sdk");
 
 //Create a Campaign
 const create_campaign = async (req, res, next) => {
@@ -106,12 +108,13 @@ const get_adSet = async (req, res, next) => {
 //Create creative
 const create_creative = async (req, res, next) => {
   try {
+        const access_token = req.facebook_token
         let { id, fields, params } = req.body;
         fields = JSON.parse(fields);
         params = JSON.parse(params);
         if(req.file){
           let { path, filename, originalname, fieldname } = req.file;
-          const adcreatives = await facebook_create_creative(path, filename, id, fields, params, req.facebook_token);
+          const adcreatives = await facebook_create_creative(path, filename, id, fields, params,access_token);
           if (adcreatives.status == "success") {
             return responseApi.successResponseWithData(res, "New creative image data post Successfully", adcreatives.data, StatusCodes.CREATED);
           } else {
@@ -177,7 +180,7 @@ const get_creative = async (req, res, next) => {
     let { id, fields, page_id } = req.query;
     fields = fields_constant.fields[fields]
     let params = {};
-    const creative_data = await facebook_get_creative(id, fields, params, page_id, req.facebook_token);
+    const creative_data = await facebook_get_creative(id, fields, params, page_id);
     if (creative_data.status == "success") {
       return responseApi.successResponseWithData(res, "creative data found", creative_data.data, StatusCodes.OK);
     } else {
@@ -228,7 +231,7 @@ const get_ads = async (req, res, next) => {
 
 const get_account_pages = async (req, res, next) => {
   try {
-    const account_pages = await facebook_get_accounts_pages(req.facebook_token);
+    const account_pages = await facebook_get_accounts_pages()
     if (account_pages.status !== "success") {
       return responseApi.ErrorResponse(res, "unable to find account page data", account_pages.data, StatusCodes.BAD_REQUEST);
     }
@@ -243,12 +246,12 @@ const get_account_pages = async (req, res, next) => {
 
 const get_location_keys = async (req, res, next) => {
   try {
-    let { location, country_code } = req.query;
+    let { location, country_code } = req.query
     location = JSON.parse(location)
     if (!location) {
       return responseApi.ErrorResponse(res, "Location Params is required ", "", StatusCodes.BAD_REQUEST)
     }
-    const location_details = await facebook_get_location(location,req.facebook_token)
+    const location_details = await facebook_get_location(location)
     let filtered_location = location_details.data
     if (country_code) {
       filtered_location = location_details.data.data.filter((item) => {
@@ -288,7 +291,7 @@ const create_creative_video = async (req, res, next) => {
 const get_page_video = async (req,res,next) => {
   try {
     let { page_id,thumbnail } = req.query;
-    const video_data = await facebook_get_video(page_id, req.facebook_token)
+    const video_data = await facebook_get_video(page_id)
     if(video_data.status=="success"){
       for(let i=0;i<video_data.data.length;i++){
         if(thumbnail=="single"){
@@ -341,6 +344,25 @@ const get_businesses = async (req,res,next)=>{
   }
 }
 
+
+const create_carousel = async (req, res, next) => {
+  try {
+    const access_token = req.facebook_token
+    let { id, name, object_story_spec } = req.body;
+    object_story_spec = JSON.parse(object_story_spec);
+    let fileData=req.files;
+    const carousels = await facebook_create_carousel(id, name, object_story_spec,fileData,access_token);
+    if (carousels.status === "success") {
+      return responseApi.successResponseWithData(res, "Carousel data Successfully post!!", carousels.data, StatusCodes.CREATED);
+    } else {
+      return responseApi.ErrorResponse(res, "error", carousels.data, StatusCodes.BAD_REQUEST);
+    }
+  } catch (error) {
+    console.log("Error", error)
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+  }
+};
+
 module.exports = {
   create_campaign,
   get_campaign,
@@ -356,5 +378,6 @@ module.exports = {
   get_page_video,
   get_ads,
   get_page_images,
+  create_carousel,
   get_businesses
 };
