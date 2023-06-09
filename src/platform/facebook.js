@@ -73,31 +73,127 @@ const facebook_create_campaign = async (id, fields, params) => {
 };
 
 //Get a Campaign
-const facebook_get_campaign = async (id, fields, params) => {
+const facebook_get_Insights = async (object_id, fields, level, access_token, params) => {
   try {
-    params.limit = 100000;
-    const campaignss = await new AdAccount(id).getCampaigns(fields, params);
+    params.limit = 100000
+    let fields1 = [
+      "bid_strategy",
+      "budget_rebalance_flag",
+      "budget_remaining",
+      "can_create_brand_lift_study",
+      "can_use_spend_cap",
+      "configured_status",
+      "created_time",
+      "daily_budget",
+      "effective_status",
+      "has_secondary_skadnetwork_reporting",
+      "id",
+      "is_skadnetwork_attribution",
+      "pacing_type",
+      "primary_attribution",
+      "smart_promotion_type",
+      "source_campaign_id",
+      "special_ad_categories",
+      "special_ad_category",
+      "start_time",
+      "status",
+      "stop_time",
+      "topline_id",
+      "updated_time"]
 
-    if (campaignss.length > 0) {
-      if (campaignss[0]._data) {
-        let result = [];
-        for (let i = 0; i < campaignss.length; i++) {
-          result.push(campaignss[i]._data);
-        }
-        return {
-          status: "success",
-          data: result,
-        };
-      } else {
-        return {
-          status: "unsuccessfull",
-          data: campaignss,
-        };
+    let fields2 = [
+      "account_id", "adlabels", "adset_schedule", "asset_feed_id", "attribution_spec", "bid_adjustments", "bid_amount", "bid_constraints", "bid_info", "bid_strategy", "billing_event", "budget_remaining", "campaign", "campaign_attribution", "campaign_id", "configured_status", "created_time", "creative_sequence", "daily_budget", "daily_min_spend_target", "daily_spend_cap", "destination_type", "effective_status", "end_time", "id", "instagram_actor_id", "is_dynamic_creative", "issues_info", "learning_stage_info", "lifetime_budget", "lifetime_imps", "lifetime_min_spend_target", "lifetime_spend_cap", "multi_optimization_goal_weight", "name", "optimization_goal", "optimization_sub_event", "pacing_type", "promoted_object", "recommendations", "recurring_budget_semantics", "review_feedback", "rf_prediction_id", "source_adset", "source_adset_id", "start_time", "status", "targeting", "targeting_optimization_types", "time_based_ad_rotation_id_blocks", "time_based_ad_rotation_intervals", "updated_time", "use_new_app_click", "cpc"
+    ]
+
+    let fields3 = ["account_id", "id", "name", "status"]
+
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `https://graph.facebook.com/v17.0/${object_id}/insights?level=${level}&fields=${fields}&limit=100000&access_token=${access_token}`,
+      headers: {},
+    };
+
+    const result = await axios.request(config);
+    if (!result.data) {
+      return {
+        status: "unable to get data in result",
+        data: result.message ? result.message : result,
       }
-    } else {
+    }
+
+    let result1 = [];
+
+    if (level == "campaign") {
+      const campaigns_data = await new AdAccount(id).getCampaigns(fields1, params)
+      if (!campaigns_data[0]._data) {
+        return {
+          status: "unable to get campain data  because length is zero",
+          data: campaigns_data.message ? campaigns_data.message : campaigns_data,
+        }
+      }
+
+      if (campaigns_data.length > 0) {
+        for (let i = 0; i < campaigns_data.length; i++) {
+          result1.push(campaigns_data[i]._data);
+        }
+      }
+
+    } else if (level == "adset") {
+      const adsetset_data = await new Campaign(id).getAdSets(fields2, params)
+      if (!adsetset_data[0]._data) {
+        return {
+          status: "unable to get adset data because length is zero",
+          data: adsetset_data.message ? adsetset_data.message : adsetset_data,
+        }
+      }
+
+      if (adsetset_data.length > 0) {
+        for (let j = 0; j < adsetset_data.length; j++) {
+          result1.push(adsetset_data[0]._data)
+        }
+      }
+
+    } else if (level == "ad") {
+      const ad_data = await new AdSet(id).getAds(fields3, params)
+      if (!ad_data[0]._data) {
+        return {
+          status: "unable to get ad_data because length is zero",
+          data: ad_data.message ? ad_data.message : ad_data,
+        }
+      }
+
+      if (ad_data.length > 0) {
+        for (let k = 0; k < ad_data.length; k++) {
+          result1.push(ad_data[0]._data)
+        }
+      }
+    }
+
+    const mergedArr = [];
+    for (let i = 0; i < result.data.data.length; i++) {
+      const obj = result.data.data[i]; //insights data
+
+      if (matchingObj = result1.find(item => item.id === obj.campaign_id)) {  //campaign data
+        mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
+
+      } else if (matchingObj = result1.find(item => item.adset_id === obj.id)) {   //adset data
+        mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
+      }
+      else if (matchingObj = result1.find(item => item.id === obj.ad_id)) { //ad_data
+        mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
+      }
+    }
+    if (mergedArr) {
       return {
         status: "success",
-        data: [],
+        data: mergedArr,
+      };
+    }
+    else {
+      return {
+        status: "unable to get merge data",
+        data: mergedArr.message ? mergedArr.message : mergedArr,
       };
     }
   } catch (error) {
@@ -209,6 +305,7 @@ const facebook_get_adSet = async (id, fields, params) => {
         for (let i = 0; i < adsetss.length; i++) {
           arr.push(adsetss[i]._data);
         }
+        console.log(arr, "-------------adset")
         return {
           status: "success",
           data: arr,
@@ -1103,13 +1200,12 @@ const facebook_get_businesses = async (access_token) => {
       method: "get",
       maxBodyLength: Infinity,
       url: `https://graph.facebook.com/v16.0/me/businesses?fields=id,name,created_by,owned_ad_accounts{name}&access_token=${access_token}`,
-      headers: {
-        Cookie:
-          "fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z",
-      },
+      headers: { 
+        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
+      }
     };
-
-    const businesses = await axios.request(config);
+    
+    const businesses = await axios.request(config)
 
     if (businesses.data) {
       return {
@@ -1133,7 +1229,7 @@ const facebook_get_businesses = async (access_token) => {
 
 module.exports = {
   facebook_create_campaign,
-  facebook_get_campaign,
+  facebook_get_Insights,
   facebook_create_adSet,
   facebook_get_adSet,
   facebook_get_ads,
