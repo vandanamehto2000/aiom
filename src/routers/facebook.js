@@ -1,4 +1,4 @@
-const { create_campaign, get_campaign, create_adSet, get_adSet, create_creative, get_creative, create_ad, get_account_pages, get_location_keys, create_creative_video_upload, create_creative_video, get_page_video, get_ads, get_page_images,create_carousel,get_businesses } = require("../controllers/facebook");
+const { create_campaign, get_Insights, create_adSet, get_adSet, create_creative, get_creative, create_ad, get_account_pages, get_location_keys, create_creative_video_upload, create_creative_video, get_page_video, get_ads, get_page_images,create_carousel,get_businesses } = require("../controllers/facebook");
 const { authenticateToken, fb_middleware } = require('../middleware/auth')
 const { uploadVideo, uploadImage, uploadImages } = require('../middleware/fileUpload')
 const express = require("express");
