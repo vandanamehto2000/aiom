@@ -4,7 +4,7 @@ const { StatusCodes } = require("http-status-codes");
 const AdAccount = bizSdk.AdAccount;
 const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
-const Ad = bizSdk.Ad
+const Ad = bizSdk.Ad;
 // const Ad = bizSdk.Ad;
 const User = bizSdk.User;
 const axios = require("axios");
@@ -297,46 +297,7 @@ const facebook_create_adSet = async (id, fields, params) => {
 //Get AdSet
 const facebook_get_adSet = async (id, fields, params) => {
   try {
-    params.limit = 100000
-    // let fields = [
-    // "account_currency",
-    // "account_name",
-    // "actions",
-    // "campaign_id",
-    // "campaign_name",
-    // "catalog_segment_value_mobile_purchase_roas",
-    // "clicks",
-    // "cost_per_action_type",
-    // "cost_per_inline_link_click",
-    // "cost_per_inline_post_engagement",
-    // "cost_per_unique_action_type",
-    // "cost_per_unique_click",
-    // "cpc",
-    // "cpm",
-    // "cpp",
-    // "ctr",
-    // "date_start",
-    // "date_stop",
-    // "frequency",
-    // "impressions",
-    // "inline_link_click_ctr",
-    // "inline_link_clicks",
-    // "inline_post_engagement",
-    // "mobile_app_purchase_roas",
-    // "objective",
-    // "optimization_goal",
-    // "outbound_clicks_ctr",
-    // "reach",
-    // "social_spend",
-    // "spend",
-    // "website_ctr",
-    // "website_purchase_roas",
-    // "wish_bid"
-    // ]
-
-
-
-    // getAdSets
+    params.limit = 100000;
     const adsetss = await new Campaign(id).getAdSets(fields, params);
     if (adsetss.length > 0) {
       if (adsetss[0]._data) {
@@ -354,14 +315,13 @@ const facebook_get_adSet = async (id, fields, params) => {
           status: "unsuccessfull",
           data: adsetss,
         };
-      } 23854508025450580
+      }
     } else {
       return {
         status: "success",
         data: [],
       };
     }
-
   } catch (error) {
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
@@ -375,8 +335,9 @@ const facebook_get_adSet = async (id, fields, params) => {
 //Get Ad
 const facebook_get_ads = async (id, fields, params) => {
   try {
-    params.limit = 100000
-    const insightss = await new AdSet(id).getAds(                 //id here is AdSet_id
+    params.limit = 100000;
+    const insightss = await new AdSet(id).getAds(
+      //id here is AdSet_id
       fields,
       params
     );
@@ -399,8 +360,8 @@ const facebook_get_ads = async (id, fields, params) => {
     } else {
       return {
         status: "success",
-        data: []
-      }
+        data: [],
+      };
     }
   } catch (error) {
     console.log(error);
@@ -455,21 +416,19 @@ const facebook_create_creative = async (
     //Change Params according to the input(image/video)
     let adcreatives;
     if (imagePath == null && imageName == null && "object_story_id" in params) {
-      adcreatives = await new AdAccount(id).createAdCreative(
-        fields,
-        params
+      adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+    } else {
+      console.log("pass data", imagePath, imageName, access_token);
+      let result = await facebook_get_image_hash(
+        imagePath,
+        imageName,
+        access_token
       );
-    }
-    else {
-      let result = await facebook_get_image_hash(imagePath, imageName, access_token);
       let { hash, url, name } = result.data.images[`${imageName}`];
       params.image_hash = hash;
       params.object_story_spec.link_data.link = url;
       params.object_story_spec.link_data.image_hash = hash;
-      adcreatives = await new AdAccount(id).createAdCreative(
-        fields,
-        params
-      );
+      adcreatives = await new AdAccount(id).createAdCreative(fields, params);
     }
     if (adcreatives._data) {
       return {
@@ -494,7 +453,13 @@ const facebook_create_creative = async (
 };
 
 //get Creative
-const facebook_get_creative = async (id, fields, params, page_id, access_token) => {
+const facebook_get_creative = async (
+  id,
+  fields,
+  params,
+  page_id,
+  access_token
+) => {
   try {
     const adcreativess = await new AdAccount(id).getAdCreatives(fields, params);
     const video_data = await facebook_get_video(page_id, access_token);
@@ -533,11 +498,9 @@ const facebook_get_creative = async (id, fields, params, page_id, access_token) 
   }
 };
 
-
 //Create Ad
 const facebook_create_ad = async (id, fields, params) => {
   try {
-
     const ads = await new AdAccount(id).createAd(fields, params);
     if (ads._data) {
       return {
@@ -579,7 +542,6 @@ const facebook_get_image_hash = async (imagePath, imageName, access_token) => {
       data: data,
     };
     const response = await axios.request(config);
-
     if (response.data) {
       return {
         status: "success",
@@ -633,7 +595,6 @@ const facebook_get_user_account_id = async (access_token) => {
     };
   }
 };
-
 
 //pages related to the user account id
 const facebook_get_accounts_pages = async (access_token) => {
@@ -743,13 +704,12 @@ const facebook_get_interest = async () => {
       headers: {},
     };
 
-    const interests = await axios.request(config)
+    const interests = await axios.request(config);
 
     return {
       status: "success",
-      data: interests.data.data
-    }
-
+      data: interests.data.data,
+    };
   } catch (error) {
     console.log(error);
     console.log("error part1", error);
@@ -778,11 +738,11 @@ const facebook_get_demographics = async () => {
       headers: {},
     };
 
-    const demographics = await axios.request(config)
+    const demographics = await axios.request(config);
     return {
       status: "success",
-      data: demographics.data.data
-    }
+      data: demographics.data.data,
+    };
   } catch (error) {
     console.log("error part1", error);
     console.log("Error Message:" + error);
@@ -800,10 +760,10 @@ const facebook_get_demographics = async () => {
 const facebook_get_video = async (id, access_token, video_id = null) => {
   try {
     let config = {
-      method: 'get',
+      method: "get",
       maxBodyLength: Infinity,
       url: `https://graph.facebook.com/v16.0/${id}/videos?fields=id,source,updated_time,views,description,title,length,thumbnails&limit=1000&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
-      headers: {}
+      headers: {},
     };
     let video_data = await axios.request(config);
     if (video_data && video_data.data) {
@@ -816,8 +776,9 @@ const facebook_get_video = async (id, access_token, video_id = null) => {
           status: "success",
           data: arr,
         };
-      } else {                // video data of only 1 video
-        let arr = []
+      } else {
+        // video data of only 1 video
+        let arr = [];
         for (let i = 0; i < video_data.data.data.length; i++) {
           if (video_data.data.data[i].id == video_id) {
             arr.push(video_data.data.data[i]);
@@ -828,7 +789,6 @@ const facebook_get_video = async (id, access_token, video_id = null) => {
           data: arr,
         };
       }
-
     } else {
       return {
         status: "unsuccessfull",
@@ -846,17 +806,15 @@ const facebook_get_video = async (id, access_token, video_id = null) => {
 
 const facebook_get_images = async (id) => {
   try {
-    let fields = ["id", "link", "name"]
-    let params = {}
-    const photoss = await (new Page(id)).getPhotos(
-      fields,
-      params
-    );
+    let fields = ["id", "link", "name"];
+    let params = {};
+    const photoss = await new Page(id).getPhotos(fields, params);
     if (photoss[0]._data) {
-      let result = []
+      let result = [];
       for (let i = 0; i < photoss.length; i++) {
-        result.push(photoss[i]._data)
+        result.push(photoss[i]._data);
       }
+      console.log(result)
       return {
         status: "success",
         data: result,
@@ -867,7 +825,6 @@ const facebook_get_images = async (id) => {
         data: photoss,
       };
     }
-
   } catch (error) {
     console.log(error);
     return {
@@ -875,9 +832,8 @@ const facebook_get_images = async (id) => {
       data: error.message ? error.message : error,
     };
   }
-}
+};
 // facebook_get_images(106284349116205)
-
 
 // facebook_get_video(106284349116205)
 
@@ -891,7 +847,11 @@ const facebook_get_images = async (id) => {
 //   }
 // };
 
-const facebook_get_page_access_token = async (user_id, page_id, access_token) => {
+const facebook_get_page_access_token = async (
+  user_id,
+  page_id,
+  access_token
+) => {
   try {
     page_id;
     let config = {
@@ -940,29 +900,30 @@ const facebook_get_video_id = async (
   access_token
 ) => {
   try {
-    let user_id_details = await facebook_get_user_account_id(access_token)
-    console.log(user_id_details, "iiiiiiiii")
+    let user_id_details = await facebook_get_user_account_id(access_token);
     if (user_id_details.status !== "success") {
       return {
         status: user_id_details.status,
-        data: user_id_details.data
-      }
+        data: user_id_details.data,
+      };
     }
-    let page_access_token = await facebook_get_page_access_token(user_id_details.data.id, page_id, access_token)
-    console.log(page_access_token, "oooooooo");
+    let page_access_token = await facebook_get_page_access_token(
+      user_id_details.data.id,
+      page_id,
+      access_token
+    );
     if (page_access_token.status !== "success") {
       return {
         status: page_access_token.status,
-        data: page_access_token.data
-      }
+        data: page_access_token.data,
+      };
     }
     let data = new FormData();
     data.append("access_token", page_access_token.data);
     if (thumbFieldname) {
       data.append(sourceFieldname, fs.createReadStream(videoPath));
       data.append(thumbFieldname, fs.createReadStream(thumbPath));
-    }
-    else {
+    } else {
       data.append(sourceFieldname, fs.createReadStream(videoPath));
     }
 
@@ -1037,52 +998,18 @@ const facebook_create_creative_video_upload = async (
       page_id,
       access_token
     );
-    if (result.status !== "success") {
-      return {
-        status: result.status,
-        data: result.data
-      }
-    }
-    const getVideoData = () => {
-      return new Promise(async (resolve, reject) => {
-        let video_data = await facebook_get_video(page_id, access_token, result.data);
-        if (video_data) {
-          resolve(video_data.data);
-        } else {
-          reject(video_data);
-        }
-      });
-    };
-
-    let video_data = await new Promise((resolve, reject) => {
-      setTimeout(async () => {
-        try {
-          let data = await getVideoData();
-          resolve({
-            status: "success",
-            data: data
-          });
-        } catch (error) {
-          reject({
-            status: "error",
-            data: error
-          });
-        }
-      }, 25000);
-    });
-
-    if (video_data.status == "success") {
+    if (result.status == "success") {
       return {
         status: "success",
-        data: video_data.data
-      };
-    } else {
-      return {
-        status: video_data.status,
-        data: video_data
+        data: result.data,
       };
     }
-
+    else{
+      return {
+        status: "error",
+        data: result.data,
+      };
+    }
   } catch (error) {
     console.log(error);
     return {
@@ -1095,8 +1022,10 @@ const facebook_create_creative_video_upload = async (
 // after uploading video
 const facebook_create_creative_video = async (id, fields, params) => {
   try {
-    const adcreatives = await new AdAccount(id).createAdCreative(fields, params);
-    console.log("upload data--res", adcreatives)
+    const adcreatives = await new AdAccount(id).createAdCreative(
+      fields,
+      params
+    );
     if (adcreatives._data) {
       return {
         status: "success",
@@ -1117,10 +1046,8 @@ const facebook_create_creative_video = async (id, fields, params) => {
   }
 };
 
-
 const facebook_get_interest_and_demographics = async () => {
   try {
-
     const interest_data = await facebook_get_interest();
     // console.log( interest_data.data)
 
@@ -1129,10 +1056,8 @@ const facebook_get_interest_and_demographics = async () => {
 
     const combinedObj = {
       interests: interest_data.data,
-      demographics: demographics_data.data
-    }
-
-    console.log(combinedObj)
+      demographics: demographics_data.data,
+    };
     return {
       status: "unsuccessfull",
       data: combinedObj,
@@ -1147,19 +1072,17 @@ const facebook_get_interest_and_demographics = async () => {
       data: error.message ? error.message : error,
     };
   }
-}
+};
 
 // facebook_get_interest_and_demographics();
-
-
 
 const facebook_get_interest_behavior = async () => {
   try {
     let params = {
       type: "adTargetingCategory",
       class: "behaviors",
-    }
-    console.log(params, "params")
+    };
+    console.log(params, "params");
     const url = "https://graph.facebook.com/v16.0/search";
 
     let config = {
@@ -1191,34 +1114,77 @@ const facebook_get_interest_behavior = async () => {
   }
 };
 // facebook_get_interest_behavior()
+const creat_image_carousel = async (
+  id,
+  name,
+  object_story_spec,
+  access_token
+) => {
+  console.log("carousel data post-------",JSON.stringify(object_story_spec))
 
+  let data = new FormData();
+data.append('name', name);
+data.append('object_story_spec', JSON.stringify(object_story_spec));
+data.append('access_token', access_token);
 
+let config = {
+  method: 'post',
+  maxBodyLength: Infinity,
+  url: `https://graph.facebook.com/v16.0/${id}/adcreatives`,
+  headers: { 
+    ...data.getHeaders()
+  },
+  data : data
+};
 
-const facebook_get_businesses = async (access_token) => {
-  try {
-    let config = {
-      method: 'get',
-      maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v16.0/me/businesses?fields=id,name,created_by,owned_ad_accounts{name}&access_token=${access_token}`,
-      headers: {
-        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
-      }
+  const response = await axios.request(config);
+  if (response.data) {
+    return {
+      status: "success",
+      data: response.data.id,
     };
-
-    const businesses = await axios.request(config)
-
-    if (businesses.data) {
+  } else {
+    return {
+      status: "error",
+      data: response.message ? response.message : response,
+    };
+  }
+};
+const facebook_create_carousel = async (
+  id,
+  name,
+  object_story_spec,
+  fileData,
+  access_token
+) => {
+  try {
+    for (let i = 0; i < fileData.length; i++) {
+      let result = await facebook_get_image_hash(
+        fileData[i].path,
+        fileData[i].filename,
+        access_token
+      );
+      let { hash, url, name } = result.data.images[`${fileData[i].filename}`];
+      object_story_spec.link_data.child_attachments[i].image_hash = hash;
+      object_story_spec.link_data.child_attachments[i].link = url;
+    }
+    let carousel_result = await creat_image_carousel(
+      id,
+      name,
+      object_story_spec,
+      access_token
+    );
+    if (carousel_result.status === "success") {
       return {
         status: "success",
-        data: businesses.data
-      }
+        data: carousel_result.data,
+      };
     } else {
       return {
-        status: "unsuccesfull",
-        data: businesses
-      }
+        status: "error",
+        data: carousel_result.data,
+      };
     }
-
   } catch (error) {
     console.log(error);
     return {
@@ -1226,9 +1192,40 @@ const facebook_get_businesses = async (access_token) => {
       data: error.message ? error.message : error,
     };
   }
-}
+};
 
+const facebook_get_businesses = async (access_token) => {
+  try {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `https://graph.facebook.com/v16.0/me/businesses?fields=id,name,created_by,owned_ad_accounts{name}&access_token=${access_token}`,
+      headers: { 
+        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
+      }
+    };
+    
+    const businesses = await axios.request(config)
 
+    if (businesses.data) {
+      return {
+        status: "success",
+        data: businesses.data,
+      };
+    } else {
+      return {
+        status: "unsuccesfull",
+        data: businesses,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+};
 
 module.exports = {
   facebook_create_campaign,
@@ -1245,5 +1242,7 @@ module.exports = {
   facebook_create_creative_video_upload,
   facebook_create_creative_video,
   facebook_get_video,
-  facebook_get_images
+  facebook_get_images,
+  facebook_create_carousel,
+  facebook_get_businesses
 };
