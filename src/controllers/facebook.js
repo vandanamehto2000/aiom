@@ -180,7 +180,7 @@ const get_creative = async (req, res, next) => {
     let { id, fields, page_id } = req.query;
     fields = fields_constant.fields[fields]
     let params = {};
-    const creative_data = await facebook_get_creative(id, fields, params, page_id);
+    const creative_data = await facebook_get_creative(id, fields, params, page_id, req.facebook_token);
     if (creative_data.status == "success") {
       return responseApi.successResponseWithData(res, "creative data found", creative_data.data, StatusCodes.OK);
     } else {
@@ -231,7 +231,7 @@ const get_ads = async (req, res, next) => {
 
 const get_account_pages = async (req, res, next) => {
   try {
-    const account_pages = await facebook_get_accounts_pages()
+    const account_pages = await facebook_get_accounts_pages(req.facebook_token)
     if (account_pages.status !== "success") {
       return responseApi.ErrorResponse(res, "unable to find account page data", account_pages.data, StatusCodes.BAD_REQUEST);
     }
@@ -251,7 +251,7 @@ const get_location_keys = async (req, res, next) => {
     if (!location) {
       return responseApi.ErrorResponse(res, "Location Params is required ", "", StatusCodes.BAD_REQUEST)
     }
-    const location_details = await facebook_get_location(location)
+    const location_details = await facebook_get_location(location, req.facebook_token)
     let filtered_location = location_details.data
     if (country_code) {
       filtered_location = location_details.data.data.filter((item) => {
@@ -291,7 +291,7 @@ const create_creative_video = async (req, res, next) => {
 const get_page_video = async (req,res,next) => {
   try {
     let { page_id,thumbnail } = req.query;
-    const video_data = await facebook_get_video(page_id)
+    const video_data = await facebook_get_video(page_id,req.facebook_token)
     if(video_data.status=="success"){
       for(let i=0;i<video_data.data.length;i++){
         if(thumbnail=="single"){
