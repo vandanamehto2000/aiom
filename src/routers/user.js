@@ -9,7 +9,6 @@ const router = express.Router();
 router.post("/register", commonValidator(registerUser), register);
 router.post("/login", login);
 router.post("/logout", authenticateToken, logout);
-router.post("/organization", organization);
 
 
 module.exports = router;
