@@ -12,4 +12,5 @@ let storage = multer.diskStorage({
   let upload = multer({ storage: storage });
   const uploadVideo = upload.fields([{ name: 'source', maxCount: 1 }, { name: 'thumb', maxCount: 1 }]);
   const uploadImage = upload.single("hasImage");
-  module.exports = { uploadVideo, uploadImage }
+  const uploadImages = upload.array ("images",10);
+  module.exports = { uploadVideo, uploadImage, uploadImages }
