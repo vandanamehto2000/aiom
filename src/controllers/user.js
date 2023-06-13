@@ -2,6 +2,7 @@ const CryptoJS = require("crypto-js");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const responseApi = require("../utils/apiresponse");
 
 const generateAccessToken = (response) => {
   return jwt.sign(
@@ -10,7 +11,7 @@ const generateAccessToken = (response) => {
       email: response.email,
       username: response.username,
       roles: response.roles,
-      organization:response.organization
+      organization: response.organization
 
     },
     process.env.JWT_SEC
@@ -26,27 +27,19 @@ const register = async (req, res, next) => {
       process.env.PASS_SECRET
     ).toString(),
     organization: req.body.organization,
-    roles: req.body.roles
-    };
+    roles: req.body.roles,
+    assigned_BM: req.body.assigned_BM
+  };
   try {
-    console.log("data-",newUser)
+    console.log("data-", newUser)
     let userData = await User.create(newUser);
-    return next({
-      status: StatusCodes.CREATED,
-      message: "User created successfully",
-      data: userData,
-    });
+    return responseApi.successResponseWithData(res, "User created successfully", userData, StatusCodes.CREATED);
+
   } catch (err) {
     console.log(err);
     err.code === 11000
-      ? next({
-        status: StatusCodes.BAD_REQUEST,
-        message: "User already exist",
-      })
-      : next({
-        status: StatusCodes.BAD_REQUEST,
-        message: err.message,
-      });
+      ? responseApi.ErrorResponse(res, "Password entered is incorrect", req.body.email, StatusCodes.BAD_REQUEST)
+      : responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
 
@@ -67,29 +60,20 @@ const login = async (req, res, next) => {
           { token: token1 },
           { new: true }
         );
-        next({
-          status: StatusCodes.OK,
-          message: "User login successfully",
-          data: data
-        });
+        return responseApi.successResponseWithData(res, "User login successfully", data, StatusCodes.OK);
+
       } else {
-        next({
-          status: StatusCodes.BAD_REQUEST,
-          message: "Password entered is incorrect",
-        });
+        return responseApi.ErrorResponse(res, "Password entered is incorrect", req.body.password, StatusCodes.BAD_REQUEST);
+
       }
     } else {
-      next({
-        status: StatusCodes.BAD_REQUEST,
-        message: `No user found with email ${req.body.email}`,
-      });
+      return responseApi.ErrorResponse(res, `No user found with email ${req.body.email}`, req.body.email, StatusCodes.BAD_REQUEST);
+
     }
-  } catch (err) {
-    console.log(err);
-    next({
-      status: StatusCodes.BAD_REQUEST,
-      message: err.message,
-    });
+  } catch (error) {
+    console.log(error);
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+
   }
 };
 
@@ -101,30 +85,39 @@ const logout = async (req, res, next) => {
 
     if (response.length !== 0 && response[0].token === token) {
       await User.updateOne({ token: token }, { token: "" }, { new: true });
-      next({
-        status: StatusCodes.OK,
-        message: "You logged out successfully",
-      });
+      return responseApi.successResponseWithData(res, "You logged out successfully", "", StatusCodes.OK);
+
     }
-    // else if(response.length !== 0 && response[0].token === "") {
-    //   next({
-    //     status: StatusCodes.OK,
-    //     message: "User Already Logged Out",
-    //   });
-    // }
     else {
-      next({
-        status: StatusCodes.OK,
-        message: "Unauthorized User",
-      });
+      return responseApi.ErrorResponse(res, "Unauthorized User", "", StatusCodes.OK);
+
     }
-  } catch (err) {
-    next({
-      status: StatusCodes.BAD_REQUEST,
-      message: err.message,
-    });
+  } catch (error) {
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+
   }
 };
 
 
-module.exports = { register, login, logout };
+const employee_details = async (req, res, next) => {
+  try {
+    let organization_data;
+    if (req.body.organization == "aiiom") {
+      organization_data = await User.findOne({ organization: req.body.organization });
+      if (!organization_data) {
+        return responseApi.ErrorResponse(res, "unable to find Organization data.", organization_data, StatusCodes.NOT_FOUND);
+      } else {
+        return responseApi.successResponseWithData(res, "found organization data", { username: organization_data.username, email: organization_data.email, roles: organization_data.roles }, StatusCodes.OK);
+      }
+    } else {
+      return responseApi.ErrorResponse(res, "organization has no name aiiom.", req.body.organization, StatusCodes.BAD_REQUEST);
+    }
+
+  } catch (error) {
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+
+  }
+}
+
+
+module.exports = { register, login, logout, employee_details };

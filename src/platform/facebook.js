@@ -11,7 +11,7 @@ const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 const facebook = require("../models/facebook");
-const { fields } = require("../utils/constant");
+const  fields_constant  = require("../utils/constant");
 const Page = bizSdk.Page;
 
 // // global.Token;
@@ -76,36 +76,11 @@ const facebook_create_campaign = async (id, fields, params) => {
 const facebook_get_Insights = async (object_id, fields, level, access_token, params) => {
   try {
     params.limit = 100000
-    let fields1 = [
-      "bid_strategy",
-      "budget_rebalance_flag",
-      "budget_remaining",
-      "can_create_brand_lift_study",
-      "can_use_spend_cap",
-      "configured_status",
-      "created_time",
-      "daily_budget",
-      "effective_status",
-      "has_secondary_skadnetwork_reporting",
-      "id",
-      "is_skadnetwork_attribution",
-      "pacing_type",
-      "primary_attribution",
-      "smart_promotion_type",
-      "source_campaign_id",
-      "special_ad_categories",
-      "special_ad_category",
-      "start_time",
-      "status",
-      "stop_time",
-      "topline_id",
-      "updated_time"]
+    let fields1 = fields_constant.fields[5]
+   
+    let fields2 = fields_constant.fields[2]
 
-    let fields2 = [
-      "account_id", "adlabels", "adset_schedule", "asset_feed_id", "attribution_spec", "bid_adjustments", "bid_amount", "bid_constraints", "bid_info", "bid_strategy", "billing_event", "budget_remaining", "campaign", "campaign_attribution", "campaign_id", "configured_status", "created_time", "creative_sequence", "daily_budget", "daily_min_spend_target", "daily_spend_cap", "destination_type", "effective_status", "end_time", "id", "instagram_actor_id", "is_dynamic_creative", "issues_info", "learning_stage_info", "lifetime_budget", "lifetime_imps", "lifetime_min_spend_target", "lifetime_spend_cap", "multi_optimization_goal_weight", "name", "optimization_goal", "optimization_sub_event", "pacing_type", "promoted_object", "recommendations", "recurring_budget_semantics", "review_feedback", "rf_prediction_id", "source_adset", "source_adset_id", "start_time", "status", "targeting", "targeting_optimization_types", "time_based_ad_rotation_id_blocks", "time_based_ad_rotation_intervals", "updated_time", "use_new_app_click", "cpc"
-    ]
-
-    let fields3 = ["account_id", "id", "name", "status"]
+    let fields3 = fields_constant.fields[3]
 
     let config = {
       method: 'get',
