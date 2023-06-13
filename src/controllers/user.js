@@ -102,12 +102,19 @@ const logout = async (req, res, next) => {
 const employee_details = async (req, res, next) => {
   try {
     let organization_data;
-    if (req.body.organization == "aiiom") {
-      organization_data = await User.findOne({ organization: req.body.organization });
+    let result = [];
+
+    if (req.body.organization == "aiom") {
+      organization_data = await User.find({ organization: req.body.organization }, { username: 1, email: 1, roles: 1})
       if (!organization_data) {
         return responseApi.ErrorResponse(res, "unable to find Organization data.", organization_data, StatusCodes.NOT_FOUND);
       } else {
-        return responseApi.successResponseWithData(res, "found organization data", { username: organization_data.username, email: organization_data.email, roles: organization_data.roles }, StatusCodes.OK);
+        for (let i = 0; i < organization_data.length; i++) {
+          if (organization_data[i].email != req.body.email) {
+            result.push(organization_data[i])
+          }
+        }
+        return responseApi.successResponseWithData(res, "found organization data", result, StatusCodes.OK);
       }
     } else {
       return responseApi.ErrorResponse(res, "organization has no name aiiom.", req.body.organization, StatusCodes.BAD_REQUEST);

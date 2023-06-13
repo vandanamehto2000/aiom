@@ -5,7 +5,9 @@ const registerUser = Joi.object({
   email: Joi.string().required().email(),
   password: Joi.string().required().min(3),
   organization: Joi.string().required(),
-  roles: Joi.string().required()
+  roles: Joi.string().required(),
+  assigned_BM:Joi.array()
+
 })
 
 const loginUser = Joi.object({
