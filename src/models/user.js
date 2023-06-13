@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema(
     token: { type: String, default: '' },
     organization: { type: String, required: true },
     roles: { type: String, required: true, enum: ["admin", "business_owner", "employee"] },
-    facebook_token: { type: String, default: '' },
+    facebook_token: { type: String, default: null },
     assigned_BM : {type:String, require:true},
     assigned_ad_account:{type:[]}
 

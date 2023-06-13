@@ -51,7 +51,6 @@ const login = async (req, res, next) => {
         response.password,
         process.env.PASS_SECRET
       );
-      console.log(bytes)
 
       let decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
       if (req.body.password === decryptedPassword) {
