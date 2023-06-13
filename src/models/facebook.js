@@ -8,7 +8,7 @@ const FacebookSchema = new mongoose.Schema(
         app_secret: { type: String, required: false },
         ad_account_id: { type: String, required: true },
         account_id: { type: String, required: false },
-        pages:[{page_id:{type: String, required: false}}],
+        facebook_user_id: {type:String,required:false},
         user_id: { type: Schema.Types.ObjectId, ref: 'User' }
     },
     { timestamps: true }
