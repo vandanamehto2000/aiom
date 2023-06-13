@@ -373,25 +373,6 @@ const create_carousel = async (req, res, next) => {
 };
 
 
-// const get_video_details_by_id = async (req, res, next) => {
-//   try {
-//     const access_token = req.facebook_token
-//     let { video_id,page_id } = req.query;
-//     const video_details = await facebook_get_video(page_id,access_token,video_id)
-//     if(video_details.status==="success"){
-//       if(video_details.data.length===0){
-//         return responseApi.successResponseWithData(res,"Please wait for Facebook databse to update the video details!!",video_details.data,StatusCodes.OK)
-//       }
-//       return responseApi.successResponseWithData(res,"Video data found",video_details.data,StatusCodes.OK)
-//     }else{
-//       return responseApi.ErrorResponse(res,"Unable to find video data", video_details.data,StatusCodes.BAD_REQUEST)
-//     }
-   
-//   } catch (error) {
-//     console.log("Error", error)
-//     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
-//   }
-// };
 
 
 module.exports = {
