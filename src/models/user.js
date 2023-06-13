@@ -11,8 +11,11 @@ const UserSchema = new mongoose.Schema(
     organization: { type: String, required: true },
     roles: { type: String, required: true, enum: ["admin", "business_owner", "employee"] },
     facebook_token: { type: String, default: null },
-    assigned_BM : {type:String, require:true},
-    assigned_ad_account:{type:[]}
+    assigned_BM: [{
+      id: { type: String },
+      name: { type: String }
+    }],
+    assigned_ad_account: { type: [] }
 
   },
   { timestamps: true }
@@ -21,3 +24,4 @@ const UserSchema = new mongoose.Schema(
 
 const User = mongoose.model("User", UserSchema);
 module.exports = User;
+
