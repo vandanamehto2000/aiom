@@ -1174,7 +1174,7 @@ const facebook_get_businesses = async (access_token) => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v16.0/me/businesses?fields=id,name,created_by,owned_ad_accounts{name},owned_pages&access_token=${access_token}`,
+      url: `https://graph.facebook.com/v16.0/me/businesses?fields=id,name,created_by,owned_ad_accounts{name,connected_instagram_accounts},owned_pages,client_pages,primary_page,profile_picture_uri&access_token=${access_token}`,
       headers: { 
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
