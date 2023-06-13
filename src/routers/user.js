@@ -1,4 +1,4 @@
-const { register, login, logout, welcome } = require("../controllers/user");
+const { register, login, logout, organization } = require("../controllers/user");
 const { registerUser, loginUser } = require('../validations/user')
 const commonValidator = require('../middleware/requestValidatorHandler')
 const { authenticateToken, fb_middleware, roles_auth } = require('../middleware/auth')
