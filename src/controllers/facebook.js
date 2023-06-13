@@ -306,6 +306,9 @@ const get_page_video = async (req,res,next) => {
           video_data.data[i].thumbnails = video_data.data[i].thumbnails.data
         }
       }
+      if(video_data.data.length===0){
+        return responseApi.successResponseWithData(res,"Please wait for Facebook databse to update the video details!!",video_data.data,StatusCodes.OK)
+      }
       return responseApi.successResponseWithData(res,"Video data found",video_data.data)
     }else{
       return responseApi.ErrorResponse(res, "unable to find creative data", video_data.data, StatusCodes.BAD_REQUEST);
