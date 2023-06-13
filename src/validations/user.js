@@ -6,7 +6,6 @@ const registerUser = Joi.object({
   password: Joi.string().required().min(3),
   organization: Joi.string().required(),
   roles: Joi.string().required()
-
 })
 
 const loginUser = Joi.object({
