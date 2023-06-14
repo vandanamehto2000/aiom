@@ -15,7 +15,10 @@ const UserSchema = new mongoose.Schema(
       id: { type: String },
       name: { type: String }
     }],
-    assigned_ad_account: { type: [] }
+    assigned_ad_account: [{
+      id: { type: String },
+      name: { type: String }
+    }]
 
   },
   { timestamps: true }
