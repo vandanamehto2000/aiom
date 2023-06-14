@@ -748,9 +748,6 @@ const facebook_get_images = async (id) => {
     };
   }
 };
-// facebook_get_images(106284349116205)
-
-// facebook_get_video(106284349116205)
 
 // const logApiCallResult = (apiCallName, data) => {
 //   //   console.log(apiCallName);
@@ -961,10 +958,6 @@ const facebook_create_creative_video = async (id, fields, params) => {
   }
 };
 
-const facebook_get_interest_and_demographics = async () => {
-  try {
-    const interest_data = await facebook_get_interest();
-    // console.log( interest_data.data)
 
     const demographics_data = await facebook_get_demographics();
     // console.log(demographics_data.data )
@@ -1142,6 +1135,76 @@ const facebook_get_businesses = async (access_token) => {
   }
 };
 
+const facebook_get_account_images = async (ad_account_id,access_token)=>{
+  try {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `https://graph.facebook.com/v17.0/${ad_account_id}/adimages?limit=10000&fields=created_time,hash,name,permalink_url,status,updated_time,url&access_token=${access_token}`,
+      headers: { 
+        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
+      }
+    };
+    
+    const images  = await axios.request(config)
+    if (images.data) {
+      return {
+        status: "success",
+        data: images.data.data,
+      };
+    } else {
+      return {
+        status: "unsuccesfull",
+        data: images,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+}
+
+
+const facebook_get_account_videos = async (ad_account_id,access_token)=>{
+  try {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `https://graph.facebook.com/v17.0/${ad_account_id}/advideos?limit=10000&fields=id,thumbnails&access_token=${access_token}`,
+      headers: { 
+        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
+      }
+    };
+    
+    const videos  = await axios.request(config)
+
+    for(let i=0;i<videos.data.data.length;i++){
+        videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
+    }
+    if (videos.data.data) {
+      return {
+        status: "success",
+        data: videos.data.data,
+      };
+    } else {
+      return {
+        status: "unsuccesfull",
+        data: videos,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+}
+
+
 module.exports = {
   facebook_create_campaign,
   facebook_get_Insights,
@@ -1159,5 +1222,7 @@ module.exports = {
   facebook_get_video,
   facebook_get_images,
   facebook_create_carousel,
-  facebook_get_businesses
+  facebook_get_businesses,
+  facebook_get_account_images,
+  facebook_get_account_videos
 };
