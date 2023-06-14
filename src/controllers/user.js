@@ -126,15 +126,6 @@ const employee_details = async (req, res, next) => {
   }
 }
 
-const assign_bm = async (req,res,next) =>{
-  try {
-    let {bm_id,bm_name} = req.body
-    // console.log(req.auth)
-    return 
-    
-  } catch (error) {
-    
-  }
-}
 
-module.exports = { register, login, logout, employee_details,assign_bm };
+
+module.exports = { register, login, logout, employee_details };

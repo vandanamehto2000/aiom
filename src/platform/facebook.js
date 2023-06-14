@@ -808,9 +808,6 @@ const facebook_get_images = async (id) => {
     };
   }
 };
-// facebook_get_images(106284349116205)
-
-// facebook_get_video(106284349116205)
 
 // const logApiCallResult = (apiCallName, data) => {
 //   //   console.log(apiCallName);
@@ -1021,73 +1018,7 @@ const facebook_create_creative_video = async (id, fields, params) => {
   }
 };
 
-const facebook_get_interest_and_demographics = async () => {
-  try {
-    const interest_data = await facebook_get_interest();
-    // console.log( interest_data.data)
 
-    const demographics_data = await facebook_get_demographics();
-    // console.log(demographics_data.data )
-
-    const combinedObj = {
-      interests: interest_data.data,
-      demographics: demographics_data.data,
-    };
-    return {
-      status: "unsuccessfull",
-      data: combinedObj,
-    };
-  } catch (error) {
-    console.log(error);
-    console.log("error part1", error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
-    return {
-      status: "error",
-      data: error.message ? error.message : error,
-    };
-  }
-};
-
-// facebook_get_interest_and_demographics();
-
-const facebook_get_interest_behavior = async () => {
-  try {
-    let params = {
-      type: "adTargetingCategory",
-      class: "behaviors",
-    };
-    console.log(params, "params");
-    const url = "https://graph.facebook.com/v16.0/search";
-
-    let config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
-      headers: {},
-    };
-    const behavior = await axios.request(config);
-    // console.log(behavior.data, "pppppppp")
-
-    fs.writeFileSync("behavior.txt", JSON.stringify(behavior.data));
-    return {
-      status: "unsuccessfull",
-      data: behavior.data,
-    };
-
-    // let readData = fs.readFileSync("behavior.txt");
-    // readData = JSON.parse(readData);
-    // console.log(readData)
-  } catch (error) {
-    console.log(error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
-    return {
-      status: "error",
-      data: error.message ? error.message : error,
-    };
-  }
-};
 // facebook_get_interest_behavior()
 const creat_image_carousel = async (
   id,
@@ -1202,6 +1133,76 @@ const facebook_get_businesses = async (access_token) => {
   }
 };
 
+const facebook_get_account_images = async (ad_account_id,access_token)=>{
+  try {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `https://graph.facebook.com/v17.0/${ad_account_id}/adimages?limit=10000&fields=created_time,hash,name,permalink_url,status,updated_time,url&access_token=${access_token}`,
+      headers: { 
+        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
+      }
+    };
+    
+    const images  = await axios.request(config)
+    if (images.data) {
+      return {
+        status: "success",
+        data: images.data.data,
+      };
+    } else {
+      return {
+        status: "unsuccesfull",
+        data: images,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+}
+
+
+const facebook_get_account_videos = async (ad_account_id,access_token)=>{
+  try {
+    let config = {
+      method: 'get',
+      maxBodyLength: Infinity,
+      url: `https://graph.facebook.com/v17.0/${ad_account_id}/advideos?limit=10000&fields=id,thumbnails&access_token=${access_token}`,
+      headers: { 
+        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
+      }
+    };
+    
+    const videos  = await axios.request(config)
+
+    for(let i=0;i<videos.data.data.length;i++){
+        videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
+    }
+    if (videos.data.data) {
+      return {
+        status: "success",
+        data: videos.data.data,
+      };
+    } else {
+      return {
+        status: "unsuccesfull",
+        data: videos,
+      };
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+}
+
+
 module.exports = {
   facebook_create_campaign,
   facebook_get_Insights,
@@ -1219,5 +1220,7 @@ module.exports = {
   facebook_get_video,
   facebook_get_images,
   facebook_create_carousel,
-  facebook_get_businesses
+  facebook_get_businesses,
+  facebook_get_account_images,
+  facebook_get_account_videos
 };
