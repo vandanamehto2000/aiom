@@ -34,10 +34,7 @@ const facebook_url = process.env.FACEBOOK_URL;
 // const pageId = "106284349116205";
 // const id = "act_1239957706633747"; //local
 // const api = bizSdk.FacebookAdsApi.init(access_token);
-// const showDebugingInfo = true; // Setting this to true shows more debugging info.
-// if (showDebugingInfo) {
-//   api.setDebug(true);
-// }
+
 
 //Create a Campaign
 const facebook_create_campaign = async (id, fields, params) => {
@@ -101,12 +98,6 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
 
     if (level == "campaign") {
       const campaigns_data = await new AdAccount(object_id).getCampaigns(fields1, params)
-      if (!campaigns_data[0]._data) {
-        return {
-          status: "error",
-          data: campaigns_data.message ? campaigns_data.message : campaigns_data,
-        }
-      }
 
       if (campaigns_data.length > 0) {
         for (let i = 0; i < campaigns_data.length; i++) {
@@ -119,12 +110,6 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
         limit:100000
       }
       const adsetset_data = await new Campaign(object_id).getAdSets(fields2, {});
-      if (!adsetset_data[0]?._data) {
-        return {
-          status: "error",
-          data: adsetset_data.message ? adsetset_data.message : adsetset_data,
-        }
-      }
 
       if (adsetset_data.length > 0) {
         for (let j = 0; j < adsetset_data.length; j++) {
@@ -137,12 +122,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
         limit:100000
       }
       const ad_data = await new AdSet(object_id).getAds(fields3, params)
-      if (!ad_data[0]?._data) {
-        return {
-          status: "error",
-          data: ad_data.message ? ad_data.message : ad_data,
-        }
-      }
+
 
       if (ad_data.length > 0) {
         for (let k = 0; k < ad_data.length; k++) {
