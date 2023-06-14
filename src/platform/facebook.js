@@ -15,9 +15,6 @@ const  fields_constant  = require("../utils/constant");
 const Page = bizSdk.Page;
 
 const facebook_url = process.env.FACEBOOK_URL;
-// console.log(facebook_url)
-
-
 
 // const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
 // const app_secret = "<APP_SECRET>";
