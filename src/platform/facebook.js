@@ -84,7 +84,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
     const result = await axios.request(config);
     if (!result.data) {
       return {
-        status: "unable to get data in result",
+        status: "error",
         data: result.message ? result.message : result,
       }
     }
@@ -93,7 +93,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
 
     if (level == "campaign") {
       const campaigns_data = await new AdAccount(object_id).getCampaigns(fields1, params)
-      if (!campaigns_data[0]._data) {
+      if (!campaigns_data[0]?._data) {
         return {
           status: "error",
           data: campaigns_data.message ? campaigns_data.message : campaigns_data,
@@ -128,7 +128,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       params = {
         limit:100000
       }
-      const ad_data = await new AdSet(object_id).getAds(fields3, params)
+      const ad_data = await new AdSet(object_id).getAds(fields3, {})
       if (!ad_data[0]?._data) {
         return {
           status: "error",
@@ -165,7 +165,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
     }
     else {
       return {
-        status: "unable to get merge data",
+        status: "error",
         data: mergedArr.message ? mergedArr.message : mergedArr,
       };
     }
