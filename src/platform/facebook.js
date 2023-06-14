@@ -95,7 +95,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       const campaigns_data = await new AdAccount(object_id).getCampaigns(fields1, params)
       if (!campaigns_data[0]._data) {
         return {
-          status: "unable to get campain data  because length is zero",
+          status: "error",
           data: campaigns_data.message ? campaigns_data.message : campaigns_data,
         }
       }
@@ -113,7 +113,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       const adsetset_data = await new Campaign(object_id).getAdSets(fields2, {});
       if (!adsetset_data[0]?._data) {
         return {
-          status: "unable to get adset data because length is zero",
+          status: "error",
           data: adsetset_data.message ? adsetset_data.message : adsetset_data,
         }
       }
@@ -128,10 +128,10 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       params = {
         limit:100000
       }
-      const ad_data = await new AdSet(object_id).getAds(fields3, {})
+      const ad_data = await new AdSet(object_id).getAds(fields3, params)
       if (!ad_data[0]?._data) {
         return {
-          status: "unable to get ad_data because length is zero",
+          status: "error",
           data: ad_data.message ? ad_data.message : ad_data,
         }
       }
