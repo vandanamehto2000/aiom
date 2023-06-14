@@ -14,6 +14,17 @@ const facebook = require("../models/facebook");
 const  fields_constant  = require("../utils/constant");
 const Page = bizSdk.Page;
 
+const facebook_url = process.env.FACEBOOK_URL;
+// console.log(facebook_url)
+
+// // global.Token;
+// // let obj = {}
+// let globalToken;
+// const access_details_fun = async()=>{
+//   const details = await facebook.find()
+//   // console.log(details)
+//   return details[0].token
+// }
 
 
 // const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
@@ -74,7 +85,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v17.0/${object_id}/insights?level=${level}&fields=${fields}&limit=100000&access_token=${access_token}`,
+      url: `${facebook_url}/${object_id}/insights?level=${level}&fields=${fields}&limit=100000&access_token=${access_token}`,
       headers: {},
     };
 
@@ -420,7 +431,7 @@ const facebook_get_image_hash = async (imagePath, imageName, access_token) => {
     let config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: "https://graph.facebook.com/v16.0/act_1239957706633747/adimages",
+      url: `${facebook_url}/act_1239957706633747/adimages`,
       headers: {
         ...data.getHeaders(),
       },
@@ -453,7 +464,7 @@ const facebook_get_user_account_id = async (access_token) => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v16.0/me?fields=id,name&access_token=${access_token}`,
+      url: `${facebook_url}/me?fields=id,name&access_token=${access_token}`,
       headers: {},
     };
 
@@ -539,7 +550,7 @@ const facebook_generate_previews = async () => {
 
 const facebook_get_location = async (params, access_token) => {
   try {
-    const url = "https://graph.facebook.com/v16.0/search";
+    const url = `${facebook_url}/search`;
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -569,13 +580,14 @@ const facebook_get_location = async (params, access_token) => {
   }
 };
 
+
 // Get video data from page_id
 const facebook_get_video = async (id, access_token, video_id = null) => {
   try {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v16.0/${id}/videos?fields=id,source,updated_time,views,description,title,length,thumbnails&limit=1000&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
+      url: `${facebook_url}/${id}/videos?fields=id,source,updated_time,views,description,title,length,thumbnails&limit=1000&access_token=${access_token}`, // id here is page-ID (not ad_account_ID)
       headers: {},
     };
     let video_data = await axios.request(config);
@@ -667,7 +679,7 @@ const facebook_get_page_access_token = async (
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/${user_id}/accounts?access_token=${access_token}`,
+      url: `${facebook_url}/${user_id}/accounts?access_token=${access_token}`,
       headers: {},
     };
 
@@ -857,6 +869,43 @@ const facebook_create_creative_video = async (id, fields, params) => {
 };
 
 
+const facebook_get_interest_behavior = async () => {
+  try {
+    let params = {
+      type: "adTargetingCategory",
+      class: "behaviors",
+    };
+    console.log(params, "params");
+    const url = `${facebook_url}/search`;
+
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${url}?type=${params.type}&q=${params.q}&access_token=${access_token}`,
+      headers: {},
+    };
+    const behavior = await axios.request(config);
+    // console.log(behavior.data, "pppppppp")
+
+    fs.writeFileSync("behavior.txt", JSON.stringify(behavior.data));
+    return {
+      status: "unsuccessfull",
+      data: behavior.data,
+    };
+
+    // let readData = fs.readFileSync("behavior.txt");
+    // readData = JSON.parse(readData);
+    // console.log(readData)
+  } catch (error) {
+    console.log(error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+};
 // facebook_get_interest_behavior()
 const creat_image_carousel = async (
   id,
@@ -873,7 +922,7 @@ data.append('access_token', access_token);
 let config = {
   method: 'post',
   maxBodyLength: Infinity,
-  url: `https://graph.facebook.com/v16.0/${id}/adcreatives`,
+  url: `${facebook_url}/${id}/adcreatives`,
   headers: { 
     ...data.getHeaders()
   },
@@ -942,7 +991,7 @@ const facebook_get_businesses = async (access_token) => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v16.0/me/businesses?fields=id,name,created_by,owned_ad_accounts{name,connected_instagram_accounts},owned_pages,client_pages,primary_page,profile_picture_uri&access_token=${access_token}`,
+      url: `${facebook_url}/me/businesses?fields=id,name,created_by,owned_ad_accounts{name},owned_pages&access_token=${access_token}`,
       headers: { 
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
@@ -975,7 +1024,7 @@ const facebook_get_account_images = async (ad_account_id,access_token)=>{
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v17.0/${ad_account_id}/adimages?limit=10000&fields=created_time,hash,name,permalink_url,status,updated_time,url&access_token=${access_token}`,
+      url: `${facebook_url}/${ad_account_id}/adimages?limit=10000&fields=created_time,hash,name,permalink_url,status,updated_time,url&access_token=${access_token}`,
       headers: { 
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
@@ -1008,7 +1057,7 @@ const facebook_get_account_videos = async (ad_account_id,access_token)=>{
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v17.0/${ad_account_id}/advideos?limit=10000&fields=id,thumbnails&access_token=${access_token}`,
+      url: `${facebook_url}/${ad_account_id}/advideos?limit=10000&fields=id,thumbnails&access_token=${access_token}`,
       headers: { 
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
