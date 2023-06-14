@@ -665,10 +665,6 @@ const facebook_get_location = async (params, access_token) => {
     };
   }
 };
-// facebook_get_location()
-
-
-
 
 
 // Get video data from page_id
@@ -959,31 +955,6 @@ const facebook_create_creative_video = async (id, fields, params) => {
 };
 
 
-    const demographics_data = await facebook_get_demographics();
-    // console.log(demographics_data.data )
-
-    const combinedObj = {
-      interests: interest_data.data,
-      demographics: demographics_data.data,
-    };
-    return {
-      status: "unsuccessfull",
-      data: combinedObj,
-    };
-  } catch (error) {
-    console.log(error);
-    console.log("error part1", error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
-    return {
-      status: "error",
-      data: error.message ? error.message : error,
-    };
-  }
-};
-
-// facebook_get_interest_and_demographics();
-
 const facebook_get_interest_behavior = async () => {
   try {
     let params = {
@@ -1140,7 +1111,7 @@ const facebook_get_account_images = async (ad_account_id,access_token)=>{
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v17.0/${ad_account_id}/adimages?limit=10000&fields=created_time,hash,name,permalink_url,status,updated_time,url&access_token=${access_token}`,
+      url: `${facebook_url}/${ad_account_id}/adimages?limit=10000&fields=created_time,hash,name,permalink_url,status,updated_time,url&access_token=${access_token}`,
       headers: { 
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
@@ -1173,7 +1144,7 @@ const facebook_get_account_videos = async (ad_account_id,access_token)=>{
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `https://graph.facebook.com/v17.0/${ad_account_id}/advideos?limit=10000&fields=id,thumbnails&access_token=${access_token}`,
+      url: `${facebook_url}/${ad_account_id}/advideos?limit=10000&fields=id,thumbnails&access_token=${access_token}`,
       headers: { 
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
