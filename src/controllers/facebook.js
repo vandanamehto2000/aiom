@@ -17,6 +17,8 @@ const {
   facebook_get_images,
   facebook_create_carousel,
   facebook_get_businesses,
+  facebook_get_account_videos,
+  facebook_get_account_images
 } = require("../platform/facebook");
 const users = require("../models/user");
 
@@ -678,7 +680,33 @@ const create_carousel = async (req, res, next) => {
   }
 };
 
-// Update user role and BM or AD Acount
+const get_account_videos_images = async (req,res,next)=>{
+  try {
+    const {ad_account_id,get_field} = req.query
+    if(get_field === 'video'){
+      const videos = await facebook_get_account_videos(ad_account_id,req.facebook_token)
+      if(videos.status==="success"){
+        return responseApi.successResponseWithData(res,"Account Video Data Found!!",videos.data,StatusCodes.Ok)
+      }else{
+        return responseApi.ErrorResponse(res, "Unable to fetch video data", videos.data,StatusCodes.BAD_REQUEST)
+      }
+    }else if(get_field==="image"){
+      const images = await facebook_get_account_images(ad_account_id,req.facebook_token)
+      if(images.status==="success"){
+        return responseApi.successResponseWithData(res,"Account Image Data Found!!",images.data,StatusCodes.Ok)
+      }else{
+        return responseApi.ErrorResponse(res, "Unable to fetch Image data", images.data,StatusCodes.BAD_REQUEST)
+      }
+    }else{
+      return responseApi.ErrorResponse(res, "Please provide a valid get_field", "");
+    }
+    
+  } catch (error) {
+    console.log("Error", error)
+    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+  }
+}
+
 
 const update_bm = async (req, res, next) => {
   try {
@@ -787,5 +815,6 @@ module.exports = {
   get_page_images,
   create_carousel,
   get_businesses,
+  get_account_videos_images,
   update_bm,
 };

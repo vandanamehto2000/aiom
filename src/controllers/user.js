@@ -127,4 +127,5 @@ const employee_details = async (req, res, next) => {
 }
 
 
+
 module.exports = { register, login, logout, employee_details };
