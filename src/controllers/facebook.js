@@ -16,10 +16,11 @@ const {
   facebook_get_video,
   facebook_get_images,
   facebook_create_carousel,
-  facebook_get_businesses
+  facebook_get_businesses,
 } = require("../platform/facebook");
+const users = require("../models/user");
 
-const fields_constant = require('../utils/constant')
+const fields_constant = require("../utils/constant");
 const { StatusCodes } = require("http-status-codes");
 const responseApi = require("../utils/apiresponse");
 const { APIResponse } = require("facebook-nodejs-business-sdk");
@@ -29,22 +30,46 @@ const create_campaign = async (req, res, next) => {
   try {
     const { id, fields, params } = req.body;
     if (!(id && fields && params)) {
-      return responseApi.ErrorResponse(res, "All input is required", "", StatusCodes.BAD_REQUEST)
+      return responseApi.ErrorResponse(
+        res,
+        "All input is required",
+        "",
+        StatusCodes.BAD_REQUEST
+      );
     }
 
     if (!(params.name && params.objective && params.special_ad_categories)) {
-      return responseApi.ErrorResponse(res, "One of the fields is missing-(name, objective, special_ad_categories)", "", StatusCodes.BAD_REQUEST)
+      return responseApi.ErrorResponse(
+        res,
+        "One of the fields is missing-(name, objective, special_ad_categories)",
+        "",
+        StatusCodes.BAD_REQUEST
+      );
     }
 
     const facebook_result = await facebook_create_campaign(id, fields, params);
     if (facebook_result.status == "success") {
-      return responseApi.successResponseWithData(res, "create campaign data", facebook_result.data, StatusCodes.CREATED);
+      return responseApi.successResponseWithData(
+        res,
+        "create campaign data",
+        facebook_result.data,
+        StatusCodes.CREATED
+      );
     } else {
-      return responseApi.ErrorResponse(res, "unable to create campaign data", facebook_result.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "unable to create campaign data",
+        facebook_result.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
-    console.log("error", error)
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    console.log("error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
 
@@ -52,19 +77,39 @@ const create_campaign = async (req, res, next) => {
 const get_Insights = async (req, res, next) => {
   try {
     let { object_id, level, params } = req.query;
-    fields = fields_constant.fields[1]
+    fields = fields_constant.fields[1];
     params = JSON.parse(params);
-    const insights = await facebook_get_Insights(object_id, fields, level, req.facebook_token, params);
+    const insights = await facebook_get_Insights(
+      object_id,
+      fields,
+      level,
+      req.facebook_token,
+      params
+    );
     if (insights.status == "success") {
-      return responseApi.successResponseWithData(res, "insights data found", insights.data, StatusCodes.OK);
+      return responseApi.successResponseWithData(
+        res,
+        "insights data found",
+        insights.data,
+        StatusCodes.OK
+      );
     } else {
-      return responseApi.ErrorResponse(res, "unable to find insights data", insights.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "unable to find insights data",
+        insights.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
-    console.log("error", error)
+    console.log("error", error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
 
@@ -73,71 +118,144 @@ const create_adSet = async (req, res, next) => {
   try {
     const { id, fields, params } = req.body;
     if (!(id && fields && params)) {
-      return responseApi.ErrorResponse(res, "All input is required, One of the fields is missing-(id, fields, params)", "", StatusCodes.BAD_REQUEST)
+      return responseApi.ErrorResponse(
+        res,
+        "All input is required, One of the fields is missing-(id, fields, params)",
+        "",
+        StatusCodes.BAD_REQUEST
+      );
     }
 
     const adsets = await facebook_create_adSet(id, fields, params);
     if (adsets.status === "success") {
-      return responseApi.successResponseWithData(res, "create adSet data", adsets.data, StatusCodes.CREATED);
+      return responseApi.successResponseWithData(
+        res,
+        "create adSet data",
+        adsets.data,
+        StatusCodes.CREATED
+      );
     } else {
-      return responseApi.ErrorResponse(res, "unable to create adSet data", adsets.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "unable to create adSet data",
+        adsets.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
-    console.log("Error", error)
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    console.log("Error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
 
 const get_adSet = async (req, res, next) => {
   try {
     let { id, fields } = req.query;
-    fields = fields_constant.fields[fields]
+    fields = fields_constant.fields[fields];
     let params = {};
     const adset_data = await facebook_get_adSet(id, fields, params);
     if (adset_data.status == "success") {
-      return responseApi.successResponseWithData(res, "adSet data found", adset_data.data, StatusCodes.OK);
+      return responseApi.successResponseWithData(
+        res,
+        "adSet data found",
+        adset_data.data,
+        StatusCodes.OK
+      );
     } else {
-      return responseApi.ErrorResponse(res, "unable to find adSet data", adset_data.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "unable to find adSet data",
+        adset_data.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
     console.log("Error", error);
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
 
 //Create creative
 const create_creative = async (req, res, next) => {
   try {
-    const access_token = req.facebook_token
+    const access_token = req.facebook_token;
     let { id, fields, params } = req.body;
     fields = JSON.parse(fields);
     params = JSON.parse(params);
     if (req.file) {
       let { path, filename, originalname, fieldname } = req.file;
-      const adcreatives = await facebook_create_creative(path, filename, id, fields, params, access_token);
+      const adcreatives = await facebook_create_creative(
+        path,
+        filename,
+        id,
+        fields,
+        params,
+        access_token
+      );
       if (adcreatives.status == "success") {
-        return responseApi.successResponseWithData(res, "New creative image data post Successfully", adcreatives.data, StatusCodes.CREATED);
+        return responseApi.successResponseWithData(
+          res,
+          "New creative image data post Successfully",
+          adcreatives.data,
+          StatusCodes.CREATED
+        );
       } else {
-        return responseApi.ErrorResponse(res, "error", adcreatives.data, StatusCodes.BAD_REQUEST);
+        return responseApi.ErrorResponse(
+          res,
+          "error",
+          adcreatives.data,
+          StatusCodes.BAD_REQUEST
+        );
       }
-    }
-    else {
+    } else {
       // existing code
       if ("object_story_id" in params) {
-        const adcreatives = await facebook_create_creative(null, null, id, fields, params);
+        const adcreatives = await facebook_create_creative(
+          null,
+          null,
+          id,
+          fields,
+          params
+        );
         if (adcreatives.status == "success") {
-          return responseApi.successResponseWithData(res, "Existing data post successfully", adcreatives.data, StatusCodes.CREATED);
+          return responseApi.successResponseWithData(
+            res,
+            "Existing data post successfully",
+            adcreatives.data,
+            StatusCodes.CREATED
+          );
         } else {
-          return responseApi.ErrorResponse(res, "error", adcreatives.data, StatusCodes.BAD_REQUEST);
+          return responseApi.ErrorResponse(
+            res,
+            "error",
+            adcreatives.data,
+            StatusCodes.BAD_REQUEST
+          );
         }
-      }
-      else {
-        return responseApi.ErrorResponse(res, " Error in existing video or image", adcreatives.data, StatusCodes.BAD_REQUEST);
+      } else {
+        return responseApi.ErrorResponse(
+          res,
+          " Error in existing video or image",
+          adcreatives.data,
+          StatusCodes.BAD_REQUEST
+        );
       }
     }
   } catch (error) {
     console.log(error);
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
 
@@ -150,27 +268,56 @@ const create_creative_video_upload = async (req, res, next) => {
       thumbPath = req.files.thumb[0].path;
       sourceFieldname = req.files.source[0].fieldname;
       videoPath = req.files.source[0].path;
-    }
-    else {
+    } else {
       sourceFieldname = req.files.source[0].fieldname;
       videoPath = req.files.source[0].path;
     }
     let { id, fields, params, page_id } = req.body;
     if (!page_id) {
-      return responseApi.ErrorResponse(res, "page_id is required", "", StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "page_id is required",
+        "",
+        StatusCodes.BAD_REQUEST
+      );
     }
     fields = JSON.parse(fields);
     params = JSON.parse(params);
-    const result = await facebook_create_creative_video_upload(thumbPath, thumbFieldname, thumbFileName, videoPath, sourceFieldname, id, fields, params, page_id, req.facebook_token);
+    const result = await facebook_create_creative_video_upload(
+      thumbPath,
+      thumbFieldname,
+      thumbFileName,
+      videoPath,
+      sourceFieldname,
+      id,
+      fields,
+      params,
+      page_id,
+      req.facebook_token
+    );
 
     if (result.status == "success") {
-      return responseApi.successResponseWithData(res, "Video uploaded successfully", result.data, StatusCodes.CREATED);
+      return responseApi.successResponseWithData(
+        res,
+        "Video uploaded successfully",
+        result.data,
+        StatusCodes.CREATED
+      );
     } else {
-      return responseApi.ErrorResponse(res, "error", result, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "error",
+        result,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
     console.log(error);
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
 
@@ -178,19 +325,39 @@ const create_creative_video_upload = async (req, res, next) => {
 const get_creative = async (req, res, next) => {
   try {
     let { id, fields, page_id } = req.query;
-    fields = fields_constant.fields[fields]
+    fields = fields_constant.fields[fields];
     let params = {};
-    const creative_data = await facebook_get_creative(id, fields, params, page_id, req.facebook_token);
+    const creative_data = await facebook_get_creative(
+      id,
+      fields,
+      params,
+      page_id,
+      req.facebook_token
+    );
     if (creative_data.status == "success") {
-      return responseApi.successResponseWithData(res, "creative data found", creative_data.data, StatusCodes.OK);
+      return responseApi.successResponseWithData(
+        res,
+        "creative data found",
+        creative_data.data,
+        StatusCodes.OK
+      );
     } else {
-      return responseApi.ErrorResponse(res, "unable to find creative data", creative_data.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "unable to find creative data",
+        creative_data.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
 
@@ -200,180 +367,408 @@ const create_ad = async (req, res, next) => {
     let { id, fields, params } = req.body;
     const ads = await facebook_create_ad(id, fields, params);
     if (ads.status === "success") {
-      return responseApi.successResponseWithData(res, "Ad created successfully", ads.data, StatusCodes.CREATED);
+      return responseApi.successResponseWithData(
+        res,
+        "Ad created successfully",
+        ads.data,
+        StatusCodes.CREATED
+      );
     } else {
-      return responseApi.ErrorResponse(res, "error while creating ad", ads.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "error while creating ad",
+        ads.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
     console.log(error);
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
 
 const get_ads = async (req, res, next) => {
   try {
     let { id, fields } = req.query;
-    fields = fields_constant.fields[fields]
-    let params = {}
-    const ad_data = await facebook_get_ads(id, fields, params)          //id here is Adset_id 
+    fields = fields_constant.fields[fields];
+    let params = {};
+    const ad_data = await facebook_get_ads(id, fields, params); //id here is Adset_id
     if (ad_data.status == "success") {
-      return responseApi.successResponseWithData(res, "ad data found", ad_data.data, StatusCodes.OK);
+      return responseApi.successResponseWithData(
+        res,
+        "ad data found",
+        ad_data.data,
+        StatusCodes.OK
+      );
     } else {
-      return responseApi.ErrorResponse(res, "unable to find ad data", ad_data.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "unable to find ad data",
+        ad_data.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
     console.log(error);
-    return responseApi.ErrorResponse(res, ad_data.data, error)
+    return responseApi.ErrorResponse(res, ad_data.data, error);
   }
-
-}
-
+};
 
 const get_account_pages = async (req, res, next) => {
   try {
-    const account_pages = await facebook_get_accounts_pages(req.facebook_token)
+    const account_pages = await facebook_get_accounts_pages(req.facebook_token);
     if (account_pages.status !== "success") {
-      return responseApi.ErrorResponse(res, "unable to find account page data", account_pages.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "unable to find account page data",
+        account_pages.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
-    return responseApi.successResponseWithData(res, "account pages data found", account_pages.data, StatusCodes.OK);
+    return responseApi.successResponseWithData(
+      res,
+      "account pages data found",
+      account_pages.data,
+      StatusCodes.OK
+    );
   } catch (error) {
     console.log(error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
-}
+};
 
 const get_location_keys = async (req, res, next) => {
   try {
-    let { location, country_code } = req.query
-    location = JSON.parse(location)
+    let { location, country_code } = req.query;
+    location = JSON.parse(location);
     if (!location) {
-      return responseApi.ErrorResponse(res, "Location Params is required ", "", StatusCodes.BAD_REQUEST)
+      return responseApi.ErrorResponse(
+        res,
+        "Location Params is required ",
+        "",
+        StatusCodes.BAD_REQUEST
+      );
     }
-    const location_details = await facebook_get_location(location, req.facebook_token)
-    let filtered_location = location_details.data
+    const location_details = await facebook_get_location(
+      location,
+      req.facebook_token
+    );
+    let filtered_location = location_details.data;
     if (country_code) {
       filtered_location = location_details.data.data.filter((item) => {
-        return `"${item.country_code}"` == country_code
-      })
+        return `"${item.country_code}"` == country_code;
+      });
     }
     if (location_details.status === "success") {
-      return responseApi.successResponseWithData(res, "location data found", filtered_location, StatusCodes.OK)
+      return responseApi.successResponseWithData(
+        res,
+        "location data found",
+        filtered_location,
+        StatusCodes.OK
+      );
     } else {
-      return responseApi.ErrorResponse(res, "unable to find location data", location_details.data, StatusCodes.BAD_REQUEST)
+      return responseApi.ErrorResponse(
+        res,
+        "unable to find location data",
+        location_details.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
-
   } catch (error) {
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
-}
+};
 
 const create_creative_video = async (req, res, next) => {
   try {
     const { id, fields, params } = req.body;
     if (!(id && fields && params)) {
-      return responseApi.ErrorResponse(res, "All input is required, One of the fields is missing-(id, fields, params)", "", StatusCodes.BAD_REQUEST)
+      return responseApi.ErrorResponse(
+        res,
+        "All input is required, One of the fields is missing-(id, fields, params)",
+        "",
+        StatusCodes.BAD_REQUEST
+      );
     }
 
-    const adcreativess = await facebook_create_creative_video(id, fields, params);
+    const adcreativess = await facebook_create_creative_video(
+      id,
+      fields,
+      params
+    );
     if (adcreativess.status === "success") {
-      return responseApi.successResponseWithData(res, "success", adcreativess.data, StatusCodes.CREATED);
+      return responseApi.successResponseWithData(
+        res,
+        "success",
+        adcreativess.data,
+        StatusCodes.CREATED
+      );
     } else {
-      return responseApi.ErrorResponse(res, "error", adcreativess.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "error",
+        adcreativess.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
-    console.log("Error", error)
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    console.log("Error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
 
 const get_page_video = async (req, res, next) => {
   try {
-    const access_token = req.facebook_token
-    let { page_id,thumbnail,video_id } = req.query;
+    const access_token = req.facebook_token;
+    let { page_id, thumbnail, video_id } = req.query;
     let video_data;
-    if(video_id){
-      video_data = await facebook_get_video(page_id,access_token,video_id)
-    }else{  
-      video_data = await facebook_get_video(page_id,access_token)
+    if (video_id) {
+      video_data = await facebook_get_video(page_id, access_token, video_id);
+    } else {
+      video_data = await facebook_get_video(page_id, access_token);
     }
-    if(video_data.status=="success"){
-      for(let i=0;i<video_data.data.length;i++){
-        if(thumbnail=="single"){
-          video_data.data[i].thumbnails = video_data.data[i].thumbnails.data[0]
+    if (video_data.status == "success") {
+      for (let i = 0; i < video_data.data.length; i++) {
+        if (thumbnail == "single") {
+          video_data.data[i].thumbnails = video_data.data[i].thumbnails.data[0];
         } else {
-          video_data.data[i].thumbnails = video_data.data[i].thumbnails.data
+          video_data.data[i].thumbnails = video_data.data[i].thumbnails.data;
         }
       }
-      if(video_data.data.length===0){
-        return responseApi.successResponseWithData(res,"Please wait for Facebook databse to update the video details!!",video_data.data,StatusCodes.OK)
+      if (video_data.data.length === 0) {
+        return responseApi.successResponseWithData(
+          res,
+          "Please wait for Facebook databse to update the video details!!",
+          video_data.data,
+          StatusCodes.OK
+        );
       }
-      return responseApi.successResponseWithData(res,"Video data found",video_data.data)
-    }else{
-      return responseApi.ErrorResponse(res, "unable to find creative data", video_data.data, StatusCodes.BAD_REQUEST);
+      return responseApi.successResponseWithData(
+        res,
+        "Video data found",
+        video_data.data
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "unable to find creative data",
+        video_data.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
-
   } catch (error) {
-    console.log("Error", error)
-    return responseApi.ErrorResponse(res, error.message ? error.message : "error", error);
+    console.log("Error", error);
+    return responseApi.ErrorResponse(
+      res,
+      error.message ? error.message : "error",
+      error
+    );
   }
-}
+};
 
 const get_page_images = async (req, res, next) => {
   try {
     let { page_id } = req.query;
     if (!page_id) {
-      return responseApi.ErrorResponse(res, "Page ID is required", "", StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "Page ID is required",
+        "",
+        StatusCodes.BAD_REQUEST
+      );
     }
-    let images = await facebook_get_images(page_id)
-    if (images.status = "success") {
-      return responseApi.successResponseWithData(res, "Image data found", images.data)
+    let images = await facebook_get_images(page_id);
+    if ((images.status = "success")) {
+      return responseApi.successResponseWithData(
+        res,
+        "Image data found",
+        images.data
+      );
     } else {
-      return responseApi.ErrorResponse(res, "unable to find image data", images.data, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "unable to find image data",
+        images.data,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return responseApi.ErrorResponse(res, "Internal server Error", error);
-  }
-}
-
-const get_businesses = async (req, res, next) => {
-  try {
-    const businesses = await facebook_get_businesses(req.facebook_token)
-
-    if (businesses.status === "success") {
-      return responseApi.successResponseWithData(res, "Businessses Found", businesses.data)
-    } else {
-      return responseApi.ErrorResponse(res, "unable to find businesses data", businesses.data, StatusCodes.BAD_REQUEST);
-    }
-  } catch (error) {
-    console.log(error)
-    return responseApi.ErrorResponse(res, "Internal server Error", error);
-  }
-}
-
-
-const create_carousel = async (req, res, next) => {
-  try {
-    const access_token = req.facebook_token
-    let { id, name, object_story_spec } = req.body;
-    object_story_spec = JSON.parse(object_story_spec);
-    let fileData = req.files;
-    const carousels = await facebook_create_carousel(id, name, object_story_spec, fileData, access_token);
-    if (carousels.status === "success") {
-      return responseApi.successResponseWithData(res, "Carousel data Successfully post!!", carousels.data, StatusCodes.CREATED);
-    } else {
-      return responseApi.ErrorResponse(res, "error", carousels.data, StatusCodes.BAD_REQUEST);
-    }
-  } catch (error) {
-    console.log("Error", error)
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
   }
 };
 
+const get_businesses = async (req, res, next) => {
+  try {
+    const businesses = await facebook_get_businesses(req.facebook_token);
 
+    if (businesses.status === "success") {
+      return responseApi.successResponseWithData(
+        res,
+        "Businessses Found",
+        businesses.data
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "unable to find businesses data",
+        businesses.data,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  } catch (error) {
+    console.log(error);
+    return responseApi.ErrorResponse(res, "Internal server Error", error);
+  }
+};
 
+const create_carousel = async (req, res, next) => {
+  try {
+    const access_token = req.facebook_token;
+    let { id, name, object_story_spec } = req.body;
+    object_story_spec = JSON.parse(object_story_spec);
+    let fileData = req.files;
+    const carousels = await facebook_create_carousel(
+      id,
+      name,
+      object_story_spec,
+      fileData,
+      access_token
+    );
+    if (carousels.status === "success") {
+      return responseApi.successResponseWithData(
+        res,
+        "Carousel data Successfully post!!",
+        carousels.data,
+        StatusCodes.CREATED
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "error",
+        carousels.data,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  } catch (error) {
+    console.log("Error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
+// Update user role and BM or AD Acount
+
+const update_bm = async (req, res, next) => {
+  try {
+    let { flag, bm_id, name, email } = req.body;
+    let data = [];
+    for (let i = 0; i < email.length; i++) {
+      data.push(email[i].email);
+    }
+    const users_data = await users.find({
+      email: { $in: data },
+    });
+    if (users_data.length > 0) {
+      let result;
+      let isSuccess=false;
+      for (let i = 0; i < users_data.length; i++) {
+        for (let j = 0; j < email.length; j++) {
+          if (users_data[i].email === email[j].email) {
+            let condition={ email: email[j].email };
+            let updateData={}
+            if(flag === "assigned_BM"){
+              updateData= {
+                $set: {
+                  roles: email[j].role
+                },
+                $push: {
+                  assigned_BM: {
+                    id: bm_id,
+                    name: name,
+                  },
+                },
+              };
+            }
+            else if(flag === "assigned_ad_account"){
+              updateData= {
+                $set: {
+                  roles: email[j].role
+                },
+                $push: {
+                  assigned_ad_account: {
+                    id: bm_id,
+                    name: name,
+                  },
+                },
+              };
+            }
+          result= await users.updateMany(condition, updateData, {new: true});
+            if(result.modifiedCount !=1 && result.matchedCount !=1){
+              isSuccess =false;
+              break;
+            }
+            else{
+              isSuccess=true;
+            }
+          }
+        }
+      }
+if(isSuccess){
+  return responseApi.successResponseWithData(
+    res,
+    "user data Successfully updates!!",
+    [],
+    StatusCodes.OK
+  );
+}
+else{
+  return responseApi.successResponseWithData(
+    res,
+    "Couldn't update User Data",
+    [],
+    StatusCodes.BAD_REQUEST
+  );
+}
+    }
+    else{
+      return responseApi.successResponseWithData(
+        res,
+        "User data Not found !!",
+        [],
+        StatusCodes.OK
+      );
+    }
+  } catch (error) {
+    console.log("Error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
 
 module.exports = {
   create_campaign,
@@ -392,4 +787,5 @@ module.exports = {
   get_page_images,
   create_carousel,
   get_businesses,
+  update_bm,
 };
