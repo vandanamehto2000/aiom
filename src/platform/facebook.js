@@ -128,8 +128,8 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       params = {
         limit:100000
       }
-      const ad_data = await new AdSet(object_id).getAds(fields3, params)
-      if (!ad_data[0]._data) {
+      const ad_data = await new AdSet(object_id).getAds(fields3, {})
+      if (!ad_data[0]?._data) {
         return {
           status: "unable to get ad_data because length is zero",
           data: ad_data.message ? ad_data.message : ad_data,
