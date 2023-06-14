@@ -90,6 +90,11 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
 
       if (campaigns_data.length > 0) {
         for (let i = 0; i < campaigns_data.length; i++) {
+          if(campaigns_data[i]._data.daily_budget){
+            campaigns_data[i]._data.daily_budget = campaigns_data[i]._data.daily_budget/100
+            }else if(campaigns_data[i]._data.lifetime_budget){
+              campaigns_data[i]._data.lifetime_budget = campaigns_data[i]._data.lifetime_budget/100
+            }
           result1.push(campaigns_data[i]._data);
         }
       }
@@ -134,6 +139,9 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
         mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
       }
     }
+    
+
+
     if (mergedArr) {
       return {
         status: "success",
