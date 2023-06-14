@@ -18,6 +18,7 @@ const facebook_url = process.env.FACEBOOK_URL;
 // console.log(facebook_url)
 
 
+
 // const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
 // const app_secret = "<APP_SECRET>";
 
@@ -65,6 +66,7 @@ const facebook_create_campaign = async (id, fields, params) => {
 //Get a Campaign
 const facebook_get_Insights = async (object_id, fields, level, access_token, params) => {
   try {
+
     params.limit = 100000
     let fields1 = fields_constant.fields[5]
    
@@ -105,8 +107,11 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       }
 
     } else if (level == "adset") {
-      const adsetset_data = await new Campaign(object_id).getAdSets(fields2, params)
-      if (!adsetset_data[0]._data) {
+      params = {
+        limit:100000
+      }
+      const adsetset_data = await new Campaign(object_id).getAdSets(fields2, {});
+      if (!adsetset_data[0]?._data) {
         return {
           status: "unable to get adset data because length is zero",
           data: adsetset_data.message ? adsetset_data.message : adsetset_data,
@@ -120,6 +125,9 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       }
 
     } else if (level == "ad") {
+      params = {
+        limit:100000
+      }
       const ad_data = await new AdSet(object_id).getAds(fields3, params)
       if (!ad_data[0]._data) {
         return {
@@ -172,63 +180,10 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
   }
 };
 
-// facebook_get_campaign()
-//Brand_Awareness campaign ID - 23853906349450580
-//"23853823531720580",  //conversions campaign ID
 
 //Create AdSET
 const facebook_create_adSet = async (id, fields, params) => {
   try {
-    // let fields, params;
-    // fields = [];
-    // params = {
-    //   name: "My First AdSet",
-    //   lifetime_budget: "41300",
-    //   // daily_budget:"9000",
-    //   start_time: "2023-04-26T09:24:18-0700",
-    //   end_time: "2023-05-01T09:24:18-0700",
-    //   campaign_id: "23853832660620580",
-    //   bid_amount: "80",
-    //   billing_event: "IMPRESSIONS",
-    //   optimization_goal: "POST_ENGAGEMENT",
-    //   targeting: {
-    //     age_min: 20,
-    //     age_max: 24,
-    //     behaviors: [{ id: 6002714895372, name: "All travelers" }],
-    //     genders: [1],
-    //     geo_locations: {
-    //       countries: ["US"],
-    //       regions: [{ key: "4081" }],
-    //       cities: [{ key: "777934", radius: 10, distance_unit: "mile" }],
-    //     },
-    //     // promoted_object : {page_id:'106284349116205',object_store_url:'https://sveltetech.com/'},
-    //     // interests: [{ id: "<adsInterestID>", name: "<adsInterestName>" }],
-    //     life_events: [{ id: 6002714398172, name: "Newlywed (1 year)" }],
-    //     facebook_positions: ["feed"],
-    //     publisher_platforms: ["facebook", "audience_network"],
-    //   },
-    //   status: "PAUSED",
-    // };
-
-    // params = {
-    //   name: "My AdSet",
-    //   optimization_goal: "AD_RECALL_LIFT",
-    //   billing_event: "IMPRESSIONS",
-    //   bid_strategy: "LOWEST_COST_WITHOUT_CAP",
-    //   // autobid:"true",
-    //   // bid_amount: "2",
-    //   // bid_cap:"10",
-    //   daily_budget: "50000",
-    //   campaign_id: "23853906349450580",
-    //   targeting: {
-    //     facebook_positions: ["feed"],
-    //     geo_locations: { countries: ["IN"] },
-    //     behaviors: [
-    //       // { id: 6007101597783, name: "Business Travelers" },
-    //       { id: 6004386044572, name: "Android Owners (All)" },
-    //     ],
-    //   },
-    // };
     if (params.daily_budget) {
       params.daily_budget *= 100;
     }
@@ -338,9 +293,7 @@ const facebook_get_ads = async (id, fields, params) => {
     };
   }
 };
-// facebook_get_ad()
 
-//page ID -106284349116205
 //Create creative
 const facebook_create_creative = async (
   imagePath,
@@ -351,34 +304,6 @@ const facebook_create_creative = async (
   access_token
 ) => {
   try {
-    // let fields, params;
-    // fields = [];
-    // params = {
-    //   // 'object_story_id' : '106284349116205_113796205024659',
-
-    //   name: "Sample Creative",
-    //   object_story_spec: {
-    //     page_id: "106284349116205",
-    //     link_data: {
-    //       link: "https://facebook.com/106284349116205",
-    //       message: "try it out",
-    //     },
-    //   },
-    // };
-    // let params1  = {
-    //   image_hash: "<imageHash>",
-    //   object_story_spec: {
-    //     page_id: "<pageID>",
-    //     link_data: {
-    //       image_hash: "<imageHash>",
-    //       link: "<canvasURI>",
-    //       name: "Creative message",
-    //       call_to_action: { type: "LEARN_MORE" },
-    //     },
-    //   },
-    // };
-
-    //Change Params according to the input(image/video)
     let adcreatives;
     if (imagePath == null && imageName == null && "object_story_id" in params) {
       adcreatives = await new AdAccount(id).createAdCreative(fields, params);
@@ -489,8 +414,6 @@ const facebook_create_ad = async (id, fields, params) => {
   }
 };
 
-// const imagePath =
-//   "src/platform/23-inches-display-1920-x-1080-pixels-8-gb-ram-intel-i3-branded-desktop--172.jpg";
 const facebook_get_image_hash = async (imagePath, imageName, access_token) => {
   try {
     let data = new FormData();
@@ -520,9 +443,6 @@ const facebook_get_image_hash = async (imagePath, imageName, access_token) => {
     }
   } catch (error) {
     console.log(error);
-    console.log("error part1", error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
     return {
       status: "error",
       data: error.message ? error.message : error,
@@ -530,7 +450,6 @@ const facebook_get_image_hash = async (imagePath, imageName, access_token) => {
   }
 };
 
-//User account_id - 113796205024659
 //GET User account ID
 const facebook_get_user_account_id = async (access_token) => {
   try {
@@ -986,7 +905,6 @@ const creat_image_carousel = async (
   object_story_spec,
   access_token
 ) => {
-  console.log("carousel data post-------",JSON.stringify(object_story_spec))
 
   let data = new FormData();
 data.append('name', name);
