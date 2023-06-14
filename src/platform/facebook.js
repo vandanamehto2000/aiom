@@ -17,28 +17,15 @@ const Page = bizSdk.Page;
 const facebook_url = process.env.FACEBOOK_URL;
 // console.log(facebook_url)
 
-// // global.Token;
-// // let obj = {}
-// let globalToken;
-// const access_details_fun = async()=>{
-//   const details = await facebook.find()
-//   // console.log(details)
-//   return details[0].token
-// }
-
-// const handleAccess = async()=>{
-// let token = await access_details_fun()
-//   globalToken= token
-// }
 
 // const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
-const app_secret = "<APP_SECRET>";
+// const app_secret = "<APP_SECRET>";
 
-const app_id = "1238459780139646";
+// const app_id = "1238459780139646";
 // const pageId = "106284349116205";
-const id = "act_1239957706633747"; //local
+// const id = "act_1239957706633747"; //local
 // const api = bizSdk.FacebookAdsApi.init(access_token);
-const showDebugingInfo = true; // Setting this to true shows more debugging info.
+// const showDebugingInfo = true; // Setting this to true shows more debugging info.
 // if (showDebugingInfo) {
 //   api.setDebug(true);
 // }
@@ -103,7 +90,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
     let result1 = [];
 
     if (level == "campaign") {
-      const campaigns_data = await new AdAccount(id).getCampaigns(fields1, params)
+      const campaigns_data = await new AdAccount(object_id).getCampaigns(fields1, params)
       if (!campaigns_data[0]._data) {
         return {
           status: "unable to get campain data  because length is zero",
@@ -118,7 +105,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       }
 
     } else if (level == "adset") {
-      const adsetset_data = await new Campaign(id).getAdSets(fields2, params)
+      const adsetset_data = await new Campaign(object_id).getAdSets(fields2, params)
       if (!adsetset_data[0]._data) {
         return {
           status: "unable to get adset data because length is zero",
@@ -133,7 +120,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       }
 
     } else if (level == "ad") {
-      const ad_data = await new AdSet(id).getAds(fields3, params)
+      const ad_data = await new AdSet(object_id).getAds(fields3, params)
       if (!ad_data[0]._data) {
         return {
           status: "unable to get ad_data because length is zero",
