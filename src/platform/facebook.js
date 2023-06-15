@@ -107,7 +107,12 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
 
       if (adsetset_data.length > 0) {
         for (let j = 0; j < adsetset_data.length; j++) {
-          result1.push(adsetset_data[0]._data)
+          if(adsetset_data[j]._data.daily_budget){
+            adsetset_data[j]._data.daily_budget = adsetset_data[j]._data.daily_budget/100
+            }else if(adsetset_data[j]._data.lifetime_budget){
+              adsetset_data[j]._data.lifetime_budget = adsetset_data[j]._data.lifetime_budget/100
+            }
+          result1.push(adsetset_data[j]._data)
         }
       }
 
@@ -120,7 +125,12 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
 
       if (ad_data.length > 0) {
         for (let k = 0; k < ad_data.length; k++) {
-          result1.push(ad_data[0]._data)
+          if(ad_data[k]._data.daily_budget){
+            ad_data[k]._data.daily_budget = ad_data[k]._data.daily_budget/100
+            }else if(ad_data[k]._data.lifetime_budget){
+              ad_data[k]._data.lifetime_budget = ad_data[k]._data.lifetime_budget/100
+            }
+          result1.push(ad_data[k]._data)
         }
       }
     }
