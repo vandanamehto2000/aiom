@@ -18,7 +18,7 @@ const {
   facebook_create_carousel,
   facebook_get_businesses,
   facebook_get_account_videos,
-  facebook_get_account_images
+  facebook_get_account_images,
 } = require("../platform/facebook");
 const users = require("../models/user");
 
@@ -680,33 +680,65 @@ const create_carousel = async (req, res, next) => {
   }
 };
 
-const get_account_videos_images = async (req,res,next)=>{
+const get_account_videos_images = async (req, res, next) => {
   try {
-    const {ad_account_id,get_field} = req.query
-    if(get_field === 'video'){
-      const videos = await facebook_get_account_videos(ad_account_id,req.facebook_token)
-      if(videos.status==="success"){
-        return responseApi.successResponseWithData(res,"Account Video Data Found!!",videos.data,StatusCodes.Ok)
-      }else{
-        return responseApi.ErrorResponse(res, "Unable to fetch video data", videos.data,StatusCodes.BAD_REQUEST)
+    const { ad_account_id, get_field } = req.query;
+    if (get_field === "video") {
+      const videos = await facebook_get_account_videos(
+        ad_account_id,
+        req.facebook_token
+      );
+      if (videos.status === "success") {
+        return responseApi.successResponseWithData(
+          res,
+          "Account Video Data Found!!",
+          videos.data,
+          StatusCodes.Ok
+        );
+      } else {
+        return responseApi.ErrorResponse(
+          res,
+          "Unable to fetch video data",
+          videos.data,
+          StatusCodes.BAD_REQUEST
+        );
       }
-    }else if(get_field==="image"){
-      const images = await facebook_get_account_images(ad_account_id,req.facebook_token)
-      if(images.status==="success"){
-        return responseApi.successResponseWithData(res,"Account Image Data Found!!",images.data,StatusCodes.Ok)
-      }else{
-        return responseApi.ErrorResponse(res, "Unable to fetch Image data", images.data,StatusCodes.BAD_REQUEST)
+    } else if (get_field === "image") {
+      const images = await facebook_get_account_images(
+        ad_account_id,
+        req.facebook_token
+      );
+      if (images.status === "success") {
+        return responseApi.successResponseWithData(
+          res,
+          "Account Image Data Found!!",
+          images.data,
+          StatusCodes.Ok
+        );
+      } else {
+        return responseApi.ErrorResponse(
+          res,
+          "Unable to fetch Image data",
+          images.data,
+          StatusCodes.BAD_REQUEST
+        );
       }
-    }else{
-      return responseApi.ErrorResponse(res, "Please provide a valid get_field", "");
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "Please provide a valid get_field",
+        ""
+      );
     }
-    
   } catch (error) {
-    console.log("Error", error)
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+    console.log("Error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
-}
-
+};
 
 const update_bm = async (req, res, next) => {
   try {
@@ -719,68 +751,35 @@ const update_bm = async (req, res, next) => {
       email: { $in: data },
     });
     if (users_data.length > 0) {
-      let result;
-      let isSuccess=false;
+      const bulkWriteOperations = [];
       for (let i = 0; i < users_data.length; i++) {
         for (let j = 0; j < email.length; j++) {
           if (users_data[i].email === email[j].email) {
-            let condition={ email: email[j].email };
-            let updateData={}
-            if(flag === "assigned_BM"){
-              updateData= {
-                $set: {
-                  roles: email[j].role
-                },
-                $push: {
-                  assigned_BM: {
-                    id: bm_id,
-                    name: name,
+            bulkWriteOperations.push({
+              updateOne: {
+                filter: { _id: users_data[i]._id, email: users_data[i].email },
+                update: {
+                  $set: { roles: email[j].role },
+                  $push: {
+                    [`${flag}`]: {
+                      id: bm_id,
+                      name: name,
+                    },
                   },
                 },
-              };
-            }
-            else if(flag === "assigned_ad_account"){
-              updateData= {
-                $set: {
-                  roles: email[j].role
-                },
-                $push: {
-                  assigned_ad_account: {
-                    id: bm_id,
-                    name: name,
-                  },
-                },
-              };
-            }
-          result= await users.updateMany(condition, updateData, {new: true});
-            if(result.modifiedCount !=1 && result.matchedCount !=1){
-              isSuccess =false;
-              break;
-            }
-            else{
-              isSuccess=true;
-            }
+              },
+            });
           }
         }
       }
-if(isSuccess){
-  return responseApi.successResponseWithData(
-    res,
-    "user data Successfully updates!!",
-    [],
-    StatusCodes.OK
-  );
-}
-else{
-  return responseApi.successResponseWithData(
-    res,
-    "Couldn't update User Data",
-    [],
-    StatusCodes.BAD_REQUEST
-  );
-}
-    }
-    else{
+      const result = await users.bulkWrite(bulkWriteOperations);
+      return responseApi.successResponseWithData(
+        res,
+        "user data Successfully updates!!",
+        result,
+        StatusCodes.OK
+      );
+    } else {
       return responseApi.successResponseWithData(
         res,
         "User data Not found !!",
