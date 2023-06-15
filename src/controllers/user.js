@@ -161,7 +161,7 @@ const update_bm = async (req, res, next) => {
       const result = await User.bulkWrite(bulkWriteOperations);
       return responseApi.successResponseWithData(
         res,
-        "user data Successfully updates!!",
+        "User data Successfully updates!!",
         result,
         StatusCodes.OK
       );
