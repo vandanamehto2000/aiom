@@ -3,6 +3,7 @@ const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const responseApi = require("../utils/apiresponse");
+const users = require("../models/user");
 
 const generateAccessToken = (response) => {
   return jwt.sign(
@@ -126,6 +127,63 @@ const employee_details = async (req, res, next) => {
   }
 }
 
+const update_bm = async (req, res, next) => {
+  try {
+    let { flag, id, name, email } = req.body;
+    let data = [];
+    for (let i = 0; i < email.length; i++) {
+      data.push(email[i].email);
+    }
+    const users_data = await users.find({
+      email: { $in: data },
+    });
+    if (users_data.length > 0) {
+      const bulkWriteOperations = [];
+      for (let i = 0; i < users_data.length; i++) {
+        for (let j = 0; j < email.length; j++) {
+          if (users_data[i].email === email[j].email) {
+            bulkWriteOperations.push({
+              updateOne: {
+                filter: { _id: users_data[i]._id, email: users_data[i].email },
+                update: {
+                  $set: { roles: email[j].role },
+                  $push: {
+                    [`${flag}`]: {
+                      id: id,
+                      name: name,
+                    },
+                  },
+                },
+              },
+            });
+          }
+        }
+      }
+      const result = await users.bulkWrite(bulkWriteOperations);
+      return responseApi.successResponseWithData(
+        res,
+        "user data Successfully updates!!",
+        result,
+        StatusCodes.OK
+      );
+    } else {
+      return responseApi.successResponseWithData(
+        res,
+        "User data Not found !!",
+        [],
+        StatusCodes.OK
+      );
+    }
+  } catch (error) {
+    console.log("Error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
 
 
-module.exports = { register, login, logout, employee_details };
+
+module.exports = { register, login, logout, employee_details, update_bm };
