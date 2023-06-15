@@ -680,27 +680,27 @@ const create_carousel = async (req, res, next) => {
   }
 };
 
-const get_account_videos_images = async (req,res,next)=>{
+const get_account_videos_images = async (req, res, next) => {
   try {
-    const {ad_account_id,get_field} = req.query
-    if(get_field === 'video'){
-      const videos = await facebook_get_account_videos(ad_account_id,req.facebook_token)
-      if(videos.status==="success"){
-        return responseApi.successResponseWithData(res,"Account Video Data Found!!",videos.data,StatusCodes.Ok)
-      }else{
-        return responseApi.ErrorResponse(res, "Unable to fetch video data", videos.data,StatusCodes.BAD_REQUEST)
+    const { ad_account_id, get_field } = req.query
+    if (get_field === 'video') {
+      const videos = await facebook_get_account_videos(ad_account_id, req.facebook_token)
+      if (videos.status === "success") {
+        return responseApi.successResponseWithData(res, "Account Video Data Found!!", videos.data, StatusCodes.Ok)
+      } else {
+        return responseApi.ErrorResponse(res, "Unable to fetch video data", videos.data, StatusCodes.BAD_REQUEST)
       }
-    }else if(get_field==="image"){
-      const images = await facebook_get_account_images(ad_account_id,req.facebook_token)
-      if(images.status==="success"){
-        return responseApi.successResponseWithData(res,"Account Image Data Found!!",images.data,StatusCodes.Ok)
-      }else{
-        return responseApi.ErrorResponse(res, "Unable to fetch Image data", images.data,StatusCodes.BAD_REQUEST)
+    } else if (get_field === "image") {
+      const images = await facebook_get_account_images(ad_account_id, req.facebook_token)
+      if (images.status === "success") {
+        return responseApi.successResponseWithData(res, "Account Image Data Found!!", images.data, StatusCodes.Ok)
+      } else {
+        return responseApi.ErrorResponse(res, "Unable to fetch Image data", images.data, StatusCodes.BAD_REQUEST)
       }
-    }else{
+    } else {
       return responseApi.ErrorResponse(res, "Please provide a valid get_field", "");
     }
-    
+
   } catch (error) {
     console.log("Error", error)
     return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
@@ -711,23 +711,34 @@ const get_account_videos_images = async (req,res,next)=>{
 const update_bm = async (req, res, next) => {
   try {
     let { flag, bm_id, name, email } = req.body;
+    console.log(flag == "assigned_BM", "flag");
+    console.log(req.body, "pppppppppp");
     let data = [];
     for (let i = 0; i < email.length; i++) {
+      console.log(email[i], "email");
+      console.log(email[i].email, "email...")
       data.push(email[i].email);
     }
+    console.log(data, "data")
     const users_data = await users.find({
       email: { $in: data },
     });
+    console.log(users_data, "user_data");
     if (users_data.length > 0) {
       let result;
-      let isSuccess=false;
+      let isSuccess = false;
       for (let i = 0; i < users_data.length; i++) {
+        console.log(users_data, users_data[i], "iiiiiiiii")
         for (let j = 0; j < email.length; j++) {
+          console.log(email, email[j], "jjjjjjjj")
+          console.log(users_data[i].email === email[j].email, "emialppppppppp")
           if (users_data[i].email === email[j].email) {
-            let condition={ email: email[j].email };
-            let updateData={}
-            if(flag === "assigned_BM"){
-              updateData= {
+            console.log({ email: email[j].email }, "............");
+            let condition = { email: email[j].email };
+            let updateData = {}
+            console.log(flag === "assigned_BM", "update.........");
+            if (flag === "assigned_BM") {
+              updateData = {
                 $set: {
                   roles: email[j].role
                 },
@@ -739,8 +750,8 @@ const update_bm = async (req, res, next) => {
                 },
               };
             }
-            else if(flag === "assigned_ad_account"){
-              updateData= {
+            else if (flag === "assigned_ad_account") {
+              updateData = {
                 $set: {
                   roles: email[j].role
                 },
@@ -752,35 +763,36 @@ const update_bm = async (req, res, next) => {
                 },
               };
             }
-          result= await users.updateMany(condition, updateData, {new: true});
-            if(result.modifiedCount !=1 && result.matchedCount !=1){
-              isSuccess =false;
+            result = await users.updateMany(condition, updateData, { new: true });
+            console.log(result.modifiedCount != 1 && result.matchedCount != 1, "result.......");
+            if (result.modifiedCount != 1 && result.matchedCount != 1) {
+              isSuccess = false;
               break;
             }
-            else{
-              isSuccess=true;
+            else {
+              isSuccess = true;
             }
           }
         }
       }
-if(isSuccess){
-  return responseApi.successResponseWithData(
-    res,
-    "user data Successfully updates!!",
-    [],
-    StatusCodes.OK
-  );
-}
-else{
-  return responseApi.successResponseWithData(
-    res,
-    "Couldn't update User Data",
-    [],
-    StatusCodes.BAD_REQUEST
-  );
-}
+      if (isSuccess) {
+        return responseApi.successResponseWithData(
+          res,
+          "user data Successfully updates!!",
+          [],
+          StatusCodes.OK
+        );
+      }
+      else {
+        return responseApi.successResponseWithData(
+          res,
+          "Couldn't update User Data",
+          [],
+          StatusCodes.BAD_REQUEST
+        );
+      }
     }
-    else{
+    else {
       return responseApi.successResponseWithData(
         res,
         "User data Not found !!",
@@ -797,6 +809,22 @@ else{
     );
   }
 };
+
+const delete_bm = async (req, res, next) => {
+  try {
+    let {bm_id, email,name} = req.body;
+    console.log(name, name === "assigned_BM")
+
+  }
+  catch (error) {
+    console.log(error);
+  }
+}
+
+
+
+
+
 
 module.exports = {
   create_campaign,
@@ -817,4 +845,5 @@ module.exports = {
   get_businesses,
   get_account_videos_images,
   update_bm,
+  delete_bm
 };

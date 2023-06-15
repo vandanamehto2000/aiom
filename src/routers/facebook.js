@@ -1,4 +1,4 @@
-const { create_campaign, get_Insights, create_adSet, get_adSet, create_creative, get_creative, create_ad, get_account_pages, get_location_keys, create_creative_video_upload, create_creative_video, get_page_video, get_ads, get_page_images,create_carousel,get_businesses, get_account_videos_images,update_bm } = require("../controllers/facebook");
+const { create_campaign, get_Insights, create_adSet, get_adSet, create_creative, get_creative, create_ad, get_account_pages, get_location_keys, create_creative_video_upload, create_creative_video, get_page_video, get_ads, get_page_images,create_carousel,get_businesses, get_account_videos_images,update_bm,delete_bm } = require("../controllers/facebook");
 const { authenticateToken, fb_middleware } = require('../middleware/auth')
 const { uploadVideo, uploadImage, uploadImages } = require('../middleware/fileUpload')
 const express = require("express");
@@ -23,5 +23,6 @@ router.post("/create-carousel",authenticateToken, fb_middleware,uploadImages, cr
 router.get("/businesses",authenticateToken,fb_middleware,get_businesses)
 router.post("/update-bm",authenticateToken,fb_middleware,update_bm)
 router.get("/account/media",authenticateToken,fb_middleware,get_account_videos_images)
+router.delete("/delete-bm", authenticateToken, fb_middleware, delete_bm);
 
 module.exports = router;
