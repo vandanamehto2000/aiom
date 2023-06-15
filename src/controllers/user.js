@@ -2,6 +2,7 @@ const CryptoJS = require("crypto-js");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const users = require("../models/user");
 const responseApi = require("../utils/apiresponse");
 const users = require("../models/user");
 
