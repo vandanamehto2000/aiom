@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const users = require("../models/user");
 const responseApi = require("../utils/apiresponse");
-const users = require("../models/user");
 
 const generateAccessToken = (response) => {
   return jwt.sign(
