@@ -21,7 +21,6 @@ router.get("/videos", authenticateToken, fb_middleware,get_page_video)
 router.get("/images",authenticateToken, fb_middleware, get_page_images)
 router.post("/create-carousel",authenticateToken, fb_middleware,uploadImages, create_carousel)
 router.get("/businesses",authenticateToken,fb_middleware,get_businesses)
-router.post("/update-bm",authenticateToken,fb_middleware,update_bm)
 router.get("/account/media",authenticateToken,fb_middleware,get_account_videos_images)
 
 module.exports = router;

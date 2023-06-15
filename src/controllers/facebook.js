@@ -21,7 +21,6 @@ const {
 
   facebook_get_account_images,
 } = require("../platform/facebook");
-const users = require("../models/user");
 
 const fields_constant = require("../utils/constant");
 const { StatusCodes } = require("http-status-codes");
@@ -741,62 +740,6 @@ const get_account_videos_images = async (req, res, next) => {
   }
 };
 
-const update_bm = async (req, res, next) => {
-  try {
-    let { flag, id, name, email } = req.body;
-    let data = [];
-    for (let i = 0; i < email.length; i++) {
-      data.push(email[i].email);
-    }
-    const users_data = await users.find({
-      email: { $in: data },
-    });
-    if (users_data.length > 0) {
-      const bulkWriteOperations = [];
-      for (let i = 0; i < users_data.length; i++) {
-        for (let j = 0; j < email.length; j++) {
-          if (users_data[i].email === email[j].email) {
-            bulkWriteOperations.push({
-              updateOne: {
-                filter: { _id: users_data[i]._id, email: users_data[i].email },
-                update: {
-                  $set: { roles: email[j].role },
-                  $push: {
-                    [`${flag}`]: {
-                      id: id,
-                      name: name,
-                    },
-                  },
-                },
-              },
-            });
-          }
-        }
-      }
-      const result = await users.bulkWrite(bulkWriteOperations);
-      return responseApi.successResponseWithData(
-        res,
-        "user data Successfully updates!!",
-        result,
-        StatusCodes.OK
-      );
-    } else {
-      return responseApi.successResponseWithData(
-        res,
-        "User data Not found !!",
-        [],
-        StatusCodes.OK
-      );
-    }
-  } catch (error) {
-    console.log("Error", error);
-    return responseApi.ErrorResponse(
-      res,
-      "error",
-      error.message ? error.message : error
-    );
-  }
-};
 
 module.exports = {
   create_campaign,
@@ -815,6 +758,5 @@ module.exports = {
   get_page_images,
   create_carousel,
   get_businesses,
-  get_account_videos_images,
-  update_bm,
+  get_account_videos_images
 };
