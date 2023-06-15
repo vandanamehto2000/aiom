@@ -140,8 +140,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       }
     }
     
-
-
+    
     if (mergedArr) {
       return {
         status: "success",
