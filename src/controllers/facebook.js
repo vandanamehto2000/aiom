@@ -742,7 +742,7 @@ const get_account_videos_images = async (req, res, next) => {
 
 const update_bm = async (req, res, next) => {
   try {
-    let { flag, bm_id, name, email } = req.body;
+    let { flag, id, name, email } = req.body;
     let data = [];
     for (let i = 0; i < email.length; i++) {
       data.push(email[i].email);
@@ -762,7 +762,7 @@ const update_bm = async (req, res, next) => {
                   $set: { roles: email[j].role },
                   $push: {
                     [`${flag}`]: {
-                      id: bm_id,
+                      id: id,
                       name: name,
                     },
                   },
