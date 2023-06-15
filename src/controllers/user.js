@@ -2,7 +2,6 @@ const CryptoJS = require("crypto-js");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const users = require("../models/user");
 const responseApi = require("../utils/apiresponse");
 
 const generateAccessToken = (response) => {
@@ -134,7 +133,7 @@ const update_bm = async (req, res, next) => {
     for (let i = 0; i < email.length; i++) {
       data.push(email[i].email);
     }
-    const users_data = await users.find({
+    const users_data = await User.find({
       email: { $in: data },
     });
     if (users_data.length > 0) {
@@ -159,10 +158,10 @@ const update_bm = async (req, res, next) => {
           }
         }
       }
-      const result = await users.bulkWrite(bulkWriteOperations);
+      const result = await User.bulkWrite(bulkWriteOperations);
       return responseApi.successResponseWithData(
         res,
-        "user data Successfully updates!!",
+        "User data Successfully updates!!",
         result,
         StatusCodes.OK
       );
@@ -186,4 +185,4 @@ const update_bm = async (req, res, next) => {
 
 
 
-module.exports = { register, login, logout, employee_details,update_bm };
+module.exports = { register, login, logout, employee_details, update_bm };

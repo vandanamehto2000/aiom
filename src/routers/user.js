@@ -10,7 +10,7 @@ router.post("/register", commonValidator(registerUser), register);
 router.post("/login", login);
 router.post("/logout", authenticateToken, logout);
 router.post("/organization", employee_details);
-router.post("/assign-bm-am",authenticateToken, update_bm);
+router.post("/update-bm",authenticateToken,update_bm)
 
 
 module.exports = router;
