@@ -105,7 +105,7 @@ const employee_details = async (req, res, next) => {
     let result = [];
 
     if (req.body.organization == "aiom") {
-      organization_data = await User.find({ organization: req.body.organization }, { username: 1, email: 1, roles: 1})
+      organization_data = await User.find({ organization: req.body.organization }, { username: 1, email: 1, roles: 1, assigned_BM: 1, assigned_ad_account: 1 })
       if (!organization_data) {
         return responseApi.ErrorResponse(res, "unable to find Organization data.", organization_data, StatusCodes.NOT_FOUND);
       } else {
@@ -117,7 +117,7 @@ const employee_details = async (req, res, next) => {
         return responseApi.successResponseWithData(res, "found organization data", result, StatusCodes.OK);
       }
     } else {
-      return responseApi.ErrorResponse(res, "organization has no name aiiom.", req.body.organization, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(res, "organization has no name aiom.", req.body.organization, StatusCodes.BAD_REQUEST);
     }
 
   } catch (error) {
@@ -131,7 +131,7 @@ const update_bm = async (req, res, next) => {
     let { flag, id, name, email } = req.body;
     let data = [];
     for (let i = 0; i < email.length; i++) {
-      data.push(email[i].email);
+      data.push(email[i].email);312256637907123
     }
     const users_data = await User.find({
       email: { $in: data },
@@ -184,5 +184,52 @@ const update_bm = async (req, res, next) => {
 };
 
 
+const delete_bm = async (req, res, next) => {
+  try {
+    let { flag, id, email } = req.body;
+    const users_data = await User.find({ email: req.body.email });
+    if (users_data.length > 0) {
+      const bulkWriteOperations = [];
+      for (let i = 0; i < users_data.length; i++) {
+        if (users_data[i].email === req.body.email) {
+          bulkWriteOperations.push({
+            updateOne: {
+              filter: { _id: users_data[i]._id, email: users_data[i].email },
+              update: {
+                $pull: {
+                  [`${flag}`]: {
+                    id: id
+                  },
+                },
+              },
+            },
+          });
+        }
+      }
+      const result = await User.bulkWrite(bulkWriteOperations);
+      return responseApi.successResponseWithData(
+        res,
+        "User data Successfully deleted!!",
+        result,
+        StatusCodes.OK
+      );
+    } else {
+      return responseApi.successResponseWithData(
+        res,
+        "User data Not found !!",
+        [],
+        StatusCodes.OK
+      );
+    }
+  } catch (error) {
+    console.log("Error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+}
 
-module.exports = { register, login, logout, employee_details, update_bm };
+
+module.exports = { register, login, logout, employee_details, update_bm, delete_bm };
