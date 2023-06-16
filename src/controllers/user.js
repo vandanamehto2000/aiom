@@ -3,6 +3,7 @@ const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const responseApi = require("../utils/apiresponse");
+const { updateOne } = require("../models/facebook");
 
 const generateAccessToken = (response) => {
   return jwt.sign(
@@ -131,7 +132,7 @@ const update_bm = async (req, res, next) => {
     let { flag, id, name, email } = req.body;
     let data = [];
     for (let i = 0; i < email.length; i++) {
-      data.push(email[i].email);312256637907123
+      data.push(email[i].email);
     }
     const users_data = await User.find({
       email: { $in: data },
@@ -187,24 +188,23 @@ const update_bm = async (req, res, next) => {
 const delete_bm = async (req, res, next) => {
   try {
     let { flag, id, email } = req.body;
-    const users_data = await User.find({ email: req.body.email });
+
+    const users_data = await User.find({ email: { $in: email } });
     if (users_data.length > 0) {
       const bulkWriteOperations = [];
       for (let i = 0; i < users_data.length; i++) {
-        if (users_data[i].email === req.body.email) {
-          bulkWriteOperations.push({
-            updateOne: {
-              filter: { _id: users_data[i]._id, email: users_data[i].email },
-              update: {
-                $pull: {
-                  [`${flag}`]: {
-                    id: id
-                  },
+        bulkWriteOperations.push({
+          updateOne: {
+            filter: { _id: users_data[i]._id, email: users_data[i].email },
+            update: {
+              $pull: {
+                [`${flag}`]: {
+                  id: id
                 },
               },
             },
-          });
-        }
+          },
+        });
       }
       const result = await User.bulkWrite(bulkWriteOperations);
       return responseApi.successResponseWithData(
@@ -229,6 +229,7 @@ const delete_bm = async (req, res, next) => {
       error.message ? error.message : error
     );
   }
+
 }
 
 
