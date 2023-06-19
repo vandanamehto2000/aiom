@@ -182,6 +182,7 @@ const employee_details = async (req, res, next) => {
   }
 };
 
+// assigned bussiness manager or ad-Accound
 const assigned_bm = async (req, res, next) => {
   try {
     let { flag, id, name, email } = req.body;
@@ -201,7 +202,7 @@ const assigned_bm = async (req, res, next) => {
               flag === "assigned_BM" &&
               users_data[i].email === email[j].email
             ) {
-              // when assigned_BM is empty
+              // when assigned_BM is empty.
               if (users_data[i].assigned_BM.length === 0) {
                 bulkWriteOperations.push({
                   updateOne: {
@@ -222,8 +223,8 @@ const assigned_bm = async (req, res, next) => {
                 });
               } else {
                 for (let k = 0; k < users_data[i].assigned_BM.length; k++) {
-                  if ("id" in users_data[i].assigned_BM[k]) {
-                    // when assigned_BM is exist
+                  if ("id" in users_data[i].assigned_BM[k] && id === users_data[i].assigned_BM[k].id) {
+                    // when assigned_BM is exist.
                     bulkWriteOperations.push({
                       updateOne: {
                         filter: {
@@ -242,8 +243,8 @@ const assigned_bm = async (req, res, next) => {
                         },
                       },
                     });
-                  } else {
-                    // when assigned_BM is not exist
+                  } else if("id" in users_data[i].assigned_BM[k] && id !== users_data[i].assigned_BM[k].id) {
+                    // when assigned_BM is not exist.
                     bulkWriteOperations.push({
                       updateOne: {
                         filter: {
@@ -270,7 +271,7 @@ const assigned_bm = async (req, res, next) => {
               users_data[i].email === email[j].email
             ) {
               if (users_data[i].assigned_ad_account.length === 0) {
-                // when assigned_ad_account is empty
+                // when assigned_ad_account is empty.
                 bulkWriteOperations.push({
                   updateOne: {
                     filter: {
@@ -294,8 +295,8 @@ const assigned_bm = async (req, res, next) => {
                   k < users_data[i].assigned_ad_account.length;
                   k++
                 ) {
-                  if ("id" in users_data[i].assigned_ad_account[k]) {
-                    // when assigned_ad_account is exist
+                  if ("id" in users_data[i].assigned_ad_account[k] && id === users_data[i].assigned_ad_account[k].id) {
+                    // when assigned_ad_account is exist.
                     bulkWriteOperations.push({
                       updateOne: {
                         filter: {
@@ -314,8 +315,8 @@ const assigned_bm = async (req, res, next) => {
                         },
                       },
                     });
-                  } else {
-                    // when assigned_ad_account is not exist
+                  } else if("id" in users_data[i].assigned_ad_account[k] && id !== users_data[i].assigned_ad_account[k].id) {
+                    // when assigned_ad_account is not exist.
                     bulkWriteOperations.push({
                       updateOne: {
                         filter: {
