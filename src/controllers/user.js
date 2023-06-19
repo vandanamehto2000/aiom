@@ -182,6 +182,7 @@ const employee_details = async (req, res, next) => {
   }
 };
 
+// assigned bussiness manager or ad-Accound
 const assigned_bm = async (req, res, next) => {
   try {
     let { flag, id, name, email } = req.body;
