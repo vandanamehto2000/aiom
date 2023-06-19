@@ -222,7 +222,7 @@ const assigned_bm = async (req, res, next) => {
                 });
               } else {
                 for (let k = 0; k < users_data[i].assigned_BM.length; k++) {
-                  if ("id" in users_data[i].assigned_BM[k]) {
+                  if ("id" in users_data[i].assigned_BM[k] && id === users_data[i].assigned_BM[k].id) {
                     // when assigned_BM is exist
                     bulkWriteOperations.push({
                       updateOne: {
@@ -242,7 +242,7 @@ const assigned_bm = async (req, res, next) => {
                         },
                       },
                     });
-                  } else {
+                  } else if("id" in users_data[i].assigned_BM[k] && id !== users_data[i].assigned_BM[k].id) {
                     // when assigned_BM is not exist
                     bulkWriteOperations.push({
                       updateOne: {
@@ -294,7 +294,7 @@ const assigned_bm = async (req, res, next) => {
                   k < users_data[i].assigned_ad_account.length;
                   k++
                 ) {
-                  if ("id" in users_data[i].assigned_ad_account[k]) {
+                  if ("id" in users_data[i].assigned_ad_account[k] && id === users_data[i].assigned_ad_account[k].id) {
                     // when assigned_ad_account is exist
                     bulkWriteOperations.push({
                       updateOne: {
@@ -314,7 +314,7 @@ const assigned_bm = async (req, res, next) => {
                         },
                       },
                     });
-                  } else {
+                  } else if("id" in users_data[i].assigned_ad_account[k] && id !== users_data[i].assigned_ad_account[k].id) {
                     // when assigned_ad_account is not exist
                     bulkWriteOperations.push({
                       updateOne: {
