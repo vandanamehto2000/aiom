@@ -11,8 +11,7 @@ const generateAccessToken = (response) => {
       email: response.email,
       username: response.username,
       roles: response.roles,
-      organization: response.organization
-
+      organization: response.organization,
     },
     process.env.JWT_SEC
   );
@@ -28,18 +27,31 @@ const register = async (req, res, next) => {
     ).toString(),
     organization: req.body.organization,
     roles: req.body.roles,
-    assigned_BM: req.body.assigned_BM
+    assigned_BM: req.body.assigned_BM,
   };
   try {
-    console.log("data-", newUser)
+    console.log("data-", newUser);
     let userData = await User.create(newUser);
-    return responseApi.successResponseWithData(res, "User created successfully", userData, StatusCodes.CREATED);
-
+    return responseApi.successResponseWithData(
+      res,
+      "User created successfully",
+      userData,
+      StatusCodes.CREATED
+    );
   } catch (err) {
     console.log(err);
     err.code === 11000
-      ? responseApi.ErrorResponse(res, "Password entered is incorrect", req.body.email, StatusCodes.BAD_REQUEST)
-      : responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
+      ? responseApi.ErrorResponse(
+          res,
+          "Password entered is incorrect",
+          req.body.email,
+          StatusCodes.BAD_REQUEST
+        )
+      : responseApi.ErrorResponse(
+          res,
+          "error",
+          error.message ? error.message : error
+        );
   }
 };
 
@@ -60,20 +72,35 @@ const login = async (req, res, next) => {
           { token: token1 },
           { new: true }
         );
-        return responseApi.successResponseWithData(res, "User login successfully", data, StatusCodes.OK);
-
+        return responseApi.successResponseWithData(
+          res,
+          "User login successfully",
+          data,
+          StatusCodes.OK
+        );
       } else {
-        return responseApi.ErrorResponse(res, "Password entered is incorrect", req.body.password, StatusCodes.BAD_REQUEST);
-
+        return responseApi.ErrorResponse(
+          res,
+          "Password entered is incorrect",
+          req.body.password,
+          StatusCodes.BAD_REQUEST
+        );
       }
     } else {
-      return responseApi.ErrorResponse(res, `No user found with email ${req.body.email}`, req.body.email, StatusCodes.BAD_REQUEST);
-
+      return responseApi.ErrorResponse(
+        res,
+        `No user found with email ${req.body.email}`,
+        req.body.email,
+        StatusCodes.BAD_REQUEST
+      );
     }
   } catch (error) {
     console.log(error);
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
-
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
 
@@ -85,19 +112,28 @@ const logout = async (req, res, next) => {
 
     if (response.length !== 0 && response[0].token === token) {
       await User.updateOne({ token: token }, { token: "" }, { new: true });
-      return responseApi.successResponseWithData(res, "You logged out successfully", "", StatusCodes.OK);
-
-    }
-    else {
-      return responseApi.ErrorResponse(res, "Unauthorized User", "", StatusCodes.OK);
-
+      return responseApi.successResponseWithData(
+        res,
+        "You logged out successfully",
+        "",
+        StatusCodes.OK
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "Unauthorized User",
+        "",
+        StatusCodes.OK
+      );
     }
   } catch (error) {
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
-
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
 };
-
 
 const employee_details = async (req, res, next) => {
   try {
@@ -105,28 +141,48 @@ const employee_details = async (req, res, next) => {
     let result = [];
 
     if (req.body.organization == "aiom") {
-      organization_data = await User.find({ organization: req.body.organization }, { username: 1, email: 1, roles: 1})
+      organization_data = await User.find(
+        { organization: req.body.organization },
+        { username: 1, email: 1, roles: 1 }
+      );
       if (!organization_data) {
-        return responseApi.ErrorResponse(res, "unable to find Organization data.", organization_data, StatusCodes.NOT_FOUND);
+        return responseApi.ErrorResponse(
+          res,
+          "unable to find Organization data.",
+          organization_data,
+          StatusCodes.NOT_FOUND
+        );
       } else {
         for (let i = 0; i < organization_data.length; i++) {
           if (organization_data[i].email != req.body.email) {
-            result.push(organization_data[i])
+            result.push(organization_data[i]);
           }
         }
-        return responseApi.successResponseWithData(res, "found organization data", result, StatusCodes.OK);
+        return responseApi.successResponseWithData(
+          res,
+          "found organization data",
+          result,
+          StatusCodes.OK
+        );
       }
     } else {
-      return responseApi.ErrorResponse(res, "organization has no name aiiom.", req.body.organization, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(
+        res,
+        "organization has no name aiiom.",
+        req.body.organization,
+        StatusCodes.BAD_REQUEST
+      );
     }
-
   } catch (error) {
-    return responseApi.ErrorResponse(res, "error", error.message ? error.message : error);
-
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
   }
-}
+};
 
-const update_bm = async (req, res, next) => {
+const assigned_bm = async (req, res, next) => {
   try {
     let { flag, id, name, email } = req.body;
     let data = [];
@@ -141,20 +197,147 @@ const update_bm = async (req, res, next) => {
       for (let i = 0; i < users_data.length; i++) {
         for (let j = 0; j < email.length; j++) {
           if (users_data[i].email === email[j].email) {
-            bulkWriteOperations.push({
-              updateOne: {
-                filter: { _id: users_data[i]._id, email: users_data[i].email },
-                update: {
-                  $set: { roles: email[j].role },
-                  $push: {
-                    [`${flag}`]: {
-                      id: id,
-                      name: name,
+            if (
+              flag === "assigned_BM" &&
+              users_data[i].email === email[j].email
+            ) {
+              // when assigned_BM is empty
+              if (users_data[i].assigned_BM.length === 0) {
+                bulkWriteOperations.push({
+                  updateOne: {
+                    filter: {
+                      _id: users_data[i]._id,
+                      email: users_data[i].email,
+                    },
+                    update: {
+                      $push: {
+                        [`${flag}`]: {
+                          id: id,
+                          name: name,
+                          objectiveRole: email[j].role,
+                        },
+                      },
                     },
                   },
-                },
-              },
-            });
+                });
+              } else {
+                for (let k = 0; k < users_data[i].assigned_BM.length; k++) {
+                  if ("id" in users_data[i].assigned_BM[k]) {
+                    // when assigned_BM is exist
+                    bulkWriteOperations.push({
+                      updateOne: {
+                        filter: {
+                          _id: users_data[i]._id,
+                          email: users_data[i].email,
+                        },
+                        update: {
+                          // $set: { roles: email[j].role },
+                          $set: {
+                            [`${flag}`]: {
+                              id: id,
+                              name: name,
+                              objectiveRole: email[j].role,
+                            },
+                          },
+                        },
+                      },
+                    });
+                  } else {
+                    // when assigned_BM is not exist
+                    bulkWriteOperations.push({
+                      updateOne: {
+                        filter: {
+                          _id: users_data[i]._id,
+                          email: users_data[i].email,
+                        },
+                        update: {
+                          // $set: { roles: email[j].role },
+                          $push: {
+                            [`${flag}`]: {
+                              id: id,
+                              name: name,
+                              objectiveRole: email[j].role,
+                            },
+                          },
+                        },
+                      },
+                    });
+                  }
+                }
+              }
+            } else if (
+              flag === "assigned_ad_account" &&
+              users_data[i].email === email[j].email
+            ) {
+              if (users_data[i].assigned_ad_account.length === 0) {
+                // when assigned_ad_account is empty
+                bulkWriteOperations.push({
+                  updateOne: {
+                    filter: {
+                      _id: users_data[i]._id,
+                      email: users_data[i].email,
+                    },
+                    update: {
+                      $push: {
+                        [`${flag}`]: {
+                          id: id,
+                          name: name,
+                          objectiveRole: email[j].role,
+                        },
+                      },
+                    },
+                  },
+                });
+              } else {
+                for (
+                  let k = 0;
+                  k < users_data[i].assigned_ad_account.length;
+                  k++
+                ) {
+                  if ("id" in users_data[i].assigned_ad_account[k]) {
+                    // when assigned_ad_account is exist
+                    bulkWriteOperations.push({
+                      updateOne: {
+                        filter: {
+                          _id: users_data[i]._id,
+                          email: users_data[i].email,
+                        },
+                        update: {
+                          // $set: { roles: email[j].role },
+                          $set: {
+                            [`${flag}`]: {
+                              id: id,
+                              name: name,
+                              objectiveRole: email[j].role,
+                            },
+                          },
+                        },
+                      },
+                    });
+                  } else {
+                    // when assigned_ad_account is not exist
+                    bulkWriteOperations.push({
+                      updateOne: {
+                        filter: {
+                          _id: users_data[i]._id,
+                          email: users_data[i].email,
+                        },
+                        update: {
+                          // $set: { roles: email[j].role },
+                          $push: {
+                            [`${flag}`]: {
+                              id: id,
+                              name: name,
+                              objectiveRole: email[j].role,
+                            },
+                          },
+                        },
+                      },
+                    });
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -183,6 +366,4 @@ const update_bm = async (req, res, next) => {
   }
 };
 
-
-
-module.exports = { register, login, logout, employee_details, update_bm };
+module.exports = { register, login, logout, employee_details, assigned_bm };
