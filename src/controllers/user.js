@@ -185,7 +185,7 @@ const employee_details = async (req, res, next) => {
 // assigned bussiness manager or ad-Accound
 const assigned_bm = async (req, res, next) => {
   try {
-    let { flag, id, name, email } = req.body;
+    let { assign_type, id, name, email } = req.body;
     let data = [];
     for (let i = 0; i < email.length; i++) {
       data.push(email[i].email);
@@ -199,7 +199,7 @@ const assigned_bm = async (req, res, next) => {
         for (let j = 0; j < email.length; j++) {
           if (users_data[i].email === email[j].email) {
             if (
-              flag === "assigned_BM" &&
+              assign_type === "assigned_BM" &&
               users_data[i].email === email[j].email
             ) {
               // when assigned_BM is empty.
@@ -212,7 +212,7 @@ const assigned_bm = async (req, res, next) => {
                     },
                     update: {
                       $push: {
-                        [`${flag}`]: {
+                        [`${assign_type}`]: {
                           id: id,
                           name: name,
                           objectiveRole: email[j].role,
@@ -223,7 +223,10 @@ const assigned_bm = async (req, res, next) => {
                 });
               } else {
                 for (let k = 0; k < users_data[i].assigned_BM.length; k++) {
-                  if ("id" in users_data[i].assigned_BM[k] && id === users_data[i].assigned_BM[k].id) {
+                  if (
+                    "id" in users_data[i].assigned_BM[k] &&
+                    id === users_data[i].assigned_BM[k].id
+                  ) {
                     // when assigned_BM is exist.
                     bulkWriteOperations.push({
                       updateOne: {
@@ -234,7 +237,7 @@ const assigned_bm = async (req, res, next) => {
                         update: {
                           // $set: { roles: email[j].role },
                           $set: {
-                            [`${flag}`]: {
+                            [`${assign_type}`]: {
                               id: id,
                               name: name,
                               objectiveRole: email[j].role,
@@ -243,7 +246,10 @@ const assigned_bm = async (req, res, next) => {
                         },
                       },
                     });
-                  } else if("id" in users_data[i].assigned_BM[k] && id !== users_data[i].assigned_BM[k].id) {
+                  } else if (
+                    "id" in users_data[i].assigned_BM[k] &&
+                    id !== users_data[i].assigned_BM[k].id
+                  ) {
                     // when assigned_BM is not exist.
                     bulkWriteOperations.push({
                       updateOne: {
@@ -254,7 +260,7 @@ const assigned_bm = async (req, res, next) => {
                         update: {
                           // $set: { roles: email[j].role },
                           $push: {
-                            [`${flag}`]: {
+                            [`${assign_type}`]: {
                               id: id,
                               name: name,
                               objectiveRole: email[j].role,
@@ -267,7 +273,7 @@ const assigned_bm = async (req, res, next) => {
                 }
               }
             } else if (
-              flag === "assigned_ad_account" &&
+              assign_type === "assigned_ad_account" &&
               users_data[i].email === email[j].email
             ) {
               if (users_data[i].assigned_ad_account.length === 0) {
@@ -280,7 +286,7 @@ const assigned_bm = async (req, res, next) => {
                     },
                     update: {
                       $push: {
-                        [`${flag}`]: {
+                        [`${assign_type}`]: {
                           id: id,
                           name: name,
                           objectiveRole: email[j].role,
@@ -295,7 +301,10 @@ const assigned_bm = async (req, res, next) => {
                   k < users_data[i].assigned_ad_account.length;
                   k++
                 ) {
-                  if ("id" in users_data[i].assigned_ad_account[k] && id === users_data[i].assigned_ad_account[k].id) {
+                  if (
+                    "id" in users_data[i].assigned_ad_account[k] &&
+                    id === users_data[i].assigned_ad_account[k].id
+                  ) {
                     // when assigned_ad_account is exist.
                     bulkWriteOperations.push({
                       updateOne: {
@@ -306,7 +315,7 @@ const assigned_bm = async (req, res, next) => {
                         update: {
                           // $set: { roles: email[j].role },
                           $set: {
-                            [`${flag}`]: {
+                            [`${assign_type}`]: {
                               id: id,
                               name: name,
                               objectiveRole: email[j].role,
@@ -315,7 +324,10 @@ const assigned_bm = async (req, res, next) => {
                         },
                       },
                     });
-                  } else if("id" in users_data[i].assigned_ad_account[k] && id !== users_data[i].assigned_ad_account[k].id) {
+                  } else if (
+                    "id" in users_data[i].assigned_ad_account[k] &&
+                    id !== users_data[i].assigned_ad_account[k].id
+                  ) {
                     // when assigned_ad_account is not exist.
                     bulkWriteOperations.push({
                       updateOne: {
@@ -326,7 +338,7 @@ const assigned_bm = async (req, res, next) => {
                         update: {
                           // $set: { roles: email[j].role },
                           $push: {
-                            [`${flag}`]: {
+                            [`${assign_type}`]: {
                               id: id,
                               name: name,
                               objectiveRole: email[j].role,
@@ -338,23 +350,39 @@ const assigned_bm = async (req, res, next) => {
                   }
                 }
               }
+            } else {
+              return responseApi.ErrorResponse(
+                res,
+                `assign_type must be one of {assigned_BM, assigned_BM} but we got ${assign_type}.`,
+                [],
+                StatusCodes.BAD_REQUEST
+              );
             }
           }
         }
       }
       const result = await User.bulkWrite(bulkWriteOperations);
-      return responseApi.successResponseWithData(
-        res,
-        "User data Successfully updates!!",
-        result,
-        StatusCodes.OK
-      );
+      if (result.matchedCount > 0 && result.modifiedCount > 0) {
+        return responseApi.successResponseWithData(
+          res,
+          "User data Successfully updates!!",
+          result,
+          StatusCodes.OK
+        );
+      } else {
+        return responseApi.ErrorResponse(
+          res,
+          "something went wrong!!",
+          result,
+          StatusCodes.BAD_REQUEST
+        );
+      }
     } else {
-      return responseApi.successResponseWithData(
+      return responseApi.ErrorResponse(
         res,
         "User data Not found !!",
         [],
-        StatusCodes.OK
+        StatusCodes.NOT_FOUND
       );
     }
   } catch (error) {
@@ -367,4 +395,75 @@ const assigned_bm = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, logout, employee_details, assigned_bm };
+// update role API------
+const role_update = async (req, res, next) => {
+  try {
+    let { email } = req.body;
+    let data = [];
+    for (let i = 0; i < email.length; i++) {
+      data.push(email[i].email);
+    }
+    const users_data = await User.find({
+      email: { $in: data },
+    });
+    if (users_data.length > 0) {
+      const bulkWriteOperations = [];
+      for (let i = 0; i < users_data.length; i++) {
+        for (let j = 0; j < email.length; j++) {
+          if (users_data[i].email === email[j].email) {
+            bulkWriteOperations.push({
+              updateOne: {
+                filter: {
+                  _id: users_data[i]._id,
+                  email: users_data[i].email,
+                },
+                update: {
+                  $set: { roles: email[j].role },
+                },
+              },
+            });
+          }
+        }
+      }
+      const result = await User.bulkWrite(bulkWriteOperations);
+      if (result.matchedCount > 0 && result.modifiedCount > 0) {
+        return responseApi.successResponseWithData(
+          res,
+          "User data Successfully updates!!",
+          result,
+          StatusCodes.OK
+        );
+      } else {
+        return responseApi.ErrorResponse(
+          res,
+          "something went wrong!!",
+          result,
+          StatusCodes.BAD_REQUEST
+        );
+      }
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "User data Not found !!",
+        [],
+        StatusCodes.NOT_FOUND
+      );
+    }
+  } catch (error) {
+    console.log("Error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  logout,
+  employee_details,
+  assigned_bm,
+  role_update,
+};
