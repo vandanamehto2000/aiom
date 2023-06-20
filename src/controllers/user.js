@@ -360,7 +360,7 @@ const assigned_bm = async (req, res, next) => {
       } else {
         return responseApi.ErrorResponse(
           res,
-          "something went wrong!!",
+          "something went wrong !!",
           result,
           StatusCodes.BAD_REQUEST
         );
