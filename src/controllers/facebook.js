@@ -245,8 +245,8 @@ const create_creative = async (req, res, next) => {
       } else {
         return responseApi.ErrorResponse(
           res,
-          " Error in existing video or image",
-          adcreatives.data,
+          "Invalid Params",
+          "Please provide a file or object_story_id",
           StatusCodes.BAD_REQUEST
         );
       }

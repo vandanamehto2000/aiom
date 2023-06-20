@@ -117,7 +117,7 @@ const employee_details = async (req, res, next) => {
         return responseApi.successResponseWithData(res, "found organization data", result, StatusCodes.OK);
       }
     } else {
-      return responseApi.ErrorResponse(res, "organization has no name aiiom.", req.body.organization, StatusCodes.BAD_REQUEST);
+      return responseApi.ErrorResponse(res, "No Organization Found.", req.body.organization, StatusCodes.BAD_REQUEST);
     }
 
   } catch (error) {
