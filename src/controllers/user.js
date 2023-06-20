@@ -250,7 +250,6 @@ const assigned_bm = async (req, res, next) => {
                     "id" in users_data[i].assigned_BM[k] &&
                     id !== users_data[i].assigned_BM[k].id
                   ) {
-                  } else if("id" in users_data[i].assigned_BM[k] && id !== users_data[i].assigned_BM[k].id) {
                     // when assigned_BM is not exist.
                     bulkWriteOperations.push({
                       updateOne: {
