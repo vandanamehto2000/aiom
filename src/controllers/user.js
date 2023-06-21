@@ -82,7 +82,7 @@ const login = async (req, res, next) => {
         return responseApi.ErrorResponse(
           res,
           "Password entered is incorrect",
-          req.body.password,
+          "password is incorrect !!",
           StatusCodes.BAD_REQUEST
         );
       }
@@ -139,10 +139,10 @@ const employee_details = async (req, res, next) => {
   try {
     let organization_data;
     let result = [];
-
-    if (req.body.organization == "aiom") {
+    let { organization, email } = req.query;
+    if (organization == "aiom") {
       organization_data = await User.find(
-        { organization: req.body.organization },
+        { organization: organization },
         { username: 1, email: 1, roles: 1 }
       );
       if (!organization_data) {
@@ -154,7 +154,7 @@ const employee_details = async (req, res, next) => {
         );
       } else {
         for (let i = 0; i < organization_data.length; i++) {
-          if (organization_data[i].email != req.body.email) {
+          if (organization_data[i].email != email) {
             result.push(organization_data[i]);
           }
         }
@@ -169,7 +169,7 @@ const employee_details = async (req, res, next) => {
       return responseApi.ErrorResponse(
         res,
         "organization has no name aiiom.",
-        req.body.organization,
+        `no user found with this organization- ${organization}`,
         StatusCodes.BAD_REQUEST
       );
     }
