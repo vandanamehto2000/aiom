@@ -137,6 +137,8 @@ const logout = async (req, res, next) => {
 };
 
 const employee_details = async (req, res, next) => {
+
+  
   try {
     let organization_data;
     let result = [];
