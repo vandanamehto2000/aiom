@@ -316,17 +316,22 @@ const facebook_create_creative = async (
     if (imagePath == null && imageName == null && "object_story_id" in params) {
       adcreatives = await new AdAccount(id).createAdCreative(fields, params);
     } else {
-      console.log("pass data", imagePath, imageName, access_token);
-      let result = await facebook_get_image_hash(
-        imagePath,
-        imageName,
-        access_token
-      );
-      let { hash, url, name } = result.data.images[`${imageName}`];
-      params.image_hash = hash;
-      params.object_story_spec.link_data.link = url;
-      params.object_story_spec.link_data.image_hash = hash;
-      adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+if(params.image_hash !== ""){
+  adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+}
+else{
+  console.log("pass data", imagePath, imageName, access_token);
+  let result = await facebook_get_image_hash(
+    imagePath,
+    imageName,
+    access_token
+  );
+  let { hash, url, name } = result.data.images[`${imageName}`];
+  params.image_hash = hash;
+  params.object_story_spec.link_data.link = url;
+  params.object_story_spec.link_data.image_hash = hash;
+  adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+}
     }
     if (adcreatives._data) {
       return {
@@ -1095,8 +1100,11 @@ const facebook_update_campaign = async (campaign_id, params, access_token) => {
         data.append(`${key}`, `${params[key]}`);
       }
     }
-    if("special_ad_categories" in params){
-      data.append("special_ad_categories",JSON.stringify(params.special_ad_categories));
+    if ("special_ad_categories" in params) {
+      data.append(
+        "special_ad_categories",
+        JSON.stringify(params.special_ad_categories)
+      );
     }
     data.append("access_token", access_token);
     let config = {
@@ -1108,7 +1116,61 @@ const facebook_update_campaign = async (campaign_id, params, access_token) => {
       },
       data: data,
     };
-    let response =await axios.request(config);
+    let response = await axios.request(config);
+    if (response.data) {
+      return {
+        status: "success",
+        data: response.data,
+      };
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response,
+      };
+    }
+  } catch (error) {
+    console.log("error part1", error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+};
+
+const facebook_update_adset = async (adset_id, params, access_token) => {
+  try {
+    let data = new FormData();
+    for (const key in params) {
+      if (
+        `${key}` !== "bid_adjustments" &&
+        `${key}` !== "promoted_object" &&
+        `${key}` !== "targeting"
+      ) {
+        data.append(`${key}`, `${params[key]}`);
+      }
+    }
+    if ("bid_adjustments" in params) {
+      data.append("bid_adjustments", JSON.stringify(params.bid_adjustments));
+    }
+    if ("promoted_object" in params) {
+      data.append("promoted_object", JSON.stringify(params.promoted_object));
+    }
+    if ("targeting" in params) {
+      data.append("targeting", JSON.stringify(params.targeting));
+    }
+    data.append("access_token", access_token);
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${facebook_url}/${adset_id}`,
+      headers: {
+        ...data.getHeaders(),
+      },
+      data: data,
+    };
+    let response = await axios.request(config);
     if (response.data) {
       return {
         status: "success",
@@ -1151,6 +1213,6 @@ module.exports = {
   facebook_get_businesses,
   facebook_get_account_images,
   facebook_get_account_videos,
-  facebook_update_campaign
-}
-
+  facebook_update_campaign,
+  facebook_update_adset,
+};

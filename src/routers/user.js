@@ -9,7 +9,7 @@ const router = express.Router();
 router.post("/register", commonValidator(registerUser), register);
 router.post("/login", login);
 router.post("/logout", authenticateToken, logout);
-router.get("/organization", employee_details);
+router.get("/organization",authenticateToken, employee_details);
 router.post("/assigned-bm", authenticateToken, assigned_bm)
 router.post("/update-roles", authenticateToken, role_update)
 router.delete("/delete-bm", authenticateToken, delete_bm)

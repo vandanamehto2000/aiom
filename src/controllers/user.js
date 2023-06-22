@@ -91,7 +91,7 @@ const login = async (req, res, next) => {
       return responseApi.ErrorResponse(
         res,
         `No user found with email ${req.body.email}`,
-        req.body.email,
+        `${req.body.email} email does not exist `,
         StatusCodes.BAD_REQUEST
       );
     }
