@@ -20,7 +20,8 @@ const {
   facebook_get_account_videos,
 
   facebook_get_account_images,
-  facebook_update_campaign
+  facebook_update_campaign,
+  facebook_update_adset
 } = require("../platform/facebook");
 
 const fields_constant = require("../utils/constant");
@@ -243,6 +244,31 @@ const create_creative = async (req, res, next) => {
             StatusCodes.BAD_REQUEST
           );
         }
+      }
+      else if(params.image_hash !== ""){
+console.log("---------------------",params)
+const adcreatives = await facebook_create_creative(
+  null,
+  null,
+  id,
+  fields,
+  params
+);
+if (adcreatives.status == "success") {
+  return responseApi.successResponseWithData(
+    res,
+    "Existing data post successfully",
+    adcreatives.data,
+    StatusCodes.CREATED
+  );
+} else {
+  return responseApi.ErrorResponse(
+    res,
+    "error",
+    adcreatives.data,
+    StatusCodes.BAD_REQUEST
+  );
+}
       } else {
         return responseApi.ErrorResponse(
           res,
@@ -772,6 +798,37 @@ const update_campaign = async (req, res, next) => {
   }
 };
 
+//Update a Adset
+const update_adset = async (req, res, next) => {
+  try {
+    const { adset_id,params } = req.body;
+    const access_token = req.facebook_token;
+    const facebook_result = await facebook_update_adset(adset_id, params, access_token);
+    if (facebook_result.status == "success") {
+      return responseApi.successResponseWithData(
+        res,
+        "successfully update adset data",
+        facebook_result.data,
+        StatusCodes.CREATED
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "unable to update adset data",
+        facebook_result.data,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  } catch (error) {
+    console.log("error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
 
 module.exports = {
   create_campaign,
@@ -791,5 +848,6 @@ module.exports = {
   create_carousel,
   get_businesses,
   get_account_videos_images,
-  update_campaign
+  update_campaign,
+  update_adset
 };

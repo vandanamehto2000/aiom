@@ -90,7 +90,7 @@ const login = async (req, res, next) => {
       return responseApi.ErrorResponse(
         res,
         `No user found with email ${req.body.email}`,
-        req.body.email,
+        `${req.body.email} email does not exist `,
         StatusCodes.BAD_REQUEST
       );
     }
@@ -139,7 +139,7 @@ const employee_details = async (req, res, next) => {
   try {
     let organization_data;
     let result = [];
-    let { organization, email } = req.query;
+    let { organization} = req.query;
     if (organization == "aiom") {
       organization_data = await User.find(
         { organization: organization },
@@ -154,7 +154,7 @@ const employee_details = async (req, res, next) => {
         );
       } else {
         for (let i = 0; i < organization_data.length; i++) {
-          if (organization_data[i].email != email) {
+          if (organization_data[i].email != req.auth.email) {
             result.push(organization_data[i]);
           }
         }
