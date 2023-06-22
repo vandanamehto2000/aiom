@@ -130,7 +130,7 @@ const facebook_get_Insights = async (
       }
     } else if (level == "ad") {
       params = {
-        limit:100000
+        limit: 100000
       }
       const ad_data = await new AdSet(object_id).getAds(fields3, params)
 
@@ -904,6 +904,7 @@ const facebook_get_interest_behavior = async () => {
   }
 };
 // facebook_get_interest_behavior()
+
 const creat_image_carousel = async (
   id,
   name,
@@ -1064,8 +1065,8 @@ const facebook_get_account_videos = async (ad_account_id, access_token) => {
 
     const videos = await axios.request(config);
 
-    for(let i=0;i<videos.data.data.length;i++){
-        videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
+    for (let i = 0; i < videos.data.data.length; i++) {
+      videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
     }
     if (videos.data.data) {
       return {
@@ -1095,8 +1096,8 @@ const facebook_update_campaign = async (campaign_id, params, access_token) => {
         data.append(`${key}`, `${params[key]}`);
       }
     }
-    if("special_ad_categories" in params){
-      data.append("special_ad_categories",JSON.stringify(params.special_ad_categories));
+    if ("special_ad_categories" in params) {
+      data.append("special_ad_categories", JSON.stringify(params.special_ad_categories));
     }
     data.append("access_token", access_token);
     let config = {
@@ -1108,7 +1109,7 @@ const facebook_update_campaign = async (campaign_id, params, access_token) => {
       },
       data: data,
     };
-    let response =await axios.request(config);
+    let response = await axios.request(config);
     if (response.data) {
       return {
         status: "success",

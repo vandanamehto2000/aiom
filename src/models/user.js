@@ -9,17 +9,17 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     token: { type: String, default: '' },
     organization: { type: String, required: true },
-    roles: { type: String, required: true, enum: ["admin", "business_owner", "employee","viewer"],default:"viewer" },
+    roles: { type: String, required: true, enum: ["admin", "business_owner", "employee", "viewer"], default: "viewer" },
     facebook_token: { type: String },
     assigned_BM: [{
       id: { type: String },
       name: { type: String },
-      objectiveRole: { type: String, required:true, enum: ["business_owner", "employee","viewer"], default:"viewer"}
+      objectiveRole: { type: String, required: true, enum: ["business_owner", "employee", "viewer"], default: "viewer" }
     }],
     assigned_ad_account: [{
       id: { type: String },
       name: { type: String },
-      objectiveRole: { type: String, required:true, enum: ["business_owner", "employee","viewer"], default:"viewer"}
+      objectiveRole: { type: String, required: true, enum: ["business_owner", "employee", "viewer"], default: "viewer" }
     }]
 
   },

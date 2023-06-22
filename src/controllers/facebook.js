@@ -19,7 +19,6 @@ const {
   facebook_get_businesses,
   facebook_get_account_videos,
   facebook_get_account_images,
-  facebook_save_Insights,
   facebook_update_campaign
 } = require("../platform/facebook");
 
@@ -745,7 +744,7 @@ const get_account_videos_images = async (req, res, next) => {
 //Update a Campaign
 const update_campaign = async (req, res, next) => {
   try {
-    const { campaign_id,params } = req.body;
+    const { campaign_id, params } = req.body;
     const access_token = req.facebook_token;
     const facebook_result = await facebook_update_campaign(campaign_id, params, access_token);
     if (facebook_result.status == "success") {

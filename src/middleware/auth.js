@@ -40,7 +40,7 @@ function authenticateToken(req, res, next) {
 // facebook_token middleware
 
 const fb_middleware = async (req, res, next) => {
-  let userDataByEmail = await User.findOne({email:req.auth.email});
+  let userDataByEmail = await User.findOne({ email: req.auth.email });
   if (userDataByEmail?.facebook_token) {
     let api = bizSdk.FacebookAdsApi.init(userDataByEmail.facebook_token);
     const showDebugingInfo = true; // Setting this to true shows more debugging info.
