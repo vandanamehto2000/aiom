@@ -5,15 +5,14 @@ const AdAccount = bizSdk.AdAccount;
 const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
 const Ad = bizSdk.Ad;
-// const Ad = bizSdk.Ad;
 const User = bizSdk.User;
 const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 const facebook = require("../models/facebook");
 const fields_constant = require("../utils/constant");
+const fields_constant = require("../utils/constant");
 const Page = bizSdk.Page;
-
 const facebook_url = process.env.FACEBOOK_URL;
 
 // const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
@@ -23,7 +22,6 @@ const facebook_url = process.env.FACEBOOK_URL;
 // const pageId = "106284349116205";
 // const id = "act_1239957706633747"; //local
 // const api = bizSdk.FacebookAdsApi.init(access_token);
-
 
 //Create a Campaign
 const facebook_create_campaign = async (id, fields, params) => {
@@ -58,18 +56,25 @@ const facebook_create_campaign = async (id, fields, params) => {
 };
 
 //Get a Campaign
-const facebook_get_Insights = async (object_id, fields, level, access_token, params) => {
+const facebook_get_Insights = async (
+  object_id,
+  fields,
+  level,
+  access_token,
+  params
+) => {
   try {
+    params.limit = 100000;
+    let fields1 = fields_constant.fields[5];
 
-    params.limit = 100000
-    let fields1 = fields_constant.fields[5]
+
 
     let fields2 = fields_constant.fields[2]
 
-    let fields3 = fields_constant.fields[3]
+    let fields3 = fields_constant.fields[3];
 
     let config = {
-      method: 'get',
+      method: "get",
       maxBodyLength: Infinity,
       url: `${facebook_url}/${object_id}/insights?level=${level}&fields=${fields}&limit=100000&access_token=${access_token}`,
       headers: {},
@@ -80,57 +85,65 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       return {
         status: "error",
         data: result.message ? result.message : result,
-      }
+      };
     }
 
     let result1 = [];
 
     if (level == "campaign") {
-      const campaigns_data = await new AdAccount(object_id).getCampaigns(fields1, params)
+      const campaigns_data = await new AdAccount(object_id).getCampaigns(
+        fields1,
+        params
+      );
 
       if (campaigns_data.length > 0) {
         for (let i = 0; i < campaigns_data.length; i++) {
           if (campaigns_data[i]._data.daily_budget) {
-            campaigns_data[i]._data.daily_budget = campaigns_data[i]._data.daily_budget / 100
+            campaigns_data[i]._data.daily_budget =
+              campaigns_data[i]._data.daily_budget / 100;
           } else if (campaigns_data[i]._data.lifetime_budget) {
-            campaigns_data[i]._data.lifetime_budget = campaigns_data[i]._data.lifetime_budget / 100
+            campaigns_data[i]._data.lifetime_budget =
+              campaigns_data[i]._data.lifetime_budget / 100;
           }
           result1.push(campaigns_data[i]._data);
         }
       }
-
     } else if (level == "adset") {
       params = {
-        limit: 100000
-      }
-      const adsetset_data = await new Campaign(object_id).getAdSets(fields2, {});
+        limit: 100000,
+      };
+      const adsetset_data = await new Campaign(object_id).getAdSets(
+        fields2,
+        {}
+      );
 
       if (adsetset_data.length > 0) {
         for (let j = 0; j < adsetset_data.length; j++) {
           if (adsetset_data[j]._data.daily_budget) {
-            adsetset_data[j]._data.daily_budget = adsetset_data[j]._data.daily_budget / 100
+            adsetset_data[j]._data.daily_budget =
+              adsetset_data[j]._data.daily_budget / 100;
           } else if (adsetset_data[j]._data.lifetime_budget) {
-            adsetset_data[j]._data.lifetime_budget = adsetset_data[j]._data.lifetime_budget / 100
+            adsetset_data[j]._data.lifetime_budget =
+              adsetset_data[j]._data.lifetime_budget / 100;
           }
-          result1.push(adsetset_data[j]._data)
+          result1.push(adsetset_data[j]._data);
         }
       }
-
     } else if (level == "ad") {
       params = {
-        limit: 100000
+        limit:100000
       }
       const ad_data = await new AdSet(object_id).getAds(fields3, params)
-
 
       if (ad_data.length > 0) {
         for (let k = 0; k < ad_data.length; k++) {
           if (ad_data[k]._data.daily_budget) {
-            ad_data[k]._data.daily_budget = ad_data[k]._data.daily_budget / 100
+            ad_data[k]._data.daily_budget = ad_data[k]._data.daily_budget / 100;
           } else if (ad_data[k]._data.lifetime_budget) {
-            ad_data[k]._data.lifetime_budget = ad_data[k]._data.lifetime_budget / 100
+            ad_data[k]._data.lifetime_budget =
+              ad_data[k]._data.lifetime_budget / 100;
           }
-          result1.push(ad_data[k]._data)
+          result1.push(ad_data[k]._data);
         }
       }
     }
@@ -139,25 +152,28 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
     for (let i = 0; i < result.data.data.length; i++) {
       const obj = result.data.data[i]; //insights data
 
-      if (matchingObj = result1.find(item => item.id === obj.campaign_id)) {  //campaign data
+      if ((matchingObj = result1.find((item) => item.id === obj.campaign_id))) {
+        //campaign data
         mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
-
-      } else if (matchingObj = result1.find(item => item.adset_id === obj.id)) {   //adset data
+      } else if (
+        (matchingObj = result1.find((item) => item.adset_id === obj.id))
+      ) {
+        //adset data
         mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
-      }
-      else if (matchingObj = result1.find(item => item.id === obj.ad_id)) { //ad_data
+      } else if (
+        (matchingObj = result1.find((item) => item.id === obj.ad_id))
+      ) {
+        //ad_data
         mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
       }
     }
-
 
     if (mergedArr) {
       return {
         status: "success",
         data: mergedArr,
       };
-    }
-    else {
+    } else {
       return {
         status: "error",
         data: mergedArr.message ? mergedArr.message : mergedArr,
@@ -173,7 +189,6 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
     };
   }
 };
-
 
 //Create AdSET
 const facebook_create_adSet = async (id, fields, params) => {
@@ -219,7 +234,7 @@ const facebook_get_adSet = async (id, fields, params) => {
         for (let i = 0; i < adsetss.length; i++) {
           arr.push(adsetss[i]._data);
         }
-        console.log(arr, "-------------adset")
+        console.log(arr, "-------------adset");
         return {
           status: "success",
           data: arr,
@@ -566,7 +581,6 @@ const facebook_get_location = async (params, access_token) => {
   }
 };
 
-
 // Get video data from page_id
 const facebook_get_video = async (id, access_token, video_id = null) => {
   try {
@@ -625,7 +639,7 @@ const facebook_get_images = async (id) => {
       for (let i = 0; i < photoss.length; i++) {
         result.push(photoss[i]._data);
       }
-      console.log(result)
+      console.log(result);
       return {
         status: "success",
         data: result,
@@ -811,8 +825,7 @@ const facebook_create_creative_video_upload = async (
         status: "success",
         data: result.data,
       };
-    }
-    else {
+    } else {
       return {
         status: "error",
         data: result.data,
@@ -853,7 +866,6 @@ const facebook_create_creative_video = async (id, fields, params) => {
     };
   }
 };
-
 
 const facebook_get_interest_behavior = async () => {
   try {
@@ -899,20 +911,19 @@ const creat_image_carousel = async (
   object_story_spec,
   access_token
 ) => {
-
   let data = new FormData();
-  data.append('name', name);
-  data.append('object_story_spec', JSON.stringify(object_story_spec));
-  data.append('access_token', access_token);
+  data.append("name", name);
+  data.append("object_story_spec", JSON.stringify(object_story_spec));
+  data.append("access_token", access_token);
 
   let config = {
-    method: 'post',
+    method: "post",
     maxBodyLength: Infinity,
     url: `${facebook_url}/${id}/adcreatives`,
     headers: {
-      ...data.getHeaders()
+      ...data.getHeaders(),
     },
-    data: data
+    data: data,
   };
 
   const response = await axios.request(config);
@@ -979,11 +990,12 @@ const facebook_get_businesses = async (access_token) => {
       maxBodyLength: Infinity,
       url: `${facebook_url}/me/businesses?fields=id,name,created_by,owned_ad_accounts{name},owned_pages&access_token=${access_token}`,
       headers: {
-        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
-      }
+        Cookie:
+          "fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z",
+      },
     };
 
-    const businesses = await axios.request(config)
+    const businesses = await axios.request(config);
 
     if (businesses.data) {
       return {
@@ -1006,15 +1018,18 @@ const facebook_get_businesses = async (access_token) => {
 };
 
 const facebook_get_account_images = async (ad_account_id, access_token) => {
+const facebook_get_account_images = async (ad_account_id, access_token) => {
   try {
     let config = {
-      method: 'get',
+      method: "get",
       maxBodyLength: Infinity,
       url: `${facebook_url}/${ad_account_id}/adimages?limit=10000&fields=created_time,hash,name,permalink_url,status,updated_time,url&access_token=${access_token}`,
       headers: {
-        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
-      }
+        Cookie:
+          "fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z",
+      },
     };
+
 
     const images = await axios.request(config)
     if (images.data) {
@@ -1035,24 +1050,24 @@ const facebook_get_account_images = async (ad_account_id, access_token) => {
       data: error.message ? error.message : error,
     };
   }
-}
-
+};
 
 const facebook_get_account_videos = async (ad_account_id, access_token) => {
   try {
     let config = {
-      method: 'get',
+      method: "get",
       maxBodyLength: Infinity,
       url: `${facebook_url}/${ad_account_id}/advideos?limit=10000&fields=id,thumbnails&access_token=${access_token}`,
       headers: {
-        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
-      }
+        Cookie:
+          "fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z",
+      },
     };
 
-    const videos = await axios.request(config)
+    const videos = await axios.request(config);
 
-    for (let i = 0; i < videos.data.data.length; i++) {
-      videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
+    for(let i=0;i<videos.data.data.length;i++){
+        videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
     }
     if (videos.data.data) {
       return {
@@ -1072,8 +1087,51 @@ const facebook_get_account_videos = async (ad_account_id, access_token) => {
       data: error.message ? error.message : error,
     };
   }
-}
+};
 
+const facebook_update_campaign = async (campaign_id, params, access_token) => {
+  try {
+    let data = new FormData();
+    for (const key in params) {
+      if (`${key}` !== "special_ad_categories") {
+        data.append(`${key}`, `${params[key]}`);
+      }
+    }
+    if("special_ad_categories" in params){
+      data.append("special_ad_categories",JSON.stringify(params.special_ad_categories));
+    }
+    data.append("access_token", access_token);
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${facebook_url}/${campaign_id}`,
+      headers: {
+        ...data.getHeaders(),
+      },
+      data: data,
+    };
+    let response =await axios.request(config);
+    if (response.data) {
+      return {
+        status: "success",
+        data: response.data,
+      };
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response,
+      };
+    }
+  } catch (error) {
+    console.log("error part1", error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+};
 
 module.exports = {
   facebook_create_campaign,
@@ -1095,4 +1153,5 @@ module.exports = {
   facebook_get_businesses,
   facebook_get_account_images,
   facebook_get_account_videos,
-};
+  facebook_update_campaign,
+}

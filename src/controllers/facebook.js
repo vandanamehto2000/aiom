@@ -21,6 +21,7 @@ const {
 
   facebook_get_account_images,
   facebook_save_Insights
+  facebook_update_campaign
 } = require("../platform/facebook");
 
 const fields_constant = require("../utils/constant");
@@ -742,6 +743,37 @@ const get_account_videos_images = async (req, res, next) => {
   }
 };
 
+//Update a Campaign
+const update_campaign = async (req, res, next) => {
+  try {
+    const { campaign_id,params } = req.body;
+    const access_token = req.facebook_token;
+    const facebook_result = await facebook_update_campaign(campaign_id, params, access_token);
+    if (facebook_result.status == "success") {
+      return responseApi.successResponseWithData(
+        res,
+        "create campaign data",
+        facebook_result.data,
+        StatusCodes.CREATED
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "unable to create campaign data",
+        facebook_result.data,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  } catch (error) {
+    console.log("error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
 
 module.exports = {
   create_campaign,
@@ -761,4 +793,5 @@ module.exports = {
   create_carousel,
   get_businesses,
   get_account_videos_images,
+  update_campaign
 };
