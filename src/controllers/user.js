@@ -140,7 +140,7 @@ const employee_details = async (req, res, next) => {
   try {
     let organization_data;
     let result = [];
-    let { organization, email } = req.query;
+    let { organization, email } = req.body;
     if (organization == "aiom") {
       organization_data = await User.find(
         { organization: organization },
