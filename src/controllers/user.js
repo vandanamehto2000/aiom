@@ -3,6 +3,7 @@ const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const responseApi = require("../utils/apiresponse");
+const { updateOne } = require("../models/facebook");
 
 const generateAccessToken = (response) => {
   return jwt.sign(
@@ -143,7 +144,7 @@ const employee_details = async (req, res, next) => {
     if (organization == "aiom") {
       organization_data = await User.find(
         { organization: organization },
-        { username: 1, email: 1, roles: 1 }
+        { username: 1, email: 1, roles: 1, assigned_BM: 1, assigned_ad_account: 1  }
       );
       if (!organization_data) {
         return responseApi.ErrorResponse(
@@ -459,11 +460,53 @@ const role_update = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  register,
-  login,
-  logout,
-  employee_details,
-  assigned_bm,
-  role_update,
-};
+
+const delete_bm = async (req, res, next) => {
+  try {
+    let { flag, id, email } = req.body;
+
+    const users_data = await User.find({ email: { $in: email } });
+    if (users_data.length > 0) {
+      const bulkWriteOperations = [];
+      for (let i = 0; i < users_data.length; i++) {
+        bulkWriteOperations.push({
+          updateOne: {
+            filter: { _id: users_data[i]._id, email: users_data[i].email },
+            update: {
+              $pull: {
+                [`${flag}`]: {
+                  id: id
+                },
+              },
+            },
+          },
+        });
+      }
+      const result = await User.bulkWrite(bulkWriteOperations);
+      return responseApi.successResponseWithData(
+        res,
+        "User data Successfully deleted!!",
+        result,
+        StatusCodes.OK
+      );
+    } else {
+      return responseApi.successResponseWithData(
+        res,
+        "User data Not found !!",
+        [],
+        StatusCodes.OK
+      );
+    }
+  } catch (error) {
+    console.log("Error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+
+}
+
+
+module.exports = { register, login, logout, employee_details,assigned_bm, role_update, delete_bm };

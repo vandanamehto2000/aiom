@@ -13,16 +13,6 @@ const facebook = require("../models/facebook");
 const fields_constant = require("../utils/constant");
 const Page = bizSdk.Page;
 const facebook_url = process.env.FACEBOOK_URL;
-// console.log(facebook_url)
-
-// // global.Token;
-// // let obj = {}
-// let globalToken;
-// const access_details_fun = async()=>{
-//   const details = await facebook.find()
-//   // console.log(details)
-//   return details[0].token
-// }
 
 // const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
 // const app_secret = "<APP_SECRET>";
@@ -76,7 +66,9 @@ const facebook_get_Insights = async (
     params.limit = 100000;
     let fields1 = fields_constant.fields[5];
 
-    let fields2 = fields_constant.fields[2];
+
+
+    let fields2 = fields_constant.fields[2]
 
     let fields3 = fields_constant.fields[3];
 
@@ -90,7 +82,7 @@ const facebook_get_Insights = async (
     const result = await axios.request(config);
     if (!result.data) {
       return {
-        status: "unable to get data in result",
+        status: "error",
         data: result.message ? result.message : result,
       };
     }
@@ -138,9 +130,9 @@ const facebook_get_Insights = async (
       }
     } else if (level == "ad") {
       params = {
-        limit: 100000,
-      };
-      const ad_data = await new AdSet(object_id).getAds(fields3, params);
+        limit:100000
+      }
+      const ad_data = await new AdSet(object_id).getAds(fields3, params)
 
       if (ad_data.length > 0) {
         for (let k = 0; k < ad_data.length; k++) {
@@ -182,7 +174,7 @@ const facebook_get_Insights = async (
       };
     } else {
       return {
-        status: "unable to get merge data",
+        status: "error",
         data: mergedArr.message ? mergedArr.message : mergedArr,
       };
     }
@@ -1036,7 +1028,8 @@ const facebook_get_account_images = async (ad_account_id, access_token) => {
       },
     };
 
-    const images = await axios.request(config);
+
+    const images = await axios.request(config)
     if (images.data) {
       return {
         status: "success",
@@ -1071,8 +1064,8 @@ const facebook_get_account_videos = async (ad_account_id, access_token) => {
 
     const videos = await axios.request(config);
 
-    for (let i = 0; i < videos.data.data.length; i++) {
-      videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0];
+    for(let i=0;i<videos.data.data.length;i++){
+        videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
     }
     if (videos.data.data) {
       return {
@@ -1158,5 +1151,6 @@ module.exports = {
   facebook_get_businesses,
   facebook_get_account_images,
   facebook_get_account_videos,
-  facebook_update_campaign,
-};
+  facebook_update_campaign
+}
+
