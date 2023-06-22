@@ -18,9 +18,8 @@ const {
   facebook_create_carousel,
   facebook_get_businesses,
   facebook_get_account_videos,
-
   facebook_get_account_images,
-  facebook_save_Insights
+  facebook_save_Insights,
   facebook_update_campaign
 } = require("../platform/facebook");
 

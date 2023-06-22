@@ -1018,7 +1018,6 @@ const facebook_get_businesses = async (access_token) => {
 };
 
 const facebook_get_account_images = async (ad_account_id, access_token) => {
-const facebook_get_account_images = async (ad_account_id, access_token) => {
   try {
     let config = {
       method: "get",
@@ -1153,5 +1152,6 @@ module.exports = {
   facebook_get_businesses,
   facebook_get_account_images,
   facebook_get_account_videos,
-  facebook_update_campaign,
+  facebook_update_campaign
 }
+
