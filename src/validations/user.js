@@ -6,7 +6,8 @@ const registerUser = Joi.object({
   password: Joi.string().required().min(3),
   organization: Joi.string().required(),
   roles: Joi.string().required(),
-  assigned_BM:Joi.array()
+  assigned_BM:Joi.array(),
+  assigned_ad_account:Joi.array()
 
 })
 

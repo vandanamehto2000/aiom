@@ -18,7 +18,6 @@ const {
   facebook_create_carousel,
   facebook_get_businesses,
   facebook_get_account_videos,
-
   facebook_get_account_images,
   facebook_update_campaign,
   facebook_update_adset
@@ -28,6 +27,7 @@ const fields_constant = require("../utils/constant");
 const { StatusCodes } = require("http-status-codes");
 const responseApi = require("../utils/apiresponse");
 const { APIResponse } = require("facebook-nodejs-business-sdk");
+
 
 //Create a Campaign
 const create_campaign = async (req, res, next) => {
@@ -244,36 +244,11 @@ const create_creative = async (req, res, next) => {
             StatusCodes.BAD_REQUEST
           );
         }
-      }
-      else if(params.image_hash !== ""){
-console.log("---------------------",params)
-const adcreatives = await facebook_create_creative(
-  null,
-  null,
-  id,
-  fields,
-  params
-);
-if (adcreatives.status == "success") {
-  return responseApi.successResponseWithData(
-    res,
-    "Existing data post successfully",
-    adcreatives.data,
-    StatusCodes.CREATED
-  );
-} else {
-  return responseApi.ErrorResponse(
-    res,
-    "error",
-    adcreatives.data,
-    StatusCodes.BAD_REQUEST
-  );
-}
       } else {
         return responseApi.ErrorResponse(
           res,
-          " Error in existing video or image",
-          adcreatives.data,
+          "Invalid Params",
+          "Please provide a file or object_story_id",
           StatusCodes.BAD_REQUEST
         );
       }
