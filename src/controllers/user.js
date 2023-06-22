@@ -509,4 +509,4 @@ const delete_bm = async (req, res, next) => {
 }
 
 
-module.exports = { register, login, logout, employee_details, update_bm, delete_bm };
+module.exports = { register, login, logout, employee_details,assigned_bm, role_update, delete_bm };

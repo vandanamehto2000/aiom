@@ -11,7 +11,6 @@ const FormData = require("form-data");
 const fs = require("fs");
 const facebook = require("../models/facebook");
 const fields_constant = require("../utils/constant");
-const fields_constant = require("../utils/constant");
 const Page = bizSdk.Page;
 const facebook_url = process.env.FACEBOOK_URL;
 
