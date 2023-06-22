@@ -20,12 +20,14 @@ const {
   facebook_get_account_videos,
 
   facebook_get_account_images,
+  facebook_save_Insights
 } = require("../platform/facebook");
 
 const fields_constant = require("../utils/constant");
 const { StatusCodes } = require("http-status-codes");
 const responseApi = require("../utils/apiresponse");
 const { APIResponse } = require("facebook-nodejs-business-sdk");
+
 
 //Create a Campaign
 const create_campaign = async (req, res, next) => {
@@ -758,5 +760,5 @@ module.exports = {
   get_page_images,
   create_carousel,
   get_businesses,
-  get_account_videos_images
+  get_account_videos_images,
 };

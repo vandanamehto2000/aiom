@@ -3,13 +3,16 @@ const Schema = mongoose.Schema;
 
 const CampaignSchema = new mongoose.Schema(
     {
-        user_id: { type: Schema.Types.ObjectId, ref: 'User' },
-        ad_account_id: { type: Schema.Types.ObjectId, ref: 'Facebook' },
+        // user_id: { type: Schema.Types.ObjectId, ref: 'User' },
+        // ad_account_id: { type: Schema.Types.ObjectId, ref: 'Facebook' },
         account_currency: { type: String, required: false },
         account_id: { type: String, required: false },
         account_name: { type: String, required: false },
         action_values: { type: String, required: false },
-        actions: { type: String, required: false },
+        actions: [{
+            action_type: { type: String },
+            value: { type: String }
+        }],
         ad_id: { type: String, required: false },
         ad_name: { type: String, required: false },
         adset_id: { type: String, required: false },
@@ -27,14 +30,20 @@ const CampaignSchema = new mongoose.Schema(
         conversions: { type: String, required: false },
         converted_product_quantity: { type: String, required: false },
         converted_product_value: { type: String, required: false },
-        cost_per_action_type: { type: String, required: false },
+        cost_per_action_type: [{
+            action_type: { type: String },
+            value: { type: String }
+        }],
         cost_per_conversion: { type: String, required: false },
         cost_per_estimated_ad_recallers: { type: String, required: false },
         cost_per_inline_link_click: { type: String, required: false },
         cost_per_inline_post_engagement: { type: String, required: false },
         cost_per_outbound_click: { type: String, required: false },
         cost_per_thruplay: { type: String, required: false },
-        cost_per_unique_action_type: { type: String, required: false },
+        cost_per_unique_action_type: [{
+            action_type: { type: String },
+            value: { type: String }
+        }],
         cost_per_unique_click: { type: String, required: false },
         cost_per_unique_inline_link_click: { type: String, required: false },
         cost_per_unique_outbound_click: { type: String, required: false },
@@ -48,16 +57,23 @@ const CampaignSchema = new mongoose.Schema(
         engagement_rate_ranking: { type: String, required: false },
         estimated_ad_recall_rate: { type: String, required: false },
         estimated_ad_recallers: { type: String, required: false },
-        frequency, impressions: { type: String, required: false },
+        frequency: { type: String, required: false },
+        impressions: { type: String, required: false },
         inline_link_click_ctr: { type: String, required: false },
-        inline_link_clicks, inline_post_engagement: { type: String, required: false },
+        inline_link_clicks: { type: String, required: false },
+        inline_post_engagement: { type: String, required: false },
         mobile_app_purchase_roas: { type: String, required: false },
-        objective, optimization_goal: { type: String, required: false },
-        outbound_clicks_ctr, quality_ranking: { type: String, required: false },
+        objective: { type: String, required: false },
+        optimization_goal: { type: String, required: false },
+        outbound_clicks_ctr: { type: String, required: false },
+        quality_ranking: { type: String, required: false },
         reach: { type: String, required: false },
         social_spend: { type: String, required: false },
         spend: { type: String, required: false },
-        website_ctr: { type: String, required: false },
+        website_ctr: [{
+            action_type: { type: String },
+            value: { type: String }
+        }],
         website_purchase_roas: { type: String, required: false },
         bid_strategy: { type: String, required: false },
         budget_rebalance_flag: { type: String, required: false },
@@ -71,21 +87,18 @@ const CampaignSchema = new mongoose.Schema(
         has_secondary_skadnetwork_reporting: { type: String, required: false },
         id: { type: String, required: false },
         is_skadnetwork_attribution: { type: String, required: false },
-        pacing_type: { type: String, required: false },
+        pacing_type: { type: Array, required: false },
         primary_attribution: { type: String, required: false },
         smart_promotion_type: { type: String, required: false },
         source_campaign_id: { type: String, required: false },
-        special_ad_categories: { type: String, required: false },
+        special_ad_categories: { type: Array, required: false },
         special_ad_category: { type: String, required: false },
         start_time: { type: String, required: false },
         status: { type: String, required: false },
         stop_time: { type: String, required: false },
         topline_id: { type: String, required: false },
         updated_time: { type: String, required: false }
-        
-    },
-    { timestamps: true }
-)
+    })
 
 const Campaign = mongoose.model("Campaign", CampaignSchema);
 module.exports = Campaign;

@@ -11,7 +11,7 @@ const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 const facebook = require("../models/facebook");
-const  fields_constant  = require("../utils/constant");
+const fields_constant = require("../utils/constant");
 const Page = bizSdk.Page;
 
 const facebook_url = process.env.FACEBOOK_URL;
@@ -63,7 +63,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
 
     params.limit = 100000
     let fields1 = fields_constant.fields[5]
-   
+
     let fields2 = fields_constant.fields[2]
 
     let fields3 = fields_constant.fields[3]
@@ -90,46 +90,46 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
 
       if (campaigns_data.length > 0) {
         for (let i = 0; i < campaigns_data.length; i++) {
-          if(campaigns_data[i]._data.daily_budget){
-            campaigns_data[i]._data.daily_budget = campaigns_data[i]._data.daily_budget/100
-            }else if(campaigns_data[i]._data.lifetime_budget){
-              campaigns_data[i]._data.lifetime_budget = campaigns_data[i]._data.lifetime_budget/100
-            }
+          if (campaigns_data[i]._data.daily_budget) {
+            campaigns_data[i]._data.daily_budget = campaigns_data[i]._data.daily_budget / 100
+          } else if (campaigns_data[i]._data.lifetime_budget) {
+            campaigns_data[i]._data.lifetime_budget = campaigns_data[i]._data.lifetime_budget / 100
+          }
           result1.push(campaigns_data[i]._data);
         }
       }
 
     } else if (level == "adset") {
       params = {
-        limit:100000
+        limit: 100000
       }
       const adsetset_data = await new Campaign(object_id).getAdSets(fields2, {});
 
       if (adsetset_data.length > 0) {
         for (let j = 0; j < adsetset_data.length; j++) {
-          if(adsetset_data[j]._data.daily_budget){
-            adsetset_data[j]._data.daily_budget = adsetset_data[j]._data.daily_budget/100
-            }else if(adsetset_data[j]._data.lifetime_budget){
-              adsetset_data[j]._data.lifetime_budget = adsetset_data[j]._data.lifetime_budget/100
-            }
+          if (adsetset_data[j]._data.daily_budget) {
+            adsetset_data[j]._data.daily_budget = adsetset_data[j]._data.daily_budget / 100
+          } else if (adsetset_data[j]._data.lifetime_budget) {
+            adsetset_data[j]._data.lifetime_budget = adsetset_data[j]._data.lifetime_budget / 100
+          }
           result1.push(adsetset_data[j]._data)
         }
       }
 
     } else if (level == "ad") {
       params = {
-        limit:100000
+        limit: 100000
       }
       const ad_data = await new AdSet(object_id).getAds(fields3, params)
 
 
       if (ad_data.length > 0) {
         for (let k = 0; k < ad_data.length; k++) {
-          if(ad_data[k]._data.daily_budget){
-            ad_data[k]._data.daily_budget = ad_data[k]._data.daily_budget/100
-            }else if(ad_data[k]._data.lifetime_budget){
-              ad_data[k]._data.lifetime_budget = ad_data[k]._data.lifetime_budget/100
-            }
+          if (ad_data[k]._data.daily_budget) {
+            ad_data[k]._data.daily_budget = ad_data[k]._data.daily_budget / 100
+          } else if (ad_data[k]._data.lifetime_budget) {
+            ad_data[k]._data.lifetime_budget = ad_data[k]._data.lifetime_budget / 100
+          }
           result1.push(ad_data[k]._data)
         }
       }
@@ -149,7 +149,7 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
         mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
       }
     }
-    
+
 
     if (mergedArr) {
       return {
@@ -812,7 +812,7 @@ const facebook_create_creative_video_upload = async (
         data: result.data,
       };
     }
-    else{
+    else {
       return {
         status: "error",
         data: result.data,
@@ -901,19 +901,19 @@ const creat_image_carousel = async (
 ) => {
 
   let data = new FormData();
-data.append('name', name);
-data.append('object_story_spec', JSON.stringify(object_story_spec));
-data.append('access_token', access_token);
+  data.append('name', name);
+  data.append('object_story_spec', JSON.stringify(object_story_spec));
+  data.append('access_token', access_token);
 
-let config = {
-  method: 'post',
-  maxBodyLength: Infinity,
-  url: `${facebook_url}/${id}/adcreatives`,
-  headers: { 
-    ...data.getHeaders()
-  },
-  data : data
-};
+  let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: `${facebook_url}/${id}/adcreatives`,
+    headers: {
+      ...data.getHeaders()
+    },
+    data: data
+  };
 
   const response = await axios.request(config);
   if (response.data) {
@@ -978,11 +978,11 @@ const facebook_get_businesses = async (access_token) => {
       method: "get",
       maxBodyLength: Infinity,
       url: `${facebook_url}/me/businesses?fields=id,name,created_by,owned_ad_accounts{name},owned_pages&access_token=${access_token}`,
-      headers: { 
+      headers: {
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
     };
-    
+
     const businesses = await axios.request(config)
 
     if (businesses.data) {
@@ -1005,18 +1005,18 @@ const facebook_get_businesses = async (access_token) => {
   }
 };
 
-const facebook_get_account_images = async (ad_account_id,access_token)=>{
+const facebook_get_account_images = async (ad_account_id, access_token) => {
   try {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
       url: `${facebook_url}/${ad_account_id}/adimages?limit=10000&fields=created_time,hash,name,permalink_url,status,updated_time,url&access_token=${access_token}`,
-      headers: { 
+      headers: {
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
     };
-    
-    const images  = await axios.request(config)
+
+    const images = await axios.request(config)
     if (images.data) {
       return {
         status: "success",
@@ -1038,21 +1038,21 @@ const facebook_get_account_images = async (ad_account_id,access_token)=>{
 }
 
 
-const facebook_get_account_videos = async (ad_account_id,access_token)=>{
+const facebook_get_account_videos = async (ad_account_id, access_token) => {
   try {
     let config = {
       method: 'get',
       maxBodyLength: Infinity,
       url: `${facebook_url}/${ad_account_id}/advideos?limit=10000&fields=id,thumbnails&access_token=${access_token}`,
-      headers: { 
+      headers: {
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
     };
-    
-    const videos  = await axios.request(config)
 
-    for(let i=0;i<videos.data.data.length;i++){
-        videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
+    const videos = await axios.request(config)
+
+    for (let i = 0; i < videos.data.data.length; i++) {
+      videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
     }
     if (videos.data.data) {
       return {
@@ -1094,5 +1094,5 @@ module.exports = {
   facebook_create_carousel,
   facebook_get_businesses,
   facebook_get_account_images,
-  facebook_get_account_videos
+  facebook_get_account_videos,
 };
