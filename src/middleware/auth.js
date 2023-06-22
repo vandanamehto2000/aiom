@@ -44,9 +44,9 @@ const fb_middleware = async (req, res, next) => {
   if (userDataByEmail?.facebook_token) {
     let api = bizSdk.FacebookAdsApi.init(userDataByEmail.facebook_token);
     const showDebugingInfo = true; // Setting this to true shows more debugging info.
-if (showDebugingInfo) {
-  api.setDebug(true);
-}
+    if (showDebugingInfo) {
+      api.setDebug(true);
+    }
     req.facebook_token = userDataByEmail.facebook_token;
   } else {
     return responseApi.ErrorResponse(res, "Unable to find facebook_token!!", "");
