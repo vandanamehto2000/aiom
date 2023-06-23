@@ -66,9 +66,7 @@ const facebook_get_Insights = async (
     params.limit = 100000;
     let fields1 = fields_constant.fields[5];
 
-
-
-    let fields2 = fields_constant.fields[2]
+    let fields2 = fields_constant.fields[2];
 
     let fields3 = fields_constant.fields[3];
 
@@ -130,9 +128,9 @@ const facebook_get_Insights = async (
       }
     } else if (level == "ad") {
       params = {
-        limit:100000
-      }
-      const ad_data = await new AdSet(object_id).getAds(fields3, params)
+        limit: 100000,
+      };
+      const ad_data = await new AdSet(object_id).getAds(fields3, params);
 
       if (ad_data.length > 0) {
         for (let k = 0; k < ad_data.length; k++) {
@@ -313,25 +311,26 @@ const facebook_create_creative = async (
 ) => {
   try {
     let adcreatives;
+    // Create creative through object_story_id
     if (imagePath == null && imageName == null && "object_story_id" in params) {
       adcreatives = await new AdAccount(id).createAdCreative(fields, params);
     } else {
-if(params.image_hash !== ""){
-  adcreatives = await new AdAccount(id).createAdCreative(fields, params);
-}
-else{
-  console.log("pass data", imagePath, imageName, access_token);
-  let result = await facebook_get_image_hash(
-    imagePath,
-    imageName,
-    access_token
-  );
-  let { hash, url, name } = result.data.images[`${imageName}`];
-  params.image_hash = hash;
-  params.object_story_spec.link_data.link = url;
-  params.object_story_spec.link_data.image_hash = hash;
-  adcreatives = await new AdAccount(id).createAdCreative(fields, params);
-}
+      // Create creative through hash_image and link
+      if (params.image_hash !== "") {
+        adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+      } else {
+        console.log("pass data", imagePath, imageName, access_token);
+        let result = await facebook_get_image_hash(
+          imagePath,
+          imageName,
+          access_token
+        );
+        let { hash, url, name } = result.data.images[`${imageName}`];
+        params.image_hash = hash;
+        params.object_story_spec.link_data.link = url;
+        params.object_story_spec.link_data.image_hash = hash;
+        adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+      }
     }
     if (adcreatives._data) {
       return {
@@ -1033,8 +1032,7 @@ const facebook_get_account_images = async (ad_account_id, access_token) => {
       },
     };
 
-
-    const images = await axios.request(config)
+    const images = await axios.request(config);
     if (images.data) {
       return {
         status: "success",
@@ -1069,8 +1067,8 @@ const facebook_get_account_videos = async (ad_account_id, access_token) => {
 
     const videos = await axios.request(config);
 
-    for(let i=0;i<videos.data.data.length;i++){
-        videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
+    for (let i = 0; i < videos.data.data.length; i++) {
+      videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0];
     }
     if (videos.data.data) {
       return {
