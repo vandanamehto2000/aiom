@@ -14,12 +14,12 @@ const UserSchema = new mongoose.Schema(
     assigned_BM: [{
       id: { type: String },
       name: { type: String },
-      objectiveRole: { type: String, required:true, enum: ["business_owner", "employee","viewer"], default:"viewer"}
+      objectiveRole: { type: String, required:true, enum: ["admin", "employee","viewer"], default:"viewer"}
     }],
     assigned_ad_account: [{
       id: { type: String },
       name: { type: String },
-      objectiveRole: { type: String, required:true, enum: ["business_owner", "employee","viewer"], default:"viewer"}
+      objectiveRole: { type: String, required:true, enum: ["admin", "employee","viewer"], default:"viewer"}
     }]
 
   },
