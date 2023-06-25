@@ -197,16 +197,41 @@ const assigned_bm = async (req, res, next) => {
       email: { $in: data },
     });
     if (users_data.length > 0) {
-      const bulkWriteOperations = [];
-      for (let i = 0; i < users_data.length; i++) {
-        for (let j = 0; j < email.length; j++) {
-          if (users_data[i].email === email[j].email) {
-            if (
-              assign_type === "assigned_BM" &&
-              users_data[i].email === email[j].email
-            ) {
-              // when assigned_BM is empty.
-              if (users_data[i].assigned_BM.length === 0) {
+if(id !== "" && name !== ""){
+  const bulkWriteOperations = [];
+  for (let i = 0; i < users_data.length; i++) {
+    for (let j = 0; j < email.length; j++) {
+      if (users_data[i].email === email[j].email) {
+        if (
+          assign_type === "assigned_BM" &&
+          users_data[i].email === email[j].email
+        ) {
+          // when assigned_BM is empty.
+          if (users_data[i].assigned_BM.length === 0) {
+            bulkWriteOperations.push({
+              updateOne: {
+                filter: {
+                  _id: users_data[i]._id,
+                  email: users_data[i].email,
+                },
+                update: {
+                  $push: {
+                    [`${assign_type}`]: {
+                      id: id,
+                      name: name,
+                      objectiveRole: email[j].role,
+                    },
+                  },
+                },
+              },
+            });
+          } else {
+            for (let k = 0; k < users_data[i].assigned_BM.length; k++) {
+              if (
+                "id" in users_data[i].assigned_BM[k] &&
+                id === users_data[i].assigned_BM[k].id
+              ) {
+                // when assigned_BM is exist.
                 bulkWriteOperations.push({
                   updateOne: {
                     filter: {
@@ -214,6 +239,30 @@ const assigned_bm = async (req, res, next) => {
                       email: users_data[i].email,
                     },
                     update: {
+                      // $set: { roles: email[j].role },
+                      $set: {
+                        [`${assign_type}`]: {
+                          id: id,
+                          name: name,
+                          objectiveRole: email[j].role,
+                        },
+                      },
+                    },
+                  },
+                });
+              } else if (
+                "id" in users_data[i].assigned_BM[k] &&
+                id !== users_data[i].assigned_BM[k].id
+              ) {
+                // when assigned_BM is not exist.
+                bulkWriteOperations.push({
+                  updateOne: {
+                    filter: {
+                      _id: users_data[i]._id,
+                      email: users_data[i].email,
+                    },
+                    update: {
+                      // $set: { roles: email[j].role },
                       $push: {
                         [`${assign_type}`]: {
                           id: id,
@@ -224,162 +273,123 @@ const assigned_bm = async (req, res, next) => {
                     },
                   },
                 });
-              } else {
-                for (let k = 0; k < users_data[i].assigned_BM.length; k++) {
-                  if (
-                    "id" in users_data[i].assigned_BM[k] &&
-                    id === users_data[i].assigned_BM[k].id
-                  ) {
-                    // when assigned_BM is exist.
-                    bulkWriteOperations.push({
-                      updateOne: {
-                        filter: {
-                          _id: users_data[i]._id,
-                          email: users_data[i].email,
-                        },
-                        update: {
-                          // $set: { roles: email[j].role },
-                          $set: {
-                            [`${assign_type}`]: {
-                              id: id,
-                              name: name,
-                              objectiveRole: email[j].role,
-                            },
-                          },
-                        },
-                      },
-                    });
-                  } else if (
-                    "id" in users_data[i].assigned_BM[k] &&
-                    id !== users_data[i].assigned_BM[k].id
-                  ) {
-                    // when assigned_BM is not exist.
-                    bulkWriteOperations.push({
-                      updateOne: {
-                        filter: {
-                          _id: users_data[i]._id,
-                          email: users_data[i].email,
-                        },
-                        update: {
-                          // $set: { roles: email[j].role },
-                          $push: {
-                            [`${assign_type}`]: {
-                              id: id,
-                              name: name,
-                              objectiveRole: email[j].role,
-                            },
-                          },
-                        },
-                      },
-                    });
-                  }
-                }
               }
-            } else if (
-              assign_type === "assigned_ad_account" &&
-              users_data[i].email === email[j].email
-            ) {
-              if (users_data[i].assigned_ad_account.length === 0) {
-                // when assigned_ad_account is empty.
-                bulkWriteOperations.push({
-                  updateOne: {
-                    filter: {
-                      _id: users_data[i]._id,
-                      email: users_data[i].email,
-                    },
-                    update: {
-                      $push: {
-                        [`${assign_type}`]: {
-                          id: id,
-                          name: name,
-                          objectiveRole: email[j].role,
-                        },
-                      },
-                    },
-                  },
-                });
-              } else {
-                for (
-                  let k = 0;
-                  k < users_data[i].assigned_ad_account.length;
-                  k++
-                ) {
-                  if (
-                    "id" in users_data[i].assigned_ad_account[k] &&
-                    id === users_data[i].assigned_ad_account[k].id
-                  ) {
-                    // when assigned_ad_account is exist.
-                    bulkWriteOperations.push({
-                      updateOne: {
-                        filter: {
-                          _id: users_data[i]._id,
-                          email: users_data[i].email,
-                        },
-                        update: {
-                          // $set: { roles: email[j].role },
-                          $set: {
-                            [`${assign_type}`]: {
-                              id: id,
-                              name: name,
-                              objectiveRole: email[j].role,
-                            },
-                          },
-                        },
-                      },
-                    });
-                  } else if (
-                    "id" in users_data[i].assigned_ad_account[k] &&
-                    id !== users_data[i].assigned_ad_account[k].id
-                  ) {
-                    // when assigned_ad_account is not exist.
-                    bulkWriteOperations.push({
-                      updateOne: {
-                        filter: {
-                          _id: users_data[i]._id,
-                          email: users_data[i].email,
-                        },
-                        update: {
-                          // $set: { roles: email[j].role },
-                          $push: {
-                            [`${assign_type}`]: {
-                              id: id,
-                              name: name,
-                              objectiveRole: email[j].role,
-                            },
-                          },
-                        },
-                      },
-                    });
-                  }
-                }
-              }
-            } else {
-              return responseApi.ErrorResponse(
-                res,
-                `assign_type must be one of {assigned_BM, assigned_BM} but we got ${assign_type}.`,
-                [],
-                StatusCodes.BAD_REQUEST
-              );
             }
           }
+        } else if (
+          assign_type === "assigned_ad_account" &&
+          users_data[i].email === email[j].email
+        ) {
+          if (users_data[i].assigned_ad_account.length === 0) {
+            // when assigned_ad_account is empty.
+            bulkWriteOperations.push({
+              updateOne: {
+                filter: {
+                  _id: users_data[i]._id,
+                  email: users_data[i].email,
+                },
+                update: {
+                  $push: {
+                    [`${assign_type}`]: {
+                      id: id,
+                      name: name,
+                      objectiveRole: email[j].role,
+                    },
+                  },
+                },
+              },
+            });
+          } else {
+            for (
+              let k = 0;
+              k < users_data[i].assigned_ad_account.length;
+              k++
+            ) {
+              if (
+                "id" in users_data[i].assigned_ad_account[k] &&
+                id === users_data[i].assigned_ad_account[k].id
+              ) {
+                // when assigned_ad_account is exist.
+                bulkWriteOperations.push({
+                  updateOne: {
+                    filter: {
+                      _id: users_data[i]._id,
+                      email: users_data[i].email,
+                    },
+                    update: {
+                      // $set: { roles: email[j].role },
+                      $set: {
+                        [`${assign_type}`]: {
+                          id: id,
+                          name: name,
+                          objectiveRole: email[j].role,
+                        },
+                      },
+                    },
+                  },
+                });
+              } else if (
+                "id" in users_data[i].assigned_ad_account[k] &&
+                id !== users_data[i].assigned_ad_account[k].id
+              ) {
+                // when assigned_ad_account is not exist.
+                bulkWriteOperations.push({
+                  updateOne: {
+                    filter: {
+                      _id: users_data[i]._id,
+                      email: users_data[i].email,
+                    },
+                    update: {
+                      // $set: { roles: email[j].role },
+                      $push: {
+                        [`${assign_type}`]: {
+                          id: id,
+                          name: name,
+                          objectiveRole: email[j].role,
+                        },
+                      },
+                    },
+                  },
+                });
+              }
+            }
+          }
+        } else {
+          return responseApi.ErrorResponse(
+            res,
+            `assign_type must be one of {assigned_BM, assigned_BM} but we got ${assign_type}.`,
+            [],
+            StatusCodes.BAD_REQUEST
+          );
         }
       }
-      const result = await User.bulkWrite(bulkWriteOperations);
-      if (result.matchedCount > 0 && result.modifiedCount > 0) {
-        return responseApi.successResponseWithData(
-          res,
-          "User data Successfully updates!!",
-          result,
-          StatusCodes.OK
-        );
-      } else {
-        return responseApi.ErrorResponse(
-          res,
-          "something went wrong!!",
-          result,
-          StatusCodes.BAD_REQUEST
-        );
-      }
+    }
+  }
+  const result = await User.bulkWrite(bulkWriteOperations);
+  if (result.matchedCount > 0 && result.modifiedCount > 0) {
+    return responseApi.successResponseWithData(
+      res,
+      "User data Successfully updates!!",
+      result,
+      StatusCodes.OK
+    );
+  } else {
+    return responseApi.ErrorResponse(
+      res,
+      "something went wrong!!",
+      result,
+      StatusCodes.BAD_REQUEST
+    );
+  }
+}
+else{
+  return responseApi.ErrorResponse(
+    res,
+    "Enter correct id and name",
+    "Enter correct id and name",
+    StatusCodes.BAD_REQUEST
+  );
+}
     } else {
       return responseApi.ErrorResponse(
         res,
