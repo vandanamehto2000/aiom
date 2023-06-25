@@ -232,7 +232,7 @@ const create_creative = async (req, res, next) => {
         if (adcreatives.status == "success") {
           return responseApi.successResponseWithData(
             res,
-            "Existing data post successfully",
+            "Existing data post successfully with id",
             adcreatives.data,
             StatusCodes.CREATED
           );
@@ -244,7 +244,32 @@ const create_creative = async (req, res, next) => {
             StatusCodes.BAD_REQUEST
           );
         }
-      } else {
+      }
+      else if (params.image_hash !== "") {
+        const adcreatives = await facebook_create_creative(
+          null,
+          null,
+          id,
+          fields,
+          params
+        );
+        if (adcreatives.status == "success") {
+          return responseApi.successResponseWithData(
+            res,
+            "Existing data with hash_image is post successfully",
+            adcreatives.data,
+            StatusCodes.CREATED
+          );
+        } else {
+          return responseApi.ErrorResponse(
+            res,
+            "error",
+            adcreatives.data,
+            StatusCodes.BAD_REQUEST
+          );
+        }
+      }
+       else {
         return responseApi.ErrorResponse(
           res,
           "Invalid Params",

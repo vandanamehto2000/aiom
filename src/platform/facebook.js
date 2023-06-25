@@ -133,7 +133,6 @@ const facebook_get_Insights = async (object_id, fields, level, access_token, par
       }
       const ad_data = await new AdSet(object_id).getAds(fields3, params)
 
-
       if (ad_data.length > 0) {
         for (let k = 0; k < ad_data.length; k++) {
           if(ad_data[k]._data.daily_budget){
@@ -311,25 +310,26 @@ const facebook_create_creative = async (
 ) => {
   try {
     let adcreatives;
+    // Create creative through object_story_id
     if (imagePath == null && imageName == null && "object_story_id" in params) {
       adcreatives = await new AdAccount(id).createAdCreative(fields, params);
     } else {
-if(params.image_hash !== ""){
-  adcreatives = await new AdAccount(id).createAdCreative(fields, params);
-}
-else{
-  console.log("pass data", imagePath, imageName, access_token);
-  let result = await facebook_get_image_hash(
-    imagePath,
-    imageName,
-    access_token
-  );
-  let { hash, url, name } = result.data.images[`${imageName}`];
-  params.image_hash = hash;
-  params.object_story_spec.link_data.link = url;
-  params.object_story_spec.link_data.image_hash = hash;
-  adcreatives = await new AdAccount(id).createAdCreative(fields, params);
-}
+      // Create creative through hash_image and link
+      if (params.image_hash !== "") {
+        adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+      } else {
+        console.log("pass data", imagePath, imageName, access_token);
+        let result = await facebook_get_image_hash(
+          imagePath,
+          imageName,
+          access_token
+        );
+        let { hash, url, name } = result.data.images[`${imageName}`];
+        params.image_hash = hash;
+        params.object_story_spec.link_data.link = url;
+        params.object_story_spec.link_data.image_hash = hash;
+        adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+      }
     }
     if (adcreatives._data) {
       return {
@@ -953,32 +953,84 @@ const facebook_create_carousel = async (
   access_token
 ) => {
   try {
-    for (let i = 0; i < fileData.length; i++) {
-      let result = await facebook_get_image_hash(
-        fileData[i].path,
-        fileData[i].filename,
-        access_token
-      );
-      let { hash, url, name } = result.data.images[`${fileData[i].filename}`];
-      object_story_spec.link_data.child_attachments[i].image_hash = hash;
-      object_story_spec.link_data.child_attachments[i].link = url;
-    }
-    let carousel_result = await creat_image_carousel(
-      id,
-      name,
-      object_story_spec,
-      access_token
-    );
-    if (carousel_result.status === "success") {
-      return {
-        status: "success",
-        data: carousel_result.data,
-      };
+    if (fileData.length > 0) {
+      // create carousel through upload files
+      let num_of_file = fileData.length;
+      let num_of_image = 0;
+      let num_of_video = 0;
+      for (let i = 0; i < num_of_file; i++) {
+        let file_type = fileData[i].mimetype.split("/").shift();
+        if (file_type === "image") {
+          num_of_image++;
+        } else if (file_type === "video") {
+          num_of_video++;
+        } else {
+          break;
+        }
+      }
+      if(num_of_file===num_of_image){
+        for (let i = 0; i < fileData.length; i++) {
+          let result = await facebook_get_image_hash(
+            fileData[i].path,
+            fileData[i].filename,
+            access_token
+          );
+          let { hash, url, name } = result.data.images[`${fileData[i].filename}`];
+          object_story_spec.link_data.child_attachments[i].image_hash = hash;
+          object_story_spec.link_data.child_attachments[i].link = url;
+        }
+        // upload image and create carousel
+        console.log("upload carousel------------for image")
+       let carousel_result = await creat_image_carousel(
+          id,
+          name,
+          object_story_spec,
+          access_token
+        );
+        if (carousel_result.status === "success") {
+          return {
+            status: "success",
+            data: carousel_result.data,
+          };
+        } else {
+          return {
+            status: "error",
+            data: carousel_result.data,
+          };
+        }
+      }
+      else if(num_of_file===num_of_video){
+        // upload video and create carousel
+        return {
+          status: "error",
+          data: "upload video and create carousel not implemented",
+        };
+      }
+      else{
+        return {
+          status: "error",
+          data: "upload only image or video",
+        };
+      }
     } else {
-      return {
-        status: "error",
-        data: carousel_result.data,
-      };
+            // create carousel through existing files
+            let carousel_result = await creat_image_carousel(
+              id,
+              name,
+              object_story_spec,
+              access_token
+            );
+            if (carousel_result.status === "success") {
+              return {
+                status: "success",
+                data: carousel_result.data,
+              };
+            } else {
+              return {
+                status: "error",
+                data: carousel_result.data,
+              };
+            }
     }
   } catch (error) {
     console.log(error);
@@ -1032,8 +1084,8 @@ const facebook_get_account_images = async (ad_account_id,access_token)=>{
         'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
       }
     };
-    
-    const images  = await axios.request(config)
+
+    const images = await axios.request(config);
     if (images.data) {
       return {
         status: "success",
@@ -1068,8 +1120,8 @@ const facebook_get_account_videos = async (ad_account_id,access_token)=>{
     
     const videos  = await axios.request(config)
 
-    for(let i=0;i<videos.data.data.length;i++){
-        videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
+    for (let i = 0; i < videos.data.data.length; i++) {
+      videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0];
     }
     if (videos.data.data) {
       return {
