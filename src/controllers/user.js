@@ -579,7 +579,7 @@ async function register_generate_password(email,organization,role){
   let config = {
     method: 'post',
     maxBodyLength: Infinity,
-    url: 'http://localhost:9002/user/register',
+    url: 'http://3.108.227.8:8000/user/register',
     headers: { 
       'Content-Type': 'application/json'
     },
