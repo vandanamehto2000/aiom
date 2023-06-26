@@ -19,7 +19,8 @@ const {
   facebook_get_businesses,
   facebook_get_account_videos,
   facebook_get_account_images,
-  facebook_update_campaign
+  facebook_update_campaign,
+  db_save_insight
 } = require("../platform/facebook");
 
 const fields_constant = require("../utils/constant");
@@ -772,6 +773,30 @@ const update_campaign = async (req, res, next) => {
   }
 };
 
+// save insight data in db.
+const save_insight = async (req, res, next) => {
+  try {
+    let { ad_account_id, params } = req.query;
+    fields = fields_constant.fields[1];
+    params = JSON.parse(params);
+    const campaign_insights = await get_Insights(
+      ad_account_id,
+      fields,
+      "campaign",
+      req.facebook_token,
+      params
+    );
+    
+    // for(let i = 0 ){
+
+    // }
+
+  } catch (error) {
+    console.log(error);
+  }
+
+}
+
 
 module.exports = {
   create_campaign,
@@ -791,5 +816,6 @@ module.exports = {
   create_carousel,
   get_businesses,
   get_account_videos_images,
-  update_campaign
+  update_campaign,
+  save_insight
 };

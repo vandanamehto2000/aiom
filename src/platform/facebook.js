@@ -21,6 +21,10 @@ const facebook_url = process.env.FACEBOOK_URL;
 // const pageId = "106284349116205";
 // const id = "act_1239957706633747"; //local
 // const api = bizSdk.FacebookAdsApi.init(access_token);
+const campaignModel = require("../models/campaign");
+const adsetModel = require("../models/ad_set");
+const adModel = require("../models/ads")
+const { log } = require("util");
 
 //Create a Campaign
 const facebook_create_campaign = async (id, fields, params) => {
@@ -66,9 +70,7 @@ const facebook_get_Insights = async (
     params.limit = 100000;
     let fields1 = fields_constant.fields[5];
 
-
-
-    let fields2 = fields_constant.fields[2]
+    let fields2 = fields_constant.fields[2];
 
     let fields3 = fields_constant.fields[3];
 
@@ -1132,6 +1134,174 @@ const facebook_update_campaign = async (campaign_id, params, access_token) => {
   }
 };
 
+
+const db_save_insight = async (object_id,
+  fields,
+  level,
+  access_token,
+  params) => {
+  try {
+    params.limit = 100000;
+    let fields1 = fields_constant.fields[5];
+
+    let fields2 = fields_constant.fields[2];
+
+    let fields3 = fields_constant.fields[3];
+
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${facebook_url}/${object_id}/insights?level=${level}&fields=${fields}&limit=100000&access_token=${access_token}`,
+      headers: {},
+    };
+    const result = await axios.request(config);
+    let result1 = [];
+
+    if (level == "campaign") {
+      const campaigns_data = await new AdAccount(object_id).getCampaigns(
+        fields1,
+        params
+      );
+
+      if (campaigns_data.length > 0) {
+        for (let i = 0; i < campaigns_data.length; i++) {
+          if (campaigns_data[i]._data.daily_budget) {
+            campaigns_data[i]._data.daily_budget =
+              campaigns_data[i]._data.daily_budget / 100;
+          } else if (campaigns_data[i]._data.lifetime_budget) {
+            campaigns_data[i]._data.lifetime_budget =
+              campaigns_data[i]._data.lifetime_budget / 100;
+          }
+          result1.push(campaigns_data[i]._data);
+        }
+      }
+    } else if (level == "adset") {
+      params = {
+        limit: 100000,
+      };
+      const adsetset_data = await new Campaign(object_id).getAdSets(
+        fields2,
+        {}
+      );
+
+      if (adsetset_data.length > 0) {
+        for (let j = 0; j < adsetset_data.length; j++) {
+          if (adsetset_data[j]._data.daily_budget) {
+            adsetset_data[j]._data.daily_budget =
+              adsetset_data[j]._data.daily_budget / 100;
+          } else if (adsetset_data[j]._data.lifetime_budget) {
+            adsetset_data[j]._data.lifetime_budget =
+              adsetset_data[j]._data.lifetime_budget / 100;
+          }
+          result1.push(adsetset_data[j]._data);
+        }
+      }
+    } else if (level == "ad") {
+      params = {
+        limit: 100000
+      }
+      const ad_data = await new AdSet(object_id).getAds(fields3, params)
+
+      if (ad_data.length > 0) {
+        for (let k = 0; k < ad_data.length; k++) {
+          if (ad_data[k]._data.daily_budget) {
+            ad_data[k]._data.daily_budget = ad_data[k]._data.daily_budget / 100;
+          } else if (ad_data[k]._data.lifetime_budget) {
+            ad_data[k]._data.lifetime_budget =
+              ad_data[k]._data.lifetime_budget / 100;
+          }
+          result1.push(ad_data[k]._data);
+        }
+      }
+    }
+
+    const mergedArr = [];
+    for (let i = 0; i < result.data.data.length; i++) {
+      const obj = result.data.data[i]; //insights data
+
+      if ((matchingObj = result1.find((item) => item.id === obj.campaign_id))) {
+        //campaign data
+        mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
+      }
+      else if (
+        (matchingObj = result1.find((item) => item.adset_id === obj.id))
+      ) {
+        //adset data
+        mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
+      } else if (
+        (matchingObj = result1.find((item) => item.id === obj.ad_id))
+      ) {
+        //ad_data
+        mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
+      }
+    }
+
+    for (let i = 0; i < mergedArr.length; i++) {
+      let current_obj = mergedArr[i];
+      if (level == "campaign") {
+        let campaign_data = await campaignModel.findOne({ campaign_id: mergedArr[i].campaign_id });
+        // console.log(campaign_data, "ggggggggggggg", mergedArr[i].campaign_id);
+        if (campaign_data === null) {
+          await campaignModel.create(current_obj);
+        }
+
+      } else if (level == "adset") {
+        let adset_data = await adsetModel.findOne({ adset_id: mergedArr[i].adset_id });
+        if (adset_data === null) {
+          await adsetModel.create(current_obj);
+        }
+
+      } else if (level == "ad") {
+        let ad_data = await adModel.findOne({ ad_id: mergedArr[i].ad_id });
+        if (ad_data === null) {
+          await adModel.create(current_obj);
+        }
+
+      }
+    }
+
+    return ({
+      status: "success",
+      data: "data has inserted successfully"
+    })
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+
+
+// // console.log(mergedArr, "mergedarr.......");
+
+// for (let i = 0; i < mergedArr.length; i++) {
+//   let current_obj = mergedArr[i];
+//   let saveData;
+//   let campaign_data = await campaignModel.findOne({ campaign_id: mergedArr[i].campaign_id });
+//   console.log(campaign_data, "ggggggggggggg", mergedArr[i].campaign_id);
+//   if (campaign_data === null) {
+//     saveData =  await campaignModel.create(current_obj);
+//   }
+
+// }
+// return({
+//   status:"success",
+//   data:"data has inserted successfully"
+// })
+
+
+
+// for (let i = 0; i < mergedArr.length; i++) {
+//   let current_obj = mergedArr[i];
+//   console.log(current_obj);
+// let adset_data = await adsetModel.findOne({ adset_id: mergedArr[i].adset_id });
+// console.log(adset_data, "ggggggggggggg", mergedArr[i].adset_id);
+// if (adset_data === null) {
+//    await adsetModel.create(current_obj);
+// }
+// }
+
+
 module.exports = {
   facebook_create_campaign,
   facebook_get_Insights,
@@ -1152,6 +1322,7 @@ module.exports = {
   facebook_get_businesses,
   facebook_get_account_images,
   facebook_get_account_videos,
-  facebook_update_campaign
+  facebook_update_campaign,
+  db_save_insight
 }
 
