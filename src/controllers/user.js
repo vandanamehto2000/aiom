@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const responseApi = require("../utils/apiresponse");
 const { updateOne } = require("../models/facebook");
+const nodemailer = require("nodemailer");
+const axios = require("axios");
 
 const generateAccessToken = (response) => {
   return jwt.sign(
@@ -31,7 +33,6 @@ const register = async (req, res, next) => {
     assigned_BM: req.body.assigned_BM,
   };
   try {
-    console.log("data-", newUser);
     let userData = await User.create(newUser);
     return responseApi.successResponseWithData(
       res,
@@ -40,18 +41,17 @@ const register = async (req, res, next) => {
       StatusCodes.CREATED
     );
   } catch (err) {
-    console.log(err);
     err.code === 11000
       ? responseApi.ErrorResponse(
           res,
-          "Password entered is incorrect",
+          "User Already Registered",
           req.body.email,
           StatusCodes.BAD_REQUEST
         )
       : responseApi.ErrorResponse(
           res,
           "error",
-          error.message ? error.message : error
+          err.message ? err.message : err
         );
   }
 };
@@ -137,8 +137,6 @@ const logout = async (req, res, next) => {
 };
 
 const employee_details = async (req, res, next) => {
-
-  
   try {
     let organization_data;
     let result = [];
@@ -520,5 +518,105 @@ const delete_bm = async (req, res, next) => {
 
 }
 
+const add_users = async (req,res,next) => {
+  try {
+    let {receiver_email,organization,role} = req.body
+    
+    //nodemailer transporter using Gmail service
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD
+      }
+    });
+  
+    const pass = await register_generate_password(receiver_email,organization,role);
+    if(pass.status !=='success'){
+      return responseApi.ErrorResponse(res,"registration failed", pass.data.message)
+    }
 
-module.exports = { register, login, logout, employee_details,assigned_bm, role_update, delete_bm };
+    let password = pass.data.password
+    // Compose email message
+    const emailOptions = {
+      from: process.env.EMAIL,
+      to: receiver_email,
+      subject: 'Invitation to join our platform AIOM',
+      text: `Hello!\n\nYou have been invited to join our platform. Please click on the following link to accept the invitation:`,
+      html: `<p>Hello!</p><p>You have been invited to join our platform. Please click on the following link to Login: <a href="http://3.108.227.8:3000/login">AIOM LOGIN</a></p><p>Your System Generated Password is ${password}</p>`
+    };
+  
+    // Send the email
+    const info = await transporter.sendMail(emailOptions);
+  
+    if(info.messageId){
+      return responseApi.successResponseWithData(res,"Mail send Successfully",info.messageId)
+    }else{
+      return responseApi.ErrorResponse(res,"Error Sending Mail", info)
+    }
+    
+  } catch (error) {
+    console.log(error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
+async function register_generate_password(email,organization,role){
+  try {
+    let randomPassword = generateRandomPassword(8)
+  let data = JSON.stringify({
+    "username": email.split("@")[0],
+    "email": email,
+    "password": randomPassword,
+    "organization": organization,
+    "roles": role
+  });
+  
+  let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: 'http://3.108.227.8:8000/user/register',
+    headers: { 
+      'Content-Type': 'application/json'
+    },
+    data : data
+  };
+  const registered_data =  await axios.request(config)
+  if(registered_data?.data.status ==="success"){
+    return {
+      status:"success",
+      data: {password:randomPassword}
+    }
+  }else{
+    return {
+      status:"error",
+      data: registered_data.data
+    }
+  }
+  } catch (error) {
+    return {
+      status:"error",
+      data: error.response.data
+    }
+  }
+}
+
+
+
+function generateRandomPassword(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let password = '';
+  
+  for (let i = 0; i < length; i++) {
+    password += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  
+  return password;
+}
+// add_users()
+
+module.exports = { register, login, logout, employee_details,assigned_bm, role_update, delete_bm,add_users };
