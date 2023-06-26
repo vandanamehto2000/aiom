@@ -5,14 +5,27 @@ const AdAccount = bizSdk.AdAccount;
 const Campaign = bizSdk.Campaign;
 const AdSet = bizSdk.AdSet;
 const Ad = bizSdk.Ad;
+// const Ad = bizSdk.Ad;
 const User = bizSdk.User;
 const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
 const facebook = require("../models/facebook");
-const fields_constant = require("../utils/constant");
+const  fields_constant  = require("../utils/constant");
 const Page = bizSdk.Page;
+
 const facebook_url = process.env.FACEBOOK_URL;
+// console.log(facebook_url)
+
+// // global.Token;
+// // let obj = {}
+// let globalToken;
+// const access_details_fun = async()=>{
+//   const details = await facebook.find()
+//   // console.log(details)
+//   return details[0].token
+// }
+
 
 // const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
 // const app_secret = "<APP_SECRET>";
@@ -59,23 +72,19 @@ const facebook_create_campaign = async (id, fields, params) => {
 };
 
 //Get a Campaign
-const facebook_get_Insights = async (
-  object_id,
-  fields,
-  level,
-  access_token,
-  params
-) => {
+const facebook_get_Insights = async (object_id, fields, level, access_token, params) => {
   try {
-    params.limit = 100000;
-    let fields1 = fields_constant.fields[5];
 
-    let fields2 = fields_constant.fields[2];
+ 
+    params.limit = 100000
+    let fields1 = fields_constant.fields[5]
+   
+    let fields2 = fields_constant.fields[2]
 
-    let fields3 = fields_constant.fields[3];
+    let fields3 = fields_constant.fields[3]
 
     let config = {
-      method: "get",
+      method: 'get',
       maxBodyLength: Infinity,
       url: `${facebook_url}/${object_id}/insights?level=${level}&fields=${fields}&limit=100000&access_token=${access_token}`,
       headers: {},
@@ -84,52 +93,44 @@ const facebook_get_Insights = async (
     const result = await axios.request(config);
     if (!result.data) {
       return {
-        status: "error",
+        status: "unable to get data in result",
         data: result.message ? result.message : result,
-      };
+      }
     }
 
     let result1 = [];
 
     if (level == "campaign") {
-      const campaigns_data = await new AdAccount(object_id).getCampaigns(
-        fields1,
-        params
-      );
+      const campaigns_data = await new AdAccount(object_id).getCampaigns(fields1, params)
 
       if (campaigns_data.length > 0) {
         for (let i = 0; i < campaigns_data.length; i++) {
-          if (campaigns_data[i]._data.daily_budget) {
-            campaigns_data[i]._data.daily_budget =
-              campaigns_data[i]._data.daily_budget / 100;
-          } else if (campaigns_data[i]._data.lifetime_budget) {
-            campaigns_data[i]._data.lifetime_budget =
-              campaigns_data[i]._data.lifetime_budget / 100;
-          }
+          if(campaigns_data[i]._data.daily_budget){
+            campaigns_data[i]._data.daily_budget = campaigns_data[i]._data.daily_budget/100
+            }else if(campaigns_data[i]._data.lifetime_budget){
+              campaigns_data[i]._data.lifetime_budget = campaigns_data[i]._data.lifetime_budget/100
+            }
           result1.push(campaigns_data[i]._data);
         }
       }
+
     } else if (level == "adset") {
       params = {
-        limit: 100000,
-      };
-      const adsetset_data = await new Campaign(object_id).getAdSets(
-        fields2,
-        {}
-      );
+        limit:100000
+      }
+      const adsetset_data = await new Campaign(object_id).getAdSets(fields2, {});
 
       if (adsetset_data.length > 0) {
         for (let j = 0; j < adsetset_data.length; j++) {
-          if (adsetset_data[j]._data.daily_budget) {
-            adsetset_data[j]._data.daily_budget =
-              adsetset_data[j]._data.daily_budget / 100;
-          } else if (adsetset_data[j]._data.lifetime_budget) {
-            adsetset_data[j]._data.lifetime_budget =
-              adsetset_data[j]._data.lifetime_budget / 100;
-          }
-          result1.push(adsetset_data[j]._data);
+          if(adsetset_data[j]._data.daily_budget){
+            adsetset_data[j]._data.daily_budget = adsetset_data[j]._data.daily_budget/100
+            }else if(adsetset_data[j]._data.lifetime_budget){
+              adsetset_data[j]._data.lifetime_budget = adsetset_data[j]._data.lifetime_budget/100
+            }
+          result1.push(adsetset_data[j]._data)
         }
       }
+
     } else if (level == "ad") {
       params = {
         limit: 100000
@@ -138,13 +139,12 @@ const facebook_get_Insights = async (
 
       if (ad_data.length > 0) {
         for (let k = 0; k < ad_data.length; k++) {
-          if (ad_data[k]._data.daily_budget) {
-            ad_data[k]._data.daily_budget = ad_data[k]._data.daily_budget / 100;
-          } else if (ad_data[k]._data.lifetime_budget) {
-            ad_data[k]._data.lifetime_budget =
-              ad_data[k]._data.lifetime_budget / 100;
-          }
-          result1.push(ad_data[k]._data);
+          if(ad_data[k]._data.daily_budget){
+            ad_data[k]._data.daily_budget = ad_data[k]._data.daily_budget/100
+            }else if(ad_data[k]._data.lifetime_budget){
+              ad_data[k]._data.lifetime_budget = ad_data[k]._data.lifetime_budget/100
+            }
+          result1.push(ad_data[k]._data)
         }
       }
     }
@@ -153,30 +153,28 @@ const facebook_get_Insights = async (
     for (let i = 0; i < result.data.data.length; i++) {
       const obj = result.data.data[i]; //insights data
 
-      if ((matchingObj = result1.find((item) => item.id === obj.campaign_id))) {
-        //campaign data
+      if (matchingObj = result1.find(item => item.id === obj.campaign_id)) {  //campaign data
         mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
-      } else if (
-        (matchingObj = result1.find((item) => item.adset_id === obj.id))
-      ) {
-        //adset data
+
+      } else if (matchingObj = result1.find(item => item.adset_id === obj.id)) {   //adset data
         mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
-      } else if (
-        (matchingObj = result1.find((item) => item.id === obj.ad_id))
-      ) {
-        //ad_data
+      }
+      else if (matchingObj = result1.find(item => item.id === obj.ad_id)) { //ad_data
         mergedArr.push(matchingObj ? { ...obj, ...matchingObj } : obj);
       }
     }
+    
+
 
     if (mergedArr) {
       return {
         status: "success",
         data: mergedArr,
       };
-    } else {
+    }
+    else {
       return {
-        status: "error",
+        status: "unable to get merge data",
         data: mergedArr.message ? mergedArr.message : mergedArr,
       };
     }
@@ -190,6 +188,7 @@ const facebook_get_Insights = async (
     };
   }
 };
+
 
 //Create AdSET
 const facebook_create_adSet = async (id, fields, params) => {
@@ -235,7 +234,7 @@ const facebook_get_adSet = async (id, fields, params) => {
         for (let i = 0; i < adsetss.length; i++) {
           arr.push(adsetss[i]._data);
         }
-        console.log(arr, "-------------adset");
+        console.log(arr, "-------------adset")
         return {
           status: "success",
           data: arr,
@@ -315,20 +314,26 @@ const facebook_create_creative = async (
 ) => {
   try {
     let adcreatives;
+    // Create creative through object_story_id
     if (imagePath == null && imageName == null && "object_story_id" in params) {
       adcreatives = await new AdAccount(id).createAdCreative(fields, params);
     } else {
-      console.log("pass data", imagePath, imageName, access_token);
-      let result = await facebook_get_image_hash(
-        imagePath,
-        imageName,
-        access_token
-      );
-      let { hash, url, name } = result.data.images[`${imageName}`];
-      params.image_hash = hash;
-      params.object_story_spec.link_data.link = url;
-      params.object_story_spec.link_data.image_hash = hash;
-      adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+      // Create creative through hash_image and link
+      if (params.image_hash !== "") {
+        adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+      } else {
+        console.log("pass data", imagePath, imageName, access_token);
+        let result = await facebook_get_image_hash(
+          imagePath,
+          imageName,
+          access_token
+        );
+        let { hash, url, name } = result.data.images[`${imageName}`];
+        params.image_hash = hash;
+        params.object_story_spec.link_data.link = url;
+        params.object_story_spec.link_data.image_hash = hash;
+        adcreatives = await new AdAccount(id).createAdCreative(fields, params);
+      }
     }
     if (adcreatives._data) {
       return {
@@ -582,6 +587,7 @@ const facebook_get_location = async (params, access_token) => {
   }
 };
 
+
 // Get video data from page_id
 const facebook_get_video = async (id, access_token, video_id = null) => {
   try {
@@ -640,7 +646,7 @@ const facebook_get_images = async (id) => {
       for (let i = 0; i < photoss.length; i++) {
         result.push(photoss[i]._data);
       }
-      console.log(result);
+      console.log(result)
       return {
         status: "success",
         data: result,
@@ -826,7 +832,8 @@ const facebook_create_creative_video_upload = async (
         status: "success",
         data: result.data,
       };
-    } else {
+    }
+    else{
       return {
         status: "error",
         data: result.data,
@@ -867,6 +874,7 @@ const facebook_create_creative_video = async (id, fields, params) => {
     };
   }
 };
+
 
 const facebook_get_interest_behavior = async () => {
   try {
@@ -913,20 +921,21 @@ const creat_image_carousel = async (
   object_story_spec,
   access_token
 ) => {
-  let data = new FormData();
-  data.append("name", name);
-  data.append("object_story_spec", JSON.stringify(object_story_spec));
-  data.append("access_token", access_token);
 
-  let config = {
-    method: "post",
-    maxBodyLength: Infinity,
-    url: `${facebook_url}/${id}/adcreatives`,
-    headers: {
-      ...data.getHeaders(),
-    },
-    data: data,
-  };
+  let data = new FormData();
+data.append('name', name);
+data.append('object_story_spec', JSON.stringify(object_story_spec));
+data.append('access_token', access_token);
+
+let config = {
+  method: 'post',
+  maxBodyLength: Infinity,
+  url: `${facebook_url}/${id}/adcreatives`,
+  headers: { 
+    ...data.getHeaders()
+  },
+  data : data
+};
 
   const response = await axios.request(config);
   if (response.data) {
@@ -949,32 +958,84 @@ const facebook_create_carousel = async (
   access_token
 ) => {
   try {
-    for (let i = 0; i < fileData.length; i++) {
-      let result = await facebook_get_image_hash(
-        fileData[i].path,
-        fileData[i].filename,
-        access_token
-      );
-      let { hash, url, name } = result.data.images[`${fileData[i].filename}`];
-      object_story_spec.link_data.child_attachments[i].image_hash = hash;
-      object_story_spec.link_data.child_attachments[i].link = url;
-    }
-    let carousel_result = await creat_image_carousel(
-      id,
-      name,
-      object_story_spec,
-      access_token
-    );
-    if (carousel_result.status === "success") {
-      return {
-        status: "success",
-        data: carousel_result.data,
-      };
+    if (fileData.length > 0) {
+      // create carousel through upload files
+      let num_of_file = fileData.length;
+      let num_of_image = 0;
+      let num_of_video = 0;
+      for (let i = 0; i < num_of_file; i++) {
+        let file_type = fileData[i].mimetype.split("/").shift();
+        if (file_type === "image") {
+          num_of_image++;
+        } else if (file_type === "video") {
+          num_of_video++;
+        } else {
+          break;
+        }
+      }
+      if(num_of_file===num_of_image){
+        for (let i = 0; i < fileData.length; i++) {
+          let result = await facebook_get_image_hash(
+            fileData[i].path,
+            fileData[i].filename,
+            access_token
+          );
+          let { hash, url, name } = result.data.images[`${fileData[i].filename}`];
+          object_story_spec.link_data.child_attachments[i].image_hash = hash;
+          object_story_spec.link_data.child_attachments[i].link = url;
+        }
+        // upload image and create carousel
+        console.log("upload carousel------------for image")
+       let carousel_result = await creat_image_carousel(
+          id,
+          name,
+          object_story_spec,
+          access_token
+        );
+        if (carousel_result.status === "success") {
+          return {
+            status: "success",
+            data: carousel_result.data,
+          };
+        } else {
+          return {
+            status: "error",
+            data: carousel_result.data,
+          };
+        }
+      }
+      else if(num_of_file===num_of_video){
+        // upload video and create carousel
+        return {
+          status: "error",
+          data: "upload video and create carousel not implemented",
+        };
+      }
+      else{
+        return {
+          status: "error",
+          data: "upload only image or video",
+        };
+      }
     } else {
-      return {
-        status: "error",
-        data: carousel_result.data,
-      };
+            // create carousel through existing files
+            let carousel_result = await creat_image_carousel(
+              id,
+              name,
+              object_story_spec,
+              access_token
+            );
+            if (carousel_result.status === "success") {
+              return {
+                status: "success",
+                data: carousel_result.data,
+              };
+            } else {
+              return {
+                status: "error",
+                data: carousel_result.data,
+              };
+            }
     }
   } catch (error) {
     console.log(error);
@@ -991,13 +1052,12 @@ const facebook_get_businesses = async (access_token) => {
       method: "get",
       maxBodyLength: Infinity,
       url: `${facebook_url}/me/businesses?fields=id,name,created_by,owned_ad_accounts{name},owned_pages&access_token=${access_token}`,
-      headers: {
-        Cookie:
-          "fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z",
-      },
+      headers: { 
+        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
+      }
     };
-
-    const businesses = await axios.request(config);
+    
+    const businesses = await axios.request(config)
 
     if (businesses.data) {
       return {
@@ -1019,20 +1079,18 @@ const facebook_get_businesses = async (access_token) => {
   }
 };
 
-const facebook_get_account_images = async (ad_account_id, access_token) => {
+const facebook_get_account_images = async (ad_account_id,access_token)=>{
   try {
     let config = {
-      method: "get",
+      method: 'get',
       maxBodyLength: Infinity,
       url: `${facebook_url}/${ad_account_id}/adimages?limit=10000&fields=created_time,hash,name,permalink_url,status,updated_time,url&access_token=${access_token}`,
-      headers: {
-        Cookie:
-          "fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z",
-      },
+      headers: { 
+        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
+      }
     };
 
-
-    const images = await axios.request(config)
+    const images = await axios.request(config);
     if (images.data) {
       return {
         status: "success",
@@ -1051,24 +1109,24 @@ const facebook_get_account_images = async (ad_account_id, access_token) => {
       data: error.message ? error.message : error,
     };
   }
-};
+}
 
-const facebook_get_account_videos = async (ad_account_id, access_token) => {
+
+const facebook_get_account_videos = async (ad_account_id,access_token)=>{
   try {
     let config = {
-      method: "get",
+      method: 'get',
       maxBodyLength: Infinity,
       url: `${facebook_url}/${ad_account_id}/advideos?limit=10000&fields=id,thumbnails&access_token=${access_token}`,
-      headers: {
-        Cookie:
-          "fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z",
-      },
+      headers: { 
+        'Cookie': 'fr=0o1dLdoVGBvM3uvVe..BkeH03.jx.AAA.0.0.BkeH1X.AWVSxHsEyv4; sb=N314ZHuJdDmCSWwuzfh_bS6Z'
+      }
     };
+    
+    const videos  = await axios.request(config)
 
-    const videos = await axios.request(config);
-
-    for (let i = 0; i < videos.data.data.length; i++) {
-      videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
+    for(let i=0;i<videos.data.data.length;i++){
+        videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
     }
     if (videos.data.data) {
       return {
@@ -1099,13 +1157,70 @@ const facebook_update_campaign = async (campaign_id, params, access_token) => {
       }
     }
     if ("special_ad_categories" in params) {
-      data.append("special_ad_categories", JSON.stringify(params.special_ad_categories));
+      data.append(
+        "special_ad_categories",
+        JSON.stringify(params.special_ad_categories)
+      );
     }
     data.append("access_token", access_token);
     let config = {
       method: "post",
       maxBodyLength: Infinity,
       url: `${facebook_url}/${campaign_id}`,
+      headers: {
+        ...data.getHeaders(),
+      },
+      data: data,
+    };
+    let response = await axios.request(config);
+    if (response.data) {
+      return {
+        status: "success",
+        data: response.data,
+      };
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response,
+      };
+    }
+  } catch (error) {
+    console.log("error part1", error);
+    console.log("Error Message:" + error);
+    console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+};
+
+const facebook_update_adset = async (adset_id, params, access_token) => {
+  try {
+    let data = new FormData();
+    for (const key in params) {
+      if (
+        `${key}` !== "bid_adjustments" &&
+        `${key}` !== "promoted_object" &&
+        `${key}` !== "targeting"
+      ) {
+        data.append(`${key}`, `${params[key]}`);
+      }
+    }
+    if ("bid_adjustments" in params) {
+      data.append("bid_adjustments", JSON.stringify(params.bid_adjustments));
+    }
+    if ("promoted_object" in params) {
+      data.append("promoted_object", JSON.stringify(params.promoted_object));
+    }
+    if ("targeting" in params) {
+      data.append("targeting", JSON.stringify(params.targeting));
+    }
+    data.append("access_token", access_token);
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${facebook_url}/${adset_id}`,
       headers: {
         ...data.getHeaders(),
       },
@@ -1323,6 +1438,6 @@ module.exports = {
   facebook_get_account_images,
   facebook_get_account_videos,
   facebook_update_campaign,
+  facebook_update_adset,
   db_save_insight
 }
-
