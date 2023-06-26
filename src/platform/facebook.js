@@ -13,6 +13,10 @@ const facebook = require("../models/facebook");
 const fields_constant = require("../utils/constant");
 const Page = bizSdk.Page;
 const facebook_url = process.env.FACEBOOK_URL;
+const path = require("path");
+const { createWriteStream } = require("fs");
+const { promisify } = require("util");
+const streamPipeline = promisify(require("stream").pipeline);
 
 // const access_token = "EAARmX2NDin4BAFX6rkDokk5zcMxI2AJsBnmuRNaziBYvG0WfDFZCeYIwqsCef3RCAFvV2anQWcP74G9ZB2LyH574WE0HbSRSx9ITBdhZAwjGtftgI17bhP05cinMsJ8VZCQZBRPdmqwT4VsApzgMZAZCRFxMrBYe32n3ioKiCUa6Tnd8lR8RwZCslAbh3ZBsF9HFPh4ZCgR3HOQQZDZD"
 // const app_secret = "<APP_SECRET>";
@@ -965,20 +969,21 @@ const facebook_create_carousel = async (
           break;
         }
       }
-      if(num_of_file===num_of_image){
+      if (num_of_file === num_of_image) {
         for (let i = 0; i < fileData.length; i++) {
           let result = await facebook_get_image_hash(
             fileData[i].path,
             fileData[i].filename,
             access_token
           );
-          let { hash, url, name } = result.data.images[`${fileData[i].filename}`];
+          let { hash, url, name } =
+            result.data.images[`${fileData[i].filename}`];
           object_story_spec.link_data.child_attachments[i].image_hash = hash;
           object_story_spec.link_data.child_attachments[i].link = url;
         }
         // upload image and create carousel
-        console.log("upload carousel------------for image")
-       let carousel_result = await creat_image_carousel(
+        console.log("upload carousel------------for image");
+        let carousel_result = await creat_image_carousel(
           id,
           name,
           object_story_spec,
@@ -995,39 +1000,60 @@ const facebook_create_carousel = async (
             data: carousel_result.data,
           };
         }
-      }
-      else if(num_of_file===num_of_video){
+      } else if (num_of_file === num_of_video) {
         // upload video and create carousel
         return {
           status: "error",
           data: "upload video and create carousel not implemented",
         };
-      }
-      else{
+      } else {
         return {
           status: "error",
           data: "upload only image or video",
         };
       }
     } else {
-            // create carousel through existing files
-            let carousel_result = await creat_image_carousel(
-              id,
-              name,
-              object_story_spec,
-              access_token
-            );
-            if (carousel_result.status === "success") {
-              return {
-                status: "success",
-                data: carousel_result.data,
-              };
-            } else {
-              return {
-                status: "error",
-                data: carousel_result.data,
-              };
-            }
+      // create carousel through existing files
+      for (
+        let i = 0;
+        i < object_story_spec.link_data.child_attachments.length;
+        i++
+      ) {
+        if ("video_id" in object_story_spec.link_data.child_attachments[i]) {
+          let result = await facebook_get_image_hash_with_remote_url(
+            object_story_spec.link_data.child_attachments[i].link,
+            "sample_image",
+            access_token
+          );
+          if (result.status === "success") {
+            let { hash, url, name } = result.data.images[`temp_image.jpg`];
+            object_story_spec.link_data.child_attachments[i].image_hash = hash;
+            object_story_spec.link_data.child_attachments[i].link = url;
+          } else {
+            return {
+              status: "error",
+              data: "error on hash_image creation",
+            };
+          }
+        }
+      }
+      let carousel_result = await creat_image_carousel(
+        id,
+        name,
+        object_story_spec,
+        access_token
+      );
+      if (carousel_result.status === "success") {
+        return {
+          status: "success",
+          data: carousel_result.data,
+        };
+      } else {
+        return {
+          status: "error",
+          data: carousel_result.data,
+        };
+      }
     }
   } catch (error) {
     console.log(error);
@@ -1236,6 +1262,51 @@ const facebook_update_adset = async (adset_id, params, access_token) => {
     console.log("error part1", error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
+    return {
+      status: "error",
+      data: error.message ? error.message : error,
+    };
+  }
+};
+const downloadImage = async (url, imagePath) => {
+  const response = await axios.get(url, { responseType: "stream" });
+  await streamPipeline(response.data, createWriteStream(imagePath));
+};
+
+const facebook_get_image_hash_with_remote_url = async (imageURL, imageName, access_token) => {
+  try {
+    const imagePath = path.join(__dirname, "temp_image.jpg");
+    await downloadImage(imageURL, imagePath);
+    const data = new FormData();
+    data.append(imageName, fs.createReadStream(imagePath));
+    data.append("access_token", access_token);
+
+    const config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://graph.facebook.com/v17.0/act_1239957706633747/adimages",
+      headers: {
+        ...data.getHeaders(),
+      },
+      data: data,
+    };
+
+    const response = await axios.request(config);
+    fs.unlinkSync(imagePath); // Remove temporary image file
+
+    if (response.data) {
+      return {
+        status: "success",
+        data: response.data,
+      };
+    } else {
+      return {
+        status: "error",
+        data: response.message ? response.message : response,
+      };
+    }
+  } catch (error) {
+    console.log(error);
     return {
       status: "error",
       data: error.message ? error.message : error,
