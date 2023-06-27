@@ -2,9 +2,11 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 let MONGO_URI = "";
 if (process.env.MONGO_DATABASE_USERNAME == "") {
-  MONGO_URI = `mongodb://${process.env.MONGO_DATABASE_HOST}:27017/${process.env.MONGO_DATABASE_DATABASE}`;
+
+   MONGO_URI = `mongodb://${process.env.MONGO_DATABASE_HOST}:27017/${process.env.MONGO_DATABASE_DATABASE}`;
 } else {
-  MONGO_URI = `mongodb://${process.env.MONGO_DATABASE_USERNAME}:${process.env.MONGO_DATABASE_PASSWORD}@${process.env.MONGO_DATABASE_HOST}:27017/${process.env.MONGO_DATABASE_DATABASE}?authSource=admin&authMechanism=SCRAM-SHA-1`;
+  //MONGO_URI = `mongodb://${process.env.MONGO_DATABASE_USERNAME}:${process.env.MONGO_DATABASE_PASSWORD}@${process.env.MONGO_DATABASE_HOST}:27017/${process.env.MONGO_DATABASE_DATABASE}?authSource=admin&authMechanism=SCRAM-SHA-1`;
+  MONGO_URI= `mongodb://${process.env.MONGO_DATABASE_USERNAME}:${process.env.MONGO_DATABASE_PASSWORD}@${process.env.MONGO_DATABASE_HOST}:${process.env.MONGO_DATABASE_PORT}/${process.env.MONGO_DATABASE_DATABASE}?directConnection=true&serverSelectionTimeoutMS=2000&authSource=admin&appName=mongosh+1.8.2&authMechanism=DEFAULT`
 }
 
 mongoose
