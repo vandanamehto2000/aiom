@@ -1384,18 +1384,17 @@ const facebook_update_ads = async (ad_id, params_data, access_token) => {
 
 const facebook_get_campaign_by_id = async (
   campaign_id,
-  fields,
   access_token
 ) => {
   try {
+    let fields_data=fields_constant.fields[5]
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `${facebook_url}/${campaign_id}?fields=${fields}&access_token=${access_token}`,
+      url: `${facebook_url}/${campaign_id}?fields=${fields_data}&access_token=${access_token}`,
       headers: {},
     };
     let response = await axios.request(config);
-    console.log("-------------response---", response);
     if (response.data) {
       return {
         status: "success",
@@ -1418,12 +1417,13 @@ const facebook_get_campaign_by_id = async (
   }
 };
 
-const facebook_get_adset_by_id = async (adset_id, fields, access_token) => {
+const facebook_get_adset_by_id = async (adset_id, access_token) => {
   try {
+    let fields_data=fields_constant.fields[2]
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `${facebook_url}/${adset_id}?fields=${fields}&access_token=${access_token}`,
+      url: `${facebook_url}/${adset_id}?fields=${fields_data}&access_token=${access_token}`,
       headers: {},
     };
     let response = await axios.request(config);
