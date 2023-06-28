@@ -1,4 +1,4 @@
-const { create_campaign, get_Insights, create_adSet, get_adSet, create_creative, get_creative, create_ad, get_account_pages, get_location_keys, create_creative_video_upload, create_creative_video, get_page_video, get_ads, get_page_images,create_carousel,get_businesses, get_account_videos_images,update_campaign, update_adset,save_insight } = require("../controllers/facebook");
+const { create_campaign, get_Insights, create_adSet, get_adSet, create_creative, get_creative, create_ad, get_account_pages, get_location_keys, create_creative_video_upload, create_creative_video, get_page_video, get_ads, get_page_images,create_carousel,get_businesses, get_account_videos_images,update_campaign, update_adset,save_insight,get_initial_token } = require("../controllers/facebook");
 const { authenticateToken, fb_middleware } = require('../middleware/auth')
 const { uploadVideo, uploadImage, uploadImages } = require('../middleware/fileUpload')
 const express = require("express");
@@ -25,6 +25,7 @@ router.get("/account/media",authenticateToken,fb_middleware,get_account_videos_i
 router.post("/campaign/update",authenticateToken,fb_middleware,update_campaign)
 router.post("/adset/update",authenticateToken,fb_middleware,update_adset)
 router.post("/save-insight", authenticateToken, fb_middleware, save_insight);
+router.post("/get-initial-token",get_initial_token);
 
 
 module.exports = router;

@@ -28,6 +28,11 @@ const fields_constant = require("../utils/constant");
 const { StatusCodes } = require("http-status-codes");
 const responseApi = require("../utils/apiresponse");
 const { APIResponse } = require("facebook-nodejs-business-sdk");
+const campaignModel = require("../models/campaign");
+const adsetModel = require("../models/ad_set");
+const adModel = require("../models/ads");
+const facebookModel = require("../models/facebook");
+
 
 
 //Create a Campaign
@@ -270,7 +275,7 @@ const create_creative = async (req, res, next) => {
           );
         }
       }
-       else {
+      else {
         return responseApi.ErrorResponse(
           res,
           "Invalid Params",
@@ -802,7 +807,7 @@ const update_campaign = async (req, res, next) => {
 //Update a Adset
 const update_adset = async (req, res, next) => {
   try {
-    const { adset_id,params } = req.body;
+    const { adset_id, params } = req.body;
     const access_token = req.facebook_token;
     const facebook_result = await facebook_update_adset(adset_id, params, access_token);
     if (facebook_result.status == "success") {
@@ -836,24 +841,120 @@ const save_insight = async (req, res, next) => {
     let { ad_account_id, params } = req.query;
     fields = fields_constant.fields[1];
     params = JSON.parse(params);
-    const campaign_insights = await get_Insights(
+    const campaign_insights = await facebook_get_Insights(
       ad_account_id,
       fields,
       "campaign",
       req.facebook_token,
       params
     );
-    
-    // for(let i = 0 ){
 
-    // }
+    let campaignData = [];
+    let adsetData = [];
+    let adData = [];
+    let batchSize;
+    let totalData;
+    let batch;
+    let operations;
 
+
+    if (campaign_insights.status == "success") {
+      let batchSize;
+      let totalData
+      for (let i = 0; i < campaign_insights.data.length; i++) {
+        let adset_insights = await facebook_get_Insights(
+          campaign_insights.data[i].campaign_id,
+          fields,
+          "adset",
+          req.facebook_token,
+          params
+        );
+        if (adset_insights.status == "success") {
+          for (let j = 0; j < adset_insights.data.length; j++) {
+        let ad_insights = await facebook_get_Insights(
+          adset_insights.data[j].adset_id,
+          fields,
+          "ad",
+          req.facebook_token,
+          params
+        );
+        if (ad_insights.status == "success") {
+          for (let k = 0; k < ad_insights.data.length; k++) {
+            adData.push(ad_insights.data[k])
+            batchSize = 100;
+            totalData = adData.length;
+
+            for (let i = 0; i < totalData; i += batchSize) {
+              batch = adData.slice(i, i + batchSize);
+              operations = batch.map((doc) => ({
+                updateOne: {
+                  filter: { ad_id: doc.ad_id },
+                  update: { $set: doc },
+                  upsert: true,
+                },
+              }));
+              await adModel.bulkWrite(operations);
+              await new Promise((resolve) => setTimeout(resolve, 3000));
+            }
+          }
+
+        }
+            adsetData.push(adset_insights.data[j])
+            batchSize = 10;
+            totalData = adsetData.length;
+
+            for (let i = 0; i < totalData; i += batchSize) {
+              batch = adsetData.slice(i, i + batchSize);
+              operations = batch.map((doc) => ({
+                updateOne: {
+                  filter: { adset_id: doc.adset_id },
+                  update: { $set: doc },
+                  upsert: true,
+                },
+              }));
+              await adsetModel.bulkWrite(operations);
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+          }
+        }
+
+        campaignData.push(campaign_insights.data[i])
+        operations = campaignData.map((doc) => ({
+          updateOne: {
+            filter: { campaign_id: doc.campaign_id },
+            update: { $set: doc },
+            upsert: true,
+          },
+        }));
+        await campaignModel.bulkWrite(operations);
+      }
+    }
+    return responseApi.successResponseWithData(res, "data has inserted successfully", "");
   } catch (error) {
     console.log(error);
   }
-
 }
 
+
+const get_initial_token = async (req, res, next) => {
+  try {
+    const getBusinessesDetails = await facebook_get_businesses(req.body.facebook_token);
+    const operations = getBusinessesDetails.data.data.map((doc) => ({
+
+      updateOne: {
+        filter: { id: doc.id },
+        update: { $set: doc },
+        upsert: true,
+      },
+    }));
+
+    let result = await facebookModel.bulkWrite(operations);
+    return responseApi.successResponseWithData(res, "data access", result);
+  }
+  catch (err) {
+    console.log(err);
+  }
+}
 
 module.exports = {
   create_campaign,
@@ -875,5 +976,6 @@ module.exports = {
   get_account_videos_images,
   update_campaign,
   update_adset,
-  save_insight
+  save_insight,
+  get_initial_token
 };
