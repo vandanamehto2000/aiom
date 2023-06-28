@@ -140,8 +140,8 @@ const employee_details = async (req, res, next) => {
   try {
     let organization_data;
     let result = [];
-    let { organization, email } = req.body;
-    if (organization == "aiom") {
+    let { organization, email } = req.query;
+
       organization_data = await User.find(
         { organization: organization },
         { username: 1, email: 1, roles: 1, assigned_BM: 1, assigned_ad_account: 1 }
@@ -150,7 +150,7 @@ const employee_details = async (req, res, next) => {
         return responseApi.ErrorResponse(
           res,
           "unable to find Organization data.",
-          organization_data,
+          "No User with this organization",
           StatusCodes.NOT_FOUND
         );
       } else {
@@ -166,14 +166,7 @@ const employee_details = async (req, res, next) => {
           StatusCodes.OK
         );
       }
-    } else {
-      return responseApi.ErrorResponse(
-        res,
-        "organization has no name aiiom.",
-        `no user found with this organization- ${organization}`,
-        StatusCodes.BAD_REQUEST
-      );
-    }
+    
   } catch (error) {
     return responseApi.ErrorResponse(
       res,
@@ -530,10 +523,10 @@ const add_users = async (req, res, next) => {
         pass: process.env.PASSWORD
       }
     });
-
-    const pass = await register_generate_password(receiver_email, organization, role);
-    if (pass.status !== 'success') {
-      return responseApi.ErrorResponse(res, "registration failed", pass.data.message)
+  
+    const pass = await register_generate_password(receiver_email,organization,role);
+    if(pass.status !=='success'){
+      return responseApi.ErrorResponse(res,"registration failed", pass.data)
     }
 
     let password = pass.data.password
@@ -543,16 +536,16 @@ const add_users = async (req, res, next) => {
       to: receiver_email,
       subject: 'Invitation to join our platform AIOM',
       text: `Hello!\n\nYou have been invited to join our platform. Please click on the following link to accept the invitation:`,
-      html: `<p>Hello!</p><p>You have been invited to join our platform. Please click on the following link to Login: <a href="http://3.108.227.8:3000/login">AIOM LOGIN</a></p><p>Your System Generated Password is ${password}</p>`
+      html: `<p>Hello!</p><p>You have been invited to join our platform. Please click on the following link to Login: <a href="http://3.108.227.8:3000/login">AIOM LOGIN</a></p><p>Your System Generated Password is ${password}</p><p>Use your EMAIL and this Password to login.</p><p>Regards</p><p>AIOM TEAM</p>`
     };
 
     // Send the email
     const info = await transporter.sendMail(emailOptions);
-
-    if (info.messageId) {
-      return responseApi.successResponseWithData(res, "Mail send Successfully", info.messageId)
-    } else {
-      return responseApi.ErrorResponse(res, "Error Sending Mail", info)
+  
+    if(info.messageId){
+      return responseApi.successResponseWithData(res,"Mail send Successfully",`Mail sent with message id ${info.messageId}`)
+    }else{
+      return responseApi.ErrorResponse(res,"Error Sending Mail", info)
     }
 
   } catch (error) {
@@ -568,39 +561,60 @@ const add_users = async (req, res, next) => {
 async function register_generate_password(email, organization, role) {
   try {
     let randomPassword = generateRandomPassword(8)
-    let data = JSON.stringify({
-      "username": email.split("@")[0],
-      "email": email,
-      "password": randomPassword,
-      "organization": organization,
-      "roles": role
-    });
+  let data = JSON.stringify({
+    "username": email.split("@")[0],
+    "email": email,
+    "password": randomPassword,
+    "organization": organization,
+    "roles": role
+  });
+  
+  
 
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: 'http://3.108.227.8:8000/user/register',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: data
-    };
-    const registered_data = await axios.request(config)
-    if (registered_data?.data.status === "success") {
+
+  const newUser = {
+    username: email.split("@")[0],
+    email: email,
+    password: CryptoJS.AES.encrypt(
+      randomPassword,
+      process.env.PASS_SECRET
+    ).toString(),
+    organization: organization,
+    roles: role
+  };
+
+    let userData = await User.create(newUser);
+    
+    if(!userData){
       return {
-        status: "success",
-        data: { password: randomPassword }
-      }
-    } else {
-      return {
-        status: "error",
-        data: registered_data.data
+        status:"error",
+        data: "Error Registering User"
       }
     }
-  } catch (error) {
     return {
-      status: "error",
-      data: error.response.data
+      status:"success",
+      data: {
+        password:randomPassword
+      }
+    }
+
+  // if(registered_data?.data.status ==="success"){
+  //   return {
+  //     status:"success",
+  //     data: {password:randomPassword}
+  //   }
+  // }else{
+  //   return {
+  //     status:"error",
+  //     data: registered_data.data
+  //   }
+  // }
+  } catch (error) {
+    console.log(error.message)
+   
+    return {
+      status:"error",
+      data: error.code === 11000 ? "Invite Already Sent": error.message
     }
   }
 }
