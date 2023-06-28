@@ -20,7 +20,10 @@ const {
   facebook_get_account_videos,
   facebook_get_account_images,
   facebook_update_campaign,
-  facebook_update_adset
+  facebook_update_adset,
+  facebook_update_ads,
+  facebook_get_campaign_by_id,
+  facebook_get_adset_by_id
 } = require("../platform/facebook");
 
 const fields_constant = require("../utils/constant");
@@ -829,6 +832,102 @@ const update_adset = async (req, res, next) => {
   }
 };
 
+//Update a Ad
+const update_ads = async (req, res, next) => {
+  try {
+    const { ad_id,params_data } = req.body;
+    const access_token = req.facebook_token;
+    const facebook_result = await facebook_update_ads(ad_id, params_data, access_token);
+    if (facebook_result.status == "success") {
+      return responseApi.successResponseWithData(
+        res,
+        "successfully update adset data",
+        facebook_result.data,
+        StatusCodes.CREATED
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "unable to update adset data",
+        facebook_result.data,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  } catch (error) {
+    console.log("error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
+//Get Campaign data By compaign_id
+const get_campaign_by_id = async (req, res, next) => {
+  try {
+    let campaign_id = req.params.id;
+    const { fields } = req.query;
+    const access_token = req.facebook_token;
+    const facebook_result = await facebook_get_campaign_by_id(campaign_id,fields, access_token);
+    if (facebook_result.status == "success") {
+      return responseApi.successResponseWithData(
+        res,
+        "Successfully get campaign data by campaign id",
+        facebook_result.data,
+        StatusCodes.CREATED
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "Unable to get campaign data by campaign id",
+        facebook_result.data,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  } catch (error) {
+    console.log("error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
+//Get Adset data By adset_id
+const get_adset_by_id = async (req, res, next) => {
+  try {
+    let adset_id = req.params.id;
+    const { fields } = req.query;
+    const access_token = req.facebook_token;
+    const facebook_result = await facebook_get_adset_by_id(adset_id,fields, access_token);
+    if (facebook_result.status == "success") {
+      return responseApi.successResponseWithData(
+        res,
+        "Successfully get adset data by adset id",
+        facebook_result.data,
+        StatusCodes.CREATED
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "Unable to get adset data by adset id",
+        facebook_result.data,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  } catch (error) {
+    console.log("error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
+
 
 module.exports = {
   create_campaign,
@@ -849,5 +948,8 @@ module.exports = {
   get_businesses,
   get_account_videos_images,
   update_campaign,
-  update_adset
+  update_adset,
+  update_ads,
+  get_campaign_by_id,
+  get_adset_by_id
 };

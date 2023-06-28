@@ -1,4 +1,4 @@
-const { create_campaign, get_Insights, create_adSet, get_adSet, create_creative, get_creative, create_ad, get_account_pages, get_location_keys, create_creative_video_upload, create_creative_video, get_page_video, get_ads, get_page_images,create_carousel,get_businesses, get_account_videos_images,update_bm,update_campaign, update_adset } = require("../controllers/facebook");
+const { create_campaign, get_Insights, create_adSet, get_adSet, create_creative, get_creative, create_ad, get_account_pages, get_location_keys, create_creative_video_upload, create_creative_video, get_page_video, get_ads, get_page_images,create_carousel,get_businesses, get_account_videos_images,update_bm,update_campaign, update_adset,update_ads,get_campaign_by_id,get_adset_by_id} = require("../controllers/facebook");
 const { authenticateToken, fb_middleware } = require('../middleware/auth')
 const { uploadVideo, uploadImage, uploadImages } = require('../middleware/fileUpload')
 const express = require("express");
@@ -24,5 +24,8 @@ router.get("/businesses",authenticateToken,fb_middleware,get_businesses)
 router.get("/account/media",authenticateToken,fb_middleware,get_account_videos_images)
 router.post("/campaign/update",authenticateToken,fb_middleware,update_campaign)
 router.post("/adset/update",authenticateToken,fb_middleware,update_adset)
+router.post("/ad/update",authenticateToken,fb_middleware,update_ads)
+router.get("/campaign/get-campaign-by-id/:id",authenticateToken,fb_middleware,get_campaign_by_id)
+router.get("/adset/get-adset-by-id/:id",authenticateToken,fb_middleware,get_adset_by_id)
 
 module.exports = router;
