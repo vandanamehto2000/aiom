@@ -1440,7 +1440,6 @@ const facebook_get_adset_by_id = async (adset_id, access_token) => {
       };
     }
   } catch (error) {
-    console.log("error part1", error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
     return {
