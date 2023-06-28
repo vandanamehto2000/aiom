@@ -10,7 +10,7 @@ const User = bizSdk.User;
 const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
-const facebook = require("../models/facebook");
+const facebook = require("../models/businees");
 const  fields_constant  = require("../utils/constant");
 const Page = bizSdk.Page;
 

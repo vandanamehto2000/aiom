@@ -3,7 +3,7 @@ const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const responseApi = require("../utils/apiresponse");
-const { updateOne } = require("../models/facebook");
+const { updateOne } = require("../models/businees");
 const nodemailer = require("nodemailer");
 const axios = require("axios");
 

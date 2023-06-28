@@ -25,7 +25,7 @@ router.get("/account/media",authenticateToken,fb_middleware,get_account_videos_i
 router.post("/campaign/update",authenticateToken,fb_middleware,update_campaign)
 router.post("/adset/update",authenticateToken,fb_middleware,update_adset)
 router.post("/save-insight", authenticateToken, fb_middleware, save_insight);
-router.post("/get-initial-token",get_initial_token);
+router.post("/get-initial-token",authenticateToken,get_initial_token);
 
 
 module.exports = router;

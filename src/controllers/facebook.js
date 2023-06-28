@@ -21,7 +21,6 @@ const {
   facebook_get_account_images,
   facebook_update_campaign,
   facebook_update_adset,
-  db_save_insight
 } = require("../platform/facebook");
 
 const fields_constant = require("../utils/constant");
@@ -31,8 +30,7 @@ const { APIResponse } = require("facebook-nodejs-business-sdk");
 const campaignModel = require("../models/campaign");
 const adsetModel = require("../models/ad_set");
 const adModel = require("../models/ads");
-const facebookModel = require("../models/facebook");
-
+const businessModel = require("../models/businees");
 
 
 //Create a Campaign
@@ -837,119 +835,133 @@ const update_adset = async (req, res, next) => {
 
 // save insight data in db.
 const save_insight = async (req, res, next) => {
-  try {
-    let { ad_account_id, params } = req.query;
-    fields = fields_constant.fields[1];
-    params = JSON.parse(params);
-    const campaign_insights = await facebook_get_Insights(
-      ad_account_id,
-      fields,
-      "campaign",
-      req.facebook_token,
-      params
-    );
+  // try {
+  //   let { ad_account_id, params } = req.query;
+  //   fields = fields_constant.fields[1];
+  //   params = JSON.parse(params);
+  //   const campaign_insights = await facebook_get_Insights(
+  //     ad_account_id,
+  //     fields,
+  //     "campaign",
+  //     req.facebook_token,
+  //     params
+  //   );
 
-    let campaignData = [];
-    let adsetData = [];
-    let adData = [];
-    let batchSize;
-    let totalData;
-    let batch;
-    let operations;
+  //   let campaignData = [];
+  //   let adsetData = [];
+  //   let adData = [];
+  //   let batchSize;
+  //   let totalData;
+  //   let batch;
+  //   let operations;
 
 
-    if (campaign_insights.status == "success") {
-      let batchSize;
-      let totalData
-      for (let i = 0; i < campaign_insights.data.length; i++) {
-        let adset_insights = await facebook_get_Insights(
-          campaign_insights.data[i].campaign_id,
-          fields,
-          "adset",
-          req.facebook_token,
-          params
-        );
-        if (adset_insights.status == "success") {
-          for (let j = 0; j < adset_insights.data.length; j++) {
-        let ad_insights = await facebook_get_Insights(
-          adset_insights.data[j].adset_id,
-          fields,
-          "ad",
-          req.facebook_token,
-          params
-        );
-        if (ad_insights.status == "success") {
-          for (let k = 0; k < ad_insights.data.length; k++) {
-            adData.push(ad_insights.data[k])
-            batchSize = 100;
-            totalData = adData.length;
+  //   if (campaign_insights.status == "success") {
+  //     let batchSize;
+  //     let totalData
+  //     for (let i = 0; i < campaign_insights.data.length; i++) {
+  //       let adset_insights = await facebook_get_Insights(
+  //         campaign_insights.data[i].campaign_id,
+  //         fields,
+  //         "adset",
+  //         req.facebook_token,
+  //         params
+  //       );
+  //       if (adset_insights.status == "success") {
+  //         for (let j = 0; j < adset_insights.data.length; j++) {
+  //           let ad_insights = await facebook_get_Insights(
+  //             adset_insights.data[j].adset_id,
+  //             fields,
+  //             "ad",
+  //             req.facebook_token,
+  //             params
+  //           );
+  //           if (ad_insights.status == "success") {
+  //             for (let k = 0; k < ad_insights.data.length; k++) {
+  //               adData.push(ad_insights.data[k])
+  //               batchSize = 100;
+  //               totalData = adData.length;
 
-            for (let i = 0; i < totalData; i += batchSize) {
-              batch = adData.slice(i, i + batchSize);
-              operations = batch.map((doc) => ({
-                updateOne: {
-                  filter: { ad_id: doc.ad_id },
-                  update: { $set: doc },
-                  upsert: true,
-                },
-              }));
-              await adModel.bulkWrite(operations);
-              await new Promise((resolve) => setTimeout(resolve, 3000));
-            }
-          }
+  //               for (let i = 0; i < totalData; i += batchSize) {
+  //                 batch = adData.slice(i, i + batchSize);
+  //                 operations = batch.map((doc) => ({
+  //                   updateOne: {
+  //                     filter: { ad_id: doc.ad_id },
+  //                     update: { $set: doc },
+  //                     upsert: true,
+  //                   },
+  //                 }));
+  //                 await adModel.bulkWrite(operations);
+  //                 await new Promise((resolve) => setTimeout(resolve, 3000));
+  //               }
+  //             }
 
-        }
-            adsetData.push(adset_insights.data[j])
-            batchSize = 10;
-            totalData = adsetData.length;
+  //           }
+  //           adsetData.push(adset_insights.data[j])
+  //           batchSize = 10;
+  //           totalData = adsetData.length;
 
-            for (let i = 0; i < totalData; i += batchSize) {
-              batch = adsetData.slice(i, i + batchSize);
-              operations = batch.map((doc) => ({
-                updateOne: {
-                  filter: { adset_id: doc.adset_id },
-                  update: { $set: doc },
-                  upsert: true,
-                },
-              }));
-              await adsetModel.bulkWrite(operations);
-              await new Promise((resolve) => setTimeout(resolve, 2000));
-            }
-          }
-        }
+  //           for (let i = 0; i < totalData; i += batchSize) {
+  //             batch = adsetData.slice(i, i + batchSize);
+  //             operations = batch.map((doc) => ({
+  //               updateOne: {
+  //                 filter: { adset_id: doc.adset_id },
+  //                 update: { $set: doc },
+  //                 upsert: true,
+  //               },
+  //             }));
+  //             await adsetModel.bulkWrite(operations);
+  //             await new Promise((resolve) => setTimeout(resolve, 2000));
+  //           }
+  //         }
+  //       }
 
-        campaignData.push(campaign_insights.data[i])
-        operations = campaignData.map((doc) => ({
-          updateOne: {
-            filter: { campaign_id: doc.campaign_id },
-            update: { $set: doc },
-            upsert: true,
-          },
-        }));
-        await campaignModel.bulkWrite(operations);
-      }
-    }
-    return responseApi.successResponseWithData(res, "data has inserted successfully", "");
-  } catch (error) {
-    console.log(error);
-  }
+  //       campaignData.push(campaign_insights.data[i])
+  //       operations = campaignData.map((doc) => ({
+  //         updateOne: {
+  //           filter: { campaign_id: doc.campaign_id },
+  //           update: { $set: doc },
+  //           upsert: true,
+  //         },
+  //       }));
+  //       await campaignModel.bulkWrite(operations);
+  //     }
+  //   }
+  //   return responseApi.successResponseWithData(res, "data has inserted successfully", "");
+  // } catch (error) {
+  //   console.log(error);
+  // }
 }
 
 
 const get_initial_token = async (req, res, next) => {
   try {
     const getBusinessesDetails = await facebook_get_businesses(req.body.facebook_token);
-    const operations = getBusinessesDetails.data.data.map((doc) => ({
+    if (getBusinessesDetails.status == "success") {
+      const operations = getBusinessesDetails.data.data.map((doc) => ({
+          updateOne: {
+            filter: { id: doc.id },
+            update: {
+              $set: {
+                id: doc.id,
+                name: doc.name,
+                owned_ad_accounts: doc.owned_ad_accounts ? doc.owned_ad_accounts.data : [],
+                app_id: req.body.app_id,
+                facebook_token: req.body.facebook_token,
+                user_id: req.auth._id
+              },
+            },
+            upsert: true,
+          }
+      
+      }));
+      let result = await businessModel.bulkWrite(operations);
+      return responseApi.successResponseWithData(res, "getBusinessesDetails data found", result);
 
-      updateOne: {
-        filter: { id: doc.id },
-        update: { $set: doc },
-        upsert: true,
-      },
-    }));
+    } else {
+      return responseApi.successResponseWithData(res, "unable to find getBusinessesDetails", "");
 
-    let result = await facebookModel.bulkWrite(operations);
-    return responseApi.successResponseWithData(res, "data access", result);
+    }
   }
   catch (err) {
     console.log(err);

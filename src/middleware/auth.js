@@ -26,7 +26,6 @@ function authenticateToken(req, res, next) {
         });
       }
       req.auth = decoded;
-
       next();
     });
   } else {
