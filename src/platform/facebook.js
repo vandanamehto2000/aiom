@@ -1427,6 +1427,7 @@ const facebook_get_adset_by_id = async (adset_id, access_token) => {
       url: `${facebook_url}/${adset_id}?fields=${fields_data}&access_token=${access_token}`,
       headers: {},
     };
+
     let response = await axios.request(config);
     if (response.data) {
       return {
@@ -1440,7 +1441,6 @@ const facebook_get_adset_by_id = async (adset_id, access_token) => {
       };
     }
   } catch (error) {
-    console.log("error part1", error);
     console.log("Error Message:" + error);
     console.log("Error Stack:" + error.stack);
     return {
