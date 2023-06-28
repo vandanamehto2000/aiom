@@ -836,37 +836,6 @@ const update_adset = async (req, res, next) => {
   }
 };
 
-//Update a Ad
-const update_ads = async (req, res, next) => {
-  try {
-    const { ad_id,params_data } = req.body;
-    const access_token = req.facebook_token;
-    const facebook_result = await facebook_update_ads(ad_id, params_data, access_token);
-    if (facebook_result.status == "success") {
-      return responseApi.successResponseWithData(
-        res,
-        "successfully update adset data",
-        facebook_result.data,
-        StatusCodes.CREATED
-      );
-    } else {
-      return responseApi.ErrorResponse(
-        res,
-        "unable to update adset data",
-        facebook_result.data,
-        StatusCodes.BAD_REQUEST
-      );
-    }
-  } catch (error) {
-    console.log("error", error);
-    return responseApi.ErrorResponse(
-      res,
-      "error",
-      error.message ? error.message : error
-    );
-  }
-};
-
 //Get Campaign data By compaign_id
 const get_campaign_by_id = async (req, res, next) => {
   try {
@@ -933,7 +902,7 @@ const get_adset_by_id = async (req, res, next) => {
 //Update a Ad
 const update_ads = async (req, res, next) => {
   try {
-    const { ad_id,params_data } = req.body;
+    const { ad_id, params_data } = req.body;
     const access_token = req.facebook_token;
     const facebook_result = await facebook_update_ads(ad_id, params_data, access_token);
     if (facebook_result.status == "success") {
@@ -961,67 +930,6 @@ const update_ads = async (req, res, next) => {
   }
 };
 
-//Get Campaign data By compaign_id
-const get_campaign_by_id = async (req, res, next) => {
-  try {
-    let campaign_id = req.params.id;
-    const access_token = req.facebook_token;
-    const facebook_result = await facebook_get_campaign_by_id(campaign_id, access_token);
-    if (facebook_result.status == "success") {
-      return responseApi.successResponseWithData(
-        res,
-        "Successfully get campaign data by campaign id",
-        facebook_result.data,
-        StatusCodes.CREATED
-      );
-    } else {
-      return responseApi.ErrorResponse(
-        res,
-        "Unable to get campaign data by campaign id",
-        facebook_result.data,
-        StatusCodes.BAD_REQUEST
-      );
-    }
-  } catch (error) {
-    console.log("error", error);
-    return responseApi.ErrorResponse(
-      res,
-      "error",
-      error.message ? error.message : error
-    );
-  }
-};
-
-//Get Adset data By adset_id
-const get_adset_by_id = async (req, res, next) => {
-  try {
-    let adset_id = req.params.id;
-    const access_token = req.facebook_token;
-    const facebook_result = await facebook_get_adset_by_id(adset_id, access_token);
-    if (facebook_result.status == "success") {
-      return responseApi.successResponseWithData(
-        res,
-        "Successfully get adset data by adset id",
-        facebook_result.data,
-        StatusCodes.CREATED
-      );
-    } else {
-      return responseApi.ErrorResponse(
-        res,
-        "Unable to get adset data by adset id",
-        facebook_result.data,
-        StatusCodes.BAD_REQUEST
-      );
-    }
-  } catch (error) {
-    console.log("error", error);
-    return responseApi.ErrorResponse(
-      res,
-      "error",
-      error.message ? error.message : error
-    );
-  }
-};
 
 
 // save insight data in db.
@@ -1130,21 +1038,21 @@ const get_initial_token = async (req, res, next) => {
     const getBusinessesDetails = await facebook_get_businesses(req.body.facebook_token);
     if (getBusinessesDetails.status == "success") {
       const operations = getBusinessesDetails.data.data.map((doc) => ({
-          updateOne: {
-            filter: { id: doc.id },
-            update: {
-              $set: {
-                id: doc.id,
-                name: doc.name,
-                owned_ad_accounts: doc.owned_ad_accounts ? doc.owned_ad_accounts.data : [],
-                app_id: req.body.app_id,
-                facebook_token: req.body.facebook_token,
-                user_id: req.auth._id
-              },
+        updateOne: {
+          filter: { id: doc.id },
+          update: {
+            $set: {
+              id: doc.id,
+              name: doc.name,
+              owned_ad_accounts: doc.owned_ad_accounts ? doc.owned_ad_accounts.data : [],
+              app_id: req.body.app_id,
+              facebook_token: req.body.facebook_token,
+              user_id: req.auth._id
             },
-            upsert: true,
-          }
-      
+          },
+          upsert: true,
+        }
+
       }));
       let result = await businessModel.bulkWrite(operations);
       return responseApi.successResponseWithData(res, "getBusinessesDetails data found", result);
