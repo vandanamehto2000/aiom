@@ -10,7 +10,6 @@ const User = bizSdk.User;
 const axios = require("axios");
 const FormData = require("form-data");
 const fs = require("fs");
-const facebook = require("../models/facebook");
 const fields_constant = require("../utils/constant");
 const Page = bizSdk.Page;
 
@@ -69,12 +68,11 @@ const facebook_get_Insights = async (
   params
 ) => {
   try {
-    params.limit = 100000;
-    let fields1 = fields_constant.fields[5];
 
-    let fields2 = fields_constant.fields[2];
-
-    let fields3 = fields_constant.fields[3];
+    params.limit = 100000
+    let fields1 = fields_constant.fields[5]
+   
+    let fields2 = fields_constant.fields[2]
 
     let config = {
       method: "get",
@@ -914,6 +912,7 @@ const facebook_get_interest_behavior = async () => {
   }
 };
 // facebook_get_interest_behavior()
+
 const creat_image_carousel = async (
   id,
   name,
@@ -1147,8 +1146,8 @@ const facebook_get_account_videos = async (ad_account_id, access_token) => {
 
     const videos = await axios.request(config);
 
-    for (let i = 0; i < videos.data.data.length; i++) {
-      videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0];
+    for(let i=0;i<videos.data.data.length;i++){
+        videos.data.data[i].thumbnails = videos.data.data[i].thumbnails.data[0]
     }
     if (videos.data.data) {
       return {
@@ -1319,6 +1318,8 @@ const facebook_get_image_hash_with_remote_url = async (
     };
   }
 };
+
+
 
 const facebook_update_ads = async (ad_id, params_data, access_token) => {
   try {

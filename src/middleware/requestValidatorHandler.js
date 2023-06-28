@@ -1,4 +1,4 @@
-const {StatusCodes} = require('http-status-codes')
+const { StatusCodes } = require('http-status-codes')
 const requestValidator = (schema, isQuery) => {
   return async (req, res, next) => {
     const options = {
@@ -9,7 +9,7 @@ const requestValidator = (schema, isQuery) => {
       },
       abortEarly: false,
     };
-    const { error } = await schema.validate(req.body,options);
+    const { error } = await schema.validate(req.body, options);
     let errorData = error?.details.map((item) => ({
       [item.context.label]: item.message,
     }));
