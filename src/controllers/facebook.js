@@ -867,9 +867,8 @@ const update_ads = async (req, res, next) => {
 const get_campaign_by_id = async (req, res, next) => {
   try {
     let campaign_id = req.params.id;
-    const { fields } = req.query;
     const access_token = req.facebook_token;
-    const facebook_result = await facebook_get_campaign_by_id(campaign_id,fields, access_token);
+    const facebook_result = await facebook_get_campaign_by_id(campaign_id, access_token);
     if (facebook_result.status == "success") {
       return responseApi.successResponseWithData(
         res,
@@ -899,9 +898,8 @@ const get_campaign_by_id = async (req, res, next) => {
 const get_adset_by_id = async (req, res, next) => {
   try {
     let adset_id = req.params.id;
-    const { fields } = req.query;
     const access_token = req.facebook_token;
-    const facebook_result = await facebook_get_adset_by_id(adset_id,fields, access_token);
+    const facebook_result = await facebook_get_adset_by_id(adset_id, access_token);
     if (facebook_result.status == "success") {
       return responseApi.successResponseWithData(
         res,

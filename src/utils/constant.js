@@ -10,6 +10,7 @@ const insights_fields = [
 
 
 const campaign_fields = [
+    "name",
     "bid_strategy",
     "budget_rebalance_flag",
     "budget_remaining",
@@ -85,9 +86,7 @@ const ad_set_fields = [
     "targeting_optimization_types",
     "time_based_ad_rotation_id_blocks",
     "time_based_ad_rotation_intervals",
-    "updated_time",
-    "use_new_app_click",
-    "cpc"
+    "updated_time"
 ]
 
 const ad_fields = [
