@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const { TOKEN_NOT_FOUND, UNAUTHORIZED_USER } = require("../utils/message");
 const responseApi = require("../utils/apiresponse");
 const User = require("../models/user");
+const Business = require("../models/businees");
 const bizSdk = require("facebook-nodejs-business-sdk");
 
 
@@ -39,14 +40,14 @@ function authenticateToken(req, res, next) {
 // facebook_token middleware
 
 const fb_middleware = async (req, res, next) => {
-  let userDataByEmail = await User.findOne({ email: req.auth.email });
-  if (userDataByEmail?.facebook_token) {
-    let api = bizSdk.FacebookAdsApi.init(userDataByEmail.facebook_token);
+  let businesses_data = await Business.findOne({ user_id: req.auth._id });
+  if (businesses_data?.facebook_token) {
+    let api = bizSdk.FacebookAdsApi.init(businesses_data.facebook_token);
     // const showDebugingInfo = true; // Setting this to true shows more debugging info.
     // if (showDebugingInfo) {
     //   api.setDebug(true);
     // }
-    req.facebook_token = userDataByEmail.facebook_token;
+    req.facebook_token = businesses_data.facebook_token;
   } else {
     return responseApi.ErrorResponse(res, "Unable to find facebook_token!!", "");
   }

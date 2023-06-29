@@ -1078,7 +1078,6 @@ const facebook_get_businesses = async (access_token) => {
     };
 
     const businesses = await axios.request(config);
-
     if (businesses.data) {
       return {
         status: "success",

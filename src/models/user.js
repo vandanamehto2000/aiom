@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema(
     organization: { type: String, required: true },
     roles: { type: String, required: true, enum: ["admin", "business_owner", "employee", "viewer"], default: "viewer" },
     facebook_token: { type: String },
+    is_facebook_linked: { type: Boolean, default: false },
     assigned_BM: [{
       id: { type: String },
       name: { type: String },
