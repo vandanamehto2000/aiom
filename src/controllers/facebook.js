@@ -20,13 +20,20 @@ const {
   facebook_get_account_videos,
   facebook_get_account_images,
   facebook_update_campaign,
-  facebook_update_adset
+  facebook_update_adset,
+  facebook_update_ads,
+  facebook_get_campaign_by_id,
+  facebook_get_adset_by_id
 } = require("../platform/facebook");
 
 const fields_constant = require("../utils/constant");
 const { StatusCodes } = require("http-status-codes");
 const responseApi = require("../utils/apiresponse");
 const { APIResponse } = require("facebook-nodejs-business-sdk");
+const campaignModel = require("../models/campaign");
+const adsetModel = require("../models/ad_set");
+const adModel = require("../models/ads");
+const businessModel = require("../models/businees");
 
 
 //Create a Campaign
@@ -269,7 +276,7 @@ const create_creative = async (req, res, next) => {
           );
         }
       }
-       else {
+      else {
         return responseApi.ErrorResponse(
           res,
           "Invalid Params",
@@ -770,7 +777,7 @@ const get_account_videos_images = async (req, res, next) => {
 //Update a Campaign
 const update_campaign = async (req, res, next) => {
   try {
-    const { campaign_id,params } = req.body;
+    const { campaign_id, params } = req.body;
     const access_token = req.facebook_token;
     const facebook_result = await facebook_update_campaign(campaign_id, params, access_token);
     if (facebook_result.status == "success") {
@@ -801,7 +808,7 @@ const update_campaign = async (req, res, next) => {
 //Update a Adset
 const update_adset = async (req, res, next) => {
   try {
-    const { adset_id,params } = req.body;
+    const { adset_id, params } = req.body;
     const access_token = req.facebook_token;
     const facebook_result = await facebook_update_adset(adset_id, params, access_token);
     if (facebook_result.status == "success") {
@@ -829,6 +836,236 @@ const update_adset = async (req, res, next) => {
   }
 };
 
+//Get Campaign data By compaign_id
+const get_campaign_by_id = async (req, res, next) => {
+  try {
+    let campaign_id = req.params.id;
+    const access_token = req.facebook_token;
+    const facebook_result = await facebook_get_campaign_by_id(campaign_id, access_token);
+    if (facebook_result.status == "success") {
+      return responseApi.successResponseWithData(
+        res,
+        "Successfully get campaign data by campaign id",
+        facebook_result.data,
+        StatusCodes.CREATED
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "Unable to get campaign data by campaign id",
+        facebook_result.data,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  } catch (error) {
+    console.log("error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
+//Get Adset data By adset_id
+const get_adset_by_id = async (req, res, next) => {
+  try {
+    let adset_id = req.params.id;
+    const access_token = req.facebook_token;
+    const facebook_result = await facebook_get_adset_by_id(adset_id, access_token);
+    if (facebook_result.status == "success") {
+      return responseApi.successResponseWithData(
+        res,
+        "Successfully get adset data by adset id",
+        facebook_result.data,
+        StatusCodes.CREATED
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "Unable to get adset data by adset id",
+        facebook_result.data,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  } catch (error) {
+    console.log("error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
+
+//Update a Ad
+const update_ads = async (req, res, next) => {
+  try {
+    const { ad_id, params_data } = req.body;
+    const access_token = req.facebook_token;
+    const facebook_result = await facebook_update_ads(ad_id, params_data, access_token);
+    if (facebook_result.status == "success") {
+      return responseApi.successResponseWithData(
+        res,
+        "successfully update adset data",
+        facebook_result.data,
+        StatusCodes.CREATED
+      );
+    } else {
+      return responseApi.ErrorResponse(
+        res,
+        "unable to update adset data",
+        facebook_result.data,
+        StatusCodes.BAD_REQUEST
+      );
+    }
+  } catch (error) {
+    console.log("error", error);
+    return responseApi.ErrorResponse(
+      res,
+      "error",
+      error.message ? error.message : error
+    );
+  }
+};
+
+
+
+// save insight data in db.
+const save_insight = async (req, res, next) => {
+  // try {
+  //   let { ad_account_id, params } = req.query;
+  //   fields = fields_constant.fields[1];
+  //   params = JSON.parse(params);
+  //   const campaign_insights = await facebook_get_Insights(
+  //     ad_account_id,
+  //     fields,
+  //     "campaign",
+  //     req.facebook_token,
+  //     params
+  //   );
+
+  //   let campaignData = [];
+  //   let adsetData = [];
+  //   let adData = [];
+  //   let batchSize;
+  //   let totalData;
+  //   let batch;
+  //   let operations;
+
+
+  //   if (campaign_insights.status == "success") {
+  //     let batchSize;
+  //     let totalData
+  //     for (let i = 0; i < campaign_insights.data.length; i++) {
+  //       let adset_insights = await facebook_get_Insights(
+  //         campaign_insights.data[i].campaign_id,
+  //         fields,
+  //         "adset",
+  //         req.facebook_token,
+  //         params
+  //       );
+  //       if (adset_insights.status == "success") {
+  //         for (let j = 0; j < adset_insights.data.length; j++) {
+  //           let ad_insights = await facebook_get_Insights(
+  //             adset_insights.data[j].adset_id,
+  //             fields,
+  //             "ad",
+  //             req.facebook_token,
+  //             params
+  //           );
+  //           if (ad_insights.status == "success") {
+  //             for (let k = 0; k < ad_insights.data.length; k++) {
+  //               adData.push(ad_insights.data[k])
+  //               batchSize = 100;
+  //               totalData = adData.length;
+
+  //               for (let i = 0; i < totalData; i += batchSize) {
+  //                 batch = adData.slice(i, i + batchSize);
+  //                 operations = batch.map((doc) => ({
+  //                   updateOne: {
+  //                     filter: { ad_id: doc.ad_id },
+  //                     update: { $set: doc },
+  //                     upsert: true,
+  //                   },
+  //                 }));
+  //                 await adModel.bulkWrite(operations);
+  //                 await new Promise((resolve) => setTimeout(resolve, 3000));
+  //               }
+  //             }
+
+  //           }
+  //           adsetData.push(adset_insights.data[j])
+  //           batchSize = 10;
+  //           totalData = adsetData.length;
+
+  //           for (let i = 0; i < totalData; i += batchSize) {
+  //             batch = adsetData.slice(i, i + batchSize);
+  //             operations = batch.map((doc) => ({
+  //               updateOne: {
+  //                 filter: { adset_id: doc.adset_id },
+  //                 update: { $set: doc },
+  //                 upsert: true,
+  //               },
+  //             }));
+  //             await adsetModel.bulkWrite(operations);
+  //             await new Promise((resolve) => setTimeout(resolve, 2000));
+  //           }
+  //         }
+  //       }
+
+  //       campaignData.push(campaign_insights.data[i])
+  //       operations = campaignData.map((doc) => ({
+  //         updateOne: {
+  //           filter: { campaign_id: doc.campaign_id },
+  //           update: { $set: doc },
+  //           upsert: true,
+  //         },
+  //       }));
+  //       await campaignModel.bulkWrite(operations);
+  //     }
+  //   }
+  //   return responseApi.successResponseWithData(res, "data has inserted successfully", "");
+  // } catch (error) {
+  //   console.log(error);
+  // }
+}
+
+
+const get_initial_token = async (req, res, next) => {
+  try {
+    const getBusinessesDetails = await facebook_get_businesses(req.body.facebook_token);
+    if (getBusinessesDetails.status == "success") {
+      const operations = getBusinessesDetails.data.data.map((doc) => ({
+        updateOne: {
+          filter: { id: doc.id },
+          update: {
+            $set: {
+              id: doc.id,
+              name: doc.name,
+              owned_ad_accounts: doc.owned_ad_accounts ? doc.owned_ad_accounts.data : [],
+              app_id: req.body.app_id,
+              facebook_token: req.body.facebook_token,
+              user_id: req.auth._id
+            },
+          },
+          upsert: true,
+        }
+
+      }));
+      let result = await businessModel.bulkWrite(operations);
+      return responseApi.successResponseWithData(res, "getBusinessesDetails data found", result);
+
+    } else {
+      return responseApi.successResponseWithData(res, "unable to find getBusinessesDetails", "");
+
+    }
+  }
+  catch (err) {
+    console.log(err);
+  }
+}
 
 module.exports = {
   create_campaign,
@@ -849,5 +1086,10 @@ module.exports = {
   get_businesses,
   get_account_videos_images,
   update_campaign,
-  update_adset
+  update_adset,
+  update_ads,
+  get_campaign_by_id,
+  get_adset_by_id,
+  save_insight,
+  get_initial_token
 };

@@ -10,7 +10,7 @@ const userRoute = require("./routers/user");
 const facebookRoute = require("./routers/facebook");
 const path = require("path");;
 require("dotenv").config();
-mongodb.on("open", function () {});
+mongodb.on("open", function () { });
 const port = process.env.PORT || 3000;
 
 app.use(cors());
@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
   res.send("Welcome To AIOM");
 });
 
-process.on('warning', e => console.warn(e.stack,"-------------"));
+process.on('warning', e => console.warn(e.stack, "-------------"));
 
 app.use('/uploads', express.static('./uploads'));
 app.listen(port, () => {
