@@ -526,7 +526,7 @@ const add_users = async (req,res,next) => {
   
     const pass = await register_generate_password(receiver_email,organization,role);
     if(pass.status !=='success'){
-      return responseApi.ErrorResponse(res,"registration failed", pass.data)
+      return responseApi.ErrorResponse(res,"registration failed", pass.data,StatusCodes.BAD_REQUEST)
     }
 
     let password = pass.data.password
