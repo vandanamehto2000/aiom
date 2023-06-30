@@ -181,6 +181,7 @@ const assigned_bm = async (req, res, next) => {
   try {
     let { assign_type, id, name, email } = req.body;
     let data = [];
+    let token = req.facebook_token;
     for (let i = 0; i < email.length; i++) {
       data.push(email[i].email);
     }
@@ -211,6 +212,7 @@ const assigned_bm = async (req, res, next) => {
                             id: id,
                             name: name,
                             objectiveRole: email[j].role,
+                            facebook_token:token
                           },
                         },
                       },
@@ -236,6 +238,7 @@ const assigned_bm = async (req, res, next) => {
                                 id: id,
                                 name: name,
                                 objectiveRole: email[j].role,
+                                facebook_token:token
                               },
                             },
                           },
@@ -259,6 +262,7 @@ const assigned_bm = async (req, res, next) => {
                                 id: id,
                                 name: name,
                                 objectiveRole: email[j].role,
+                                facebook_token:token
                               },
                             },
                           },
@@ -285,6 +289,7 @@ const assigned_bm = async (req, res, next) => {
                             id: id,
                             name: name,
                             objectiveRole: email[j].role,
+                            facebook_token:token
                           },
                         },
                       },
@@ -314,6 +319,7 @@ const assigned_bm = async (req, res, next) => {
                                 id: id,
                                 name: name,
                                 objectiveRole: email[j].role,
+                                facebook_token:token
                               },
                             },
                           },
@@ -337,6 +343,7 @@ const assigned_bm = async (req, res, next) => {
                                 id: id,
                                 name: name,
                                 objectiveRole: email[j].role,
+                                facebook_token:token
                               },
                             },
                           },

@@ -15,12 +15,14 @@ const UserSchema = new mongoose.Schema(
     assigned_BM: [{
       id: { type: String },
       name: { type: String },
-      objectiveRole: { type: String, required:true, enum: ["admin", "employee","viewer"], default:"viewer"}
+      objectiveRole: { type: String, required:true, enum: ["admin", "employee","viewer"], default:"viewer"},
+      facebook_token: { type: String },
     }],
     assigned_ad_account: [{
       id: { type: String },
       name: { type: String },
-      objectiveRole: { type: String, required:true, enum: ["admin", "employee","viewer"], default:"viewer"}
+      objectiveRole: { type: String, required:true, enum: ["admin", "employee","viewer"], default:"viewer"},
+      facebook_token: { type: String },
     }]
 
   },
