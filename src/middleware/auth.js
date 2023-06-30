@@ -41,16 +41,29 @@ function authenticateToken(req, res, next) {
 
 const fb_middleware = async (req, res, next) => {
   let businesses_data = await Business.findOne({ user_id: req.auth._id });
-  if (businesses_data?.facebook_token) {
-    let api = bizSdk.FacebookAdsApi.init(businesses_data.facebook_token);
+  if (businesses_data) {
+    let api = bizSdk.FacebookAdsApi.init(businesses_data?.facebook_token);
     // const showDebugingInfo = true; // Setting this to true shows more debugging info.
     // if (showDebugingInfo) {
     //   api.setDebug(true);
     // }
     req.facebook_token = businesses_data.facebook_token;
-  } else {
-    return responseApi.ErrorResponse(res, "Unable to find facebook_token!!", "");
-  }
+  }else{        //Check for assigned BM or assigned ad_account
+    let assigned_data = await User.findOne({_id:req.auth._id})
+
+    if(assigned_data.assigned_BM.length === 0 && assigned_data.assigned_ad_account.length === 0){     //If no asset is assigned 
+      return responseApi.ErrorResponse(res,"No Asset Assigned", "You have not been assigned to any Business or Ad-Account yet. Please wait!!")
+    }
+    console.log(assigned_data.facebook_token === null,assigned_data.facebook_token.length === 0)
+    if(assigned_data.facebook_token === null || assigned_data.facebook_token.length === 0){
+      return responseApi.ErrorResponse(res,"No Asset Selected", "Please select an Asset to acces this feature!!")
+    }
+
+    //SEARCH TOKEN IN USER TABLE AND PROCEED
+    
+    // req.facebook_token = 
+  } 
+  
   next();
 }
 

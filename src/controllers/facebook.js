@@ -1037,8 +1037,8 @@ const get_initial_token = async (req, res, next) => {
   try {
     const getBusinessesDetails = await facebook_get_businesses(req.body.facebook_token);
     if (getBusinessesDetails.status == "success") {
-      const operations = getBusinessesDetails.data.data.map((doc) => ({
-        updateOne: {
+      const operations = getBusinessesDetails.data.data.map((doc) => {
+       return {updateOne: {
           filter: { id: doc.id },
           update: {
             $set: {
@@ -1051,19 +1051,25 @@ const get_initial_token = async (req, res, next) => {
             },
           },
           upsert: true,
-        }
+        }}
 
-      }));
+      });
+
       let result = await businessModel.bulkWrite(operations);
-      return responseApi.successResponseWithData(res, "getBusinessesDetails data found", result);
+      return responseApi.successResponseWithData(res, "Token registration successfull", result);
 
     } else {
-      return responseApi.successResponseWithData(res, "unable to find getBusinessesDetails", "");
+      return responseApi.successResponseWithData(res, "Token registration Unsuccessfull", "");
 
     }
   }
   catch (err) {
-    console.log(err);
+    console.log(err)
+    if(err.code == 11000 ){
+      return responseApi.ErrorResponse(res,"Data Already Present","Data Already Present",StatusCodes.BAD_REQUEST)
+    }else{
+      responseApi.ErrorResponse(res,"Internal server Error",err.message)
+    }
   }
 }
 
