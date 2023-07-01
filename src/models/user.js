@@ -11,15 +11,18 @@ const UserSchema = new mongoose.Schema(
     organization: { type: String, required: true },
     roles: { type: String, required: true, enum: ["admin", "business_owner", "employee", "viewer"], default: "viewer" },
     facebook_token: { type: String },
+    is_facebook_linked: { type: Boolean, default: false },
     assigned_BM: [{
       id: { type: String },
       name: { type: String },
-      objectiveRole: { type: String, required:true, enum: ["admin", "employee","viewer"], default:"viewer"}
+      objectiveRole: { type: String, required:true, enum: ["admin", "employee","viewer"], default:"viewer"},
+      facebook_token: { type: String },
     }],
     assigned_ad_account: [{
       id: { type: String },
       name: { type: String },
-      objectiveRole: { type: String, required:true, enum: ["admin", "employee","viewer"], default:"viewer"}
+      objectiveRole: { type: String, required:true, enum: ["admin", "employee","viewer"], default:"viewer"},
+      facebook_token: { type: String },
     }]
 
   },

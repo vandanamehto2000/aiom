@@ -181,6 +181,7 @@ const assigned_bm = async (req, res, next) => {
   try {
     let { assign_type, id, name, email } = req.body;
     let data = [];
+    let token = req.facebook_token;
     for (let i = 0; i < email.length; i++) {
       data.push(email[i].email);
     }
@@ -211,6 +212,7 @@ const assigned_bm = async (req, res, next) => {
                             id: id,
                             name: name,
                             objectiveRole: email[j].role,
+                            facebook_token:token
                           },
                         },
                       },
@@ -236,6 +238,7 @@ const assigned_bm = async (req, res, next) => {
                                 id: id,
                                 name: name,
                                 objectiveRole: email[j].role,
+                                facebook_token:token
                               },
                             },
                           },
@@ -259,6 +262,7 @@ const assigned_bm = async (req, res, next) => {
                                 id: id,
                                 name: name,
                                 objectiveRole: email[j].role,
+                                facebook_token:token
                               },
                             },
                           },
@@ -285,6 +289,7 @@ const assigned_bm = async (req, res, next) => {
                             id: id,
                             name: name,
                             objectiveRole: email[j].role,
+                            facebook_token:token
                           },
                         },
                       },
@@ -314,6 +319,7 @@ const assigned_bm = async (req, res, next) => {
                                 id: id,
                                 name: name,
                                 objectiveRole: email[j].role,
+                                facebook_token:token
                               },
                             },
                           },
@@ -337,6 +343,7 @@ const assigned_bm = async (req, res, next) => {
                                 id: id,
                                 name: name,
                                 objectiveRole: email[j].role,
+                                facebook_token:token
                               },
                             },
                           },
@@ -526,7 +533,7 @@ const add_users = async (req, res, next) => {
   
     const pass = await register_generate_password(receiver_email,organization,role);
     if(pass.status !=='success'){
-      return responseApi.ErrorResponse(res,"registration failed", pass.data)
+      return responseApi.ErrorResponse(res,"registration failed", pass.data,StatusCodes.BAD_REQUEST)
     }
 
     let password = pass.data.password
@@ -557,6 +564,41 @@ const add_users = async (req, res, next) => {
     );
   }
 };
+
+
+const select_asset = async(req,res,next) => {
+  try {
+    let {bm_id,ad_account_id} = req.body
+    let user = await User.findOne({_id:req.auth._id})
+    let updated_token
+    if(bm_id && !ad_account_id){
+      for(let i =0; i<user.assigned_BM.length;i++){
+        if(user.assigned_BM[i].id == bm_id){
+          updated_token = user.assigned_BM[i].facebook_token
+        }
+      }
+    }else if(ad_account_id && !bm_id){
+      for(let i =0; i<user.assigned_ad_account.length;i++){
+        if(user.assigned_ad_account[i].id == ad_account_id){
+          updated_token = user.assigned_ad_account[i].facebook_token
+        }
+      }
+    }else{
+      return responseApi.ErrorResponse(res,"No asset Selected", "Please choose an Asset",StatusCodes.BAD_REQUEST)
+    }
+    //Update after checking the BM
+  let update_user = await User.updateOne({_id:req.auth._id},{ $set: { facebook_token: updated_token } })
+  if(update_user.acknowledged=== true){
+    return responseApi.successResponseWithData(res,"Assest Selected Successfull", "Assest Selected Successfully")
+  }else{
+    return responseApi.ErrorResponse(res,"Error", "Unable to select asset", StatusCodes.BAD_REQUEST)
+  }
+    
+  } catch (error) {
+    console.log(error)
+    return responseApi.ErrorResponse(res,"Internal server Error", error.message?error.message:error)
+  }
+}
 
 async function register_generate_password(email, organization, role) {
   try {
@@ -631,6 +673,7 @@ function generateRandomPassword(length) {
 
   return password;
 }
-// add_users()
 
-module.exports = { register, login, logout, employee_details, assigned_bm, role_update, delete_bm, add_users };
+
+
+module.exports = { register, login, logout, employee_details, assigned_bm, role_update, delete_bm, add_users,select_asset };

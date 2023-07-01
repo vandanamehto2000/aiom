@@ -235,7 +235,6 @@ const facebook_get_adSet = async (id, fields, params) => {
         for (let i = 0; i < adsetss.length; i++) {
           arr.push(adsetss[i]._data);
         }
-        console.log(arr, "-------------adset");
         return {
           status: "success",
           data: arr,
@@ -1078,7 +1077,6 @@ const facebook_get_businesses = async (access_token) => {
     };
 
     const businesses = await axios.request(config);
-
     if (businesses.data) {
       return {
         status: "success",

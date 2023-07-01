@@ -29,11 +29,12 @@ const {
 const fields_constant = require("../utils/constant");
 const { StatusCodes } = require("http-status-codes");
 const responseApi = require("../utils/apiresponse");
-const { APIResponse } = require("facebook-nodejs-business-sdk");
 const campaignModel = require("../models/campaign");
 const adsetModel = require("../models/ad_set");
 const adModel = require("../models/ads");
 const businessModel = require("../models/businees");
+const User = require("../models/user");
+const Business = require("../models/businees");
 
 
 //Create a Campaign
@@ -653,10 +654,57 @@ const get_page_images = async (req, res, next) => {
 };
 
 const get_businesses = async (req, res, next) => {
+
+  
   try {
     const businesses = await facebook_get_businesses(req.facebook_token);
 
     if (businesses.status === "success") {
+
+      let is_business_data = await Business.findOne({ user_id: req.auth._id });
+
+      if(!is_business_data){
+        let user = await User.findById({_id:req.auth._id})
+        let result = []
+        if(user.assigned_BM.length >0){
+          for (let i = 0; i < user.assigned_BM.length; i++) {
+            for (let j = 0; j < businesses.data.data.length; j++) {
+              if (businesses.data.data[j].id === user.assigned_BM[i].id) {
+                result.push(businesses.data.data[j]);
+                break;
+              }
+            }
+          }
+        }
+
+        if(user.assigned_ad_account.length>0){
+          let owned_ad_accounts_obj = {
+            data: []
+          }
+          user.assigned_ad_account.forEach(obj1 => {
+            businesses.data.data.forEach(obj2 => {
+              if (
+                obj2.owned_ad_accounts &&
+                obj2.owned_ad_accounts.data 
+              ) {
+                
+                obj2.owned_ad_accounts.data.find(data =>{ 
+                  if(data.id === obj1.id){
+                    owned_ad_accounts_obj.data.push(data)
+                  }
+                })
+                
+              }
+            });
+          });
+          result.push({owned_ad_accounts:owned_ad_accounts_obj})
+        }
+
+        return responseApi.successResponseWithData(res,"Assigned Assets Found",{data:result},StatusCodes.OK)
+      
+      }
+
+
       return responseApi.successResponseWithData(
         res,
         "Businessses Found",
@@ -1037,8 +1085,8 @@ const get_initial_token = async (req, res, next) => {
   try {
     const getBusinessesDetails = await facebook_get_businesses(req.body.facebook_token);
     if (getBusinessesDetails.status == "success") {
-      const operations = getBusinessesDetails.data.data.map((doc) => ({
-        updateOne: {
+      const operations = getBusinessesDetails.data.data.map((doc) => {
+       return {updateOne: {
           filter: { id: doc.id },
           update: {
             $set: {
@@ -1051,19 +1099,25 @@ const get_initial_token = async (req, res, next) => {
             },
           },
           upsert: true,
-        }
+        }}
 
-      }));
+      });
+
       let result = await businessModel.bulkWrite(operations);
-      return responseApi.successResponseWithData(res, "getBusinessesDetails data found", result);
+      return responseApi.successResponseWithData(res, "Token registration successfull", result);
 
     } else {
-      return responseApi.successResponseWithData(res, "unable to find getBusinessesDetails", "");
+      return responseApi.successResponseWithData(res, "Token registration Unsuccessfull", "");
 
     }
   }
   catch (err) {
-    console.log(err);
+    console.log(err)
+    if(err.code == 11000 ){
+      return responseApi.ErrorResponse(res,"Data Already Present","Data Already Present",StatusCodes.BAD_REQUEST)
+    }else{
+      responseApi.ErrorResponse(res,"Internal server Error",err.message)
+    }
   }
 }
 

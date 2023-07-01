@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const { TOKEN_NOT_FOUND, UNAUTHORIZED_USER } = require("../utils/message");
 const responseApi = require("../utils/apiresponse");
 const User = require("../models/user");
+const Business = require("../models/businees");
 const bizSdk = require("facebook-nodejs-business-sdk");
 
 
@@ -39,17 +40,37 @@ function authenticateToken(req, res, next) {
 // facebook_token middleware
 
 const fb_middleware = async (req, res, next) => {
-  let userDataByEmail = await User.findOne({ email: req.auth.email });
-  if (userDataByEmail?.facebook_token) {
-    let api = bizSdk.FacebookAdsApi.init(userDataByEmail.facebook_token);
+  let businesses_data = await Business.findOne({ user_id: req.auth._id });
+  if (businesses_data) {
+    let api = bizSdk.FacebookAdsApi.init(businesses_data?.facebook_token);
     // const showDebugingInfo = true; // Setting this to true shows more debugging info.
     // if (showDebugingInfo) {
     //   api.setDebug(true);
     // }
-    req.facebook_token = userDataByEmail.facebook_token;
-  } else {
-    return responseApi.ErrorResponse(res, "Unable to find facebook_token!!", "");
-  }
+    req.facebook_token = businesses_data.facebook_token;
+  }else{        //Check for assigned BM or assigned ad_account
+    let assigned_data = await User.findOne({_id:req.auth._id})
+
+    if(assigned_data.assigned_BM.length === 0 && assigned_data.assigned_ad_account.length === 0){     //If no asset is assigned 
+      return responseApi.ErrorResponse(res,"No Asset Assigned", "You have not been assigned to any Business or Ad-Account yet. Please wait!!")
+    }
+
+    if(assigned_data.facebook_token === null || assigned_data.facebook_token ==undefined){    //If one or more assets assigned but no facebook_token
+
+      if(assigned_data.assigned_BM.length !==0){
+        assigned_data.facebook_token = assigned_data.assigned_BM[0].facebook_token
+      }else{
+        assigned_data.facebook_token = assigned_data.assigned_ad_account[0].facebook_token
+      }
+      return responseApi.ErrorResponse(res,"No Asset Selected", "Please select an Asset to acces this feature!!")
+    }
+
+
+    let api = bizSdk.FacebookAdsApi.init(assigned_data.facebook_token);
+
+    req.facebook_token = assigned_data.facebook_token 
+  } 
+  
   next();
 }
 
