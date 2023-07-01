@@ -54,14 +54,21 @@ const fb_middleware = async (req, res, next) => {
     if(assigned_data.assigned_BM.length === 0 && assigned_data.assigned_ad_account.length === 0){     //If no asset is assigned 
       return responseApi.ErrorResponse(res,"No Asset Assigned", "You have not been assigned to any Business or Ad-Account yet. Please wait!!")
     }
-    console.log(assigned_data.facebook_token === null,assigned_data.facebook_token.length === 0)
-    if(assigned_data.facebook_token === null || assigned_data.facebook_token.length === 0){
+
+    if(assigned_data.facebook_token === null || assigned_data.facebook_token ==undefined){    //If one or more assets assigned but no facebook_token
+
+      if(assigned_data.assigned_BM.length !==0){
+        assigned_data.facebook_token = assigned_data.assigned_BM[0].facebook_token
+      }else{
+        assigned_data.facebook_token = assigned_data.assigned_ad_account[0].facebook_token
+      }
       return responseApi.ErrorResponse(res,"No Asset Selected", "Please select an Asset to acces this feature!!")
     }
 
-    //SEARCH TOKEN IN USER TABLE AND PROCEED
-    
-    // req.facebook_token = 
+
+    let api = bizSdk.FacebookAdsApi.init(assigned_data.facebook_token);
+
+    req.facebook_token = assigned_data.facebook_token 
   } 
   
   next();
