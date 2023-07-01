@@ -654,15 +654,14 @@ const get_page_images = async (req, res, next) => {
 };
 
 const get_businesses = async (req, res, next) => {
-
-  
   try {
     const businesses = await facebook_get_businesses(req.facebook_token);
 
     if (businesses.status === "success") {
-
+      //Check if super admin
       let is_business_data = await Business.findOne({ user_id: req.auth._id });
 
+      //if not super admin Filter BM and Ad_accounts
       if(!is_business_data){
         let user = await User.findById({_id:req.auth._id})
         let result = []
@@ -1104,6 +1103,12 @@ const get_initial_token = async (req, res, next) => {
       });
 
       let result = await businessModel.bulkWrite(operations);
+      //Update is_facebook_linked to true
+      const user = await User.updateOne({_id:req.auth._id},{
+        facebook_token:req.body.facebook_token,
+        is_facebook_linked:true
+      })
+
       return responseApi.successResponseWithData(res, "Token registration successfull", result);
 
     } else {
