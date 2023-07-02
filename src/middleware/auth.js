@@ -51,7 +51,7 @@ const fb_middleware = async (req, res, next) => {
   }else{        //Check for assigned BM or assigned ad_account
     let assigned_data = await User.findOne({_id:req.auth._id})
 
-    if(assigned_data.assigned_BM.length === 0 && assigned_data.assigned_ad_account.length === 0){     //If no asset is assigned 
+    if(assigned_data.assigned_BM?.length === 0 && assigned_data.assigned_ad_account?.length === 0){     //If no asset is assigned 
       return responseApi.ErrorResponse(res,"No Asset Assigned", "You have not been assigned to any Business or Ad-Account yet. Please wait!!")
     }
 
