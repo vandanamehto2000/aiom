@@ -57,9 +57,9 @@ const fb_middleware = async (req, res, next) => {
 
     if(assigned_data.facebook_token === null || assigned_data.facebook_token ==undefined){    //If one or more assets assigned but no facebook_token
 
-      if(assigned_data.assigned_BM.length !==0){
+      if(assigned_data.assigned_BM?.length !==0){
         assigned_data.facebook_token = assigned_data.assigned_BM[0].facebook_token
-      }else if(assigned_data.assigned_ad_account.length !==0){
+      }else if(assigned_data.assigned_ad_account?.length !==0){
         assigned_data.facebook_token = assigned_data.assigned_ad_account[0].facebook_token
       }else{
         return responseApi.ErrorResponse(res,"No Asset Selected", "Please select an Asset to acces this feature!!")
