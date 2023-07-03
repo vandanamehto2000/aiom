@@ -74,6 +74,8 @@ const facebook_get_Insights = async (
    
     let fields2 = fields_constant.fields[2]
 
+    let fields3 = fields_constant.fields[3]
+
     let config = {
       method: "get",
       maxBodyLength: Infinity,
