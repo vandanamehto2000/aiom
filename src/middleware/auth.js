@@ -50,16 +50,26 @@ const fb_middleware = async (req, res, next) => {
     req.facebook_token = businesses_data.facebook_token;
   }else{        //Check for assigned BM or assigned ad_account
     let assigned_data = await User.findOne({_id:req.auth._id})
+    if(!assigned_data){
+      return responseApi.ErrorResponse(res,"Error parsing token", "Invalid token",StatusCodes.BAD_REQUEST)
+    }
 
-    if(assigned_data.assigned_BM?.length === 0 && assigned_data.assigned_ad_account?.length === 0){     //If no asset is assigned 
+    if(assigned_data.assigned_BM === undefined && assigned_data.assigned_ad_account === undefined){
       return responseApi.ErrorResponse(res,"No Asset Assigned", "You have not been assigned to any Business or Ad-Account yet. Please wait!!")
     }
 
+    if(assigned_data.assigned_BM &&  assigned_data.assigned_ad_account){
+      if(assigned_data.assigned_BM?.length === 0 && assigned_data.assigned_ad_account?.length === 0 ){     //If no asset is assigned 
+        return responseApi.ErrorResponse(res,"No Asset Assigned", "You have not been assigned to any Business or Ad-Account yet. Please wait!!")
+      }
+    }
+    
+
     if(assigned_data.facebook_token === null || assigned_data.facebook_token ==undefined){    //If one or more assets assigned but no facebook_token
 
-      if(assigned_data.assigned_BM?.length !==0){
+      if(assigned_data.assigned_BM && assigned_data.assigned_BM?.length !==0){
         assigned_data.facebook_token = assigned_data.assigned_BM[0].facebook_token
-      }else if(assigned_data.assigned_ad_account?.length !==0){
+      }else if(assigned_data.assigned_ad_account && assigned_data.assigned_ad_account?.length !==0){
         assigned_data.facebook_token = assigned_data.assigned_ad_account[0].facebook_token
       }else{
         return responseApi.ErrorResponse(res,"No Asset Selected", "Please select an Asset to acces this feature!!")
@@ -81,7 +91,7 @@ const fb_middleware = async (req, res, next) => {
 const roles_auth = (roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.auth.roles)) {
-      return responseApi.ErrorResponse(res, "role does not have access to this endpoint", "");
+      return responseApi.ErrorResponse(res, "role does not have access to this endpoint", "Access Restricted",StatusCodes.BAD_REQUEST);
     }
     next();
   }

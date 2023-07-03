@@ -678,9 +678,7 @@ const get_businesses = async (req, res, next) => {
         }
 
         if(user.assigned_ad_account.length>0){
-          let owned_ad_accounts_obj = {
-            data: []
-          }
+          let owned_ad_accounts_obj = []
           user.assigned_ad_account.forEach(obj1 => {
             businesses.data.data.forEach(obj2 => {
               if (
@@ -690,7 +688,7 @@ const get_businesses = async (req, res, next) => {
                 
                 obj2.owned_ad_accounts.data.find(data =>{ 
                   if(data.id === obj1.id){
-                    owned_ad_accounts_obj.data.push(data)
+                    owned_ad_accounts_obj.push(data)
                   }
                 })
                 
@@ -1109,10 +1107,16 @@ const get_initial_token = async (req, res, next) => {
 
       let result = await businessModel.bulkWrite(operations);
       //Update is_facebook_linked to true
-      const user = await User.updateOne({_id:req.auth._id},{
-        facebook_token:req.body.facebook_token,
-        is_facebook_linked:true
-      })
+      const user = await User.updateOne(
+        { _id: req.auth._id },
+        {
+          $set: {
+            facebook_token: req.body.facebook_token,
+            is_facebook_linked: true
+          }
+        },
+        { upsert: true }
+      );
 
       return responseApi.successResponseWithData(res, "Token registration successfull", result);
 
