@@ -1109,10 +1109,16 @@ const get_initial_token = async (req, res, next) => {
 
       let result = await businessModel.bulkWrite(operations);
       //Update is_facebook_linked to true
-      const user = await User.updateOne({_id:req.auth._id},{
-        facebook_token:req.body.facebook_token,
-        is_facebook_linked:true
-      })
+      const user = await User.updateOne(
+        { _id: req.auth._id },
+        {
+          $set: {
+            facebook_token: req.body.facebook_token,
+            is_facebook_linked: true
+          }
+        },
+        { upsert: true }
+      );
 
       return responseApi.successResponseWithData(res, "Token registration successfull", result);
 
