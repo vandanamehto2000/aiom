@@ -91,7 +91,7 @@ const fb_middleware = async (req, res, next) => {
 const roles_auth = (roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.auth.roles)) {
-      return responseApi.ErrorResponse(res, "role does not have access to this endpoint", "");
+      return responseApi.ErrorResponse(res, "role does not have access to this endpoint", "Access Restricted",StatusCodes.BAD_REQUEST);
     }
     next();
   }
