@@ -1085,6 +1085,9 @@ const save_insight = async (req, res, next) => {
 
 const get_initial_token = async (req, res, next) => {
   try {
+    if(!req.body.facebook_token){
+      responseApi.ErrorResponse(res,"No Token Found","Please Provide a valid token",StatusCodes.BAD_REQUEST) 
+    }
     const getBusinessesDetails = await facebook_get_businesses(req.body.facebook_token);
     if (getBusinessesDetails.status == "success") {
       const operations = getBusinessesDetails.data.data.map((doc) => {
