@@ -622,7 +622,8 @@ async function register_generate_password(email, organization, role) {
       process.env.PASS_SECRET
     ).toString(),
     organization: organization,
-    roles: role
+    roles: role,
+    is_facebook_linked: true
   };
 
     let userData = await User.create(newUser);
