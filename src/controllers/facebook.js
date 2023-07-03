@@ -678,9 +678,7 @@ const get_businesses = async (req, res, next) => {
         }
 
         if(user.assigned_ad_account.length>0){
-          let owned_ad_accounts_obj = {
-            data: []
-          }
+          let owned_ad_accounts_obj = []
           user.assigned_ad_account.forEach(obj1 => {
             businesses.data.data.forEach(obj2 => {
               if (
@@ -690,7 +688,7 @@ const get_businesses = async (req, res, next) => {
                 
                 obj2.owned_ad_accounts.data.find(data =>{ 
                   if(data.id === obj1.id){
-                    owned_ad_accounts_obj.data.push(data)
+                    owned_ad_accounts_obj.push(data)
                   }
                 })
                 
