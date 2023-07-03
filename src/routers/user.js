@@ -9,11 +9,11 @@ const router = express.Router();
 router.post("/register", commonValidator(registerUser), register);
 router.post("/login", login);
 router.post("/logout", authenticateToken, logout);
-router.get("/organization",authenticateToken, employee_details);
-router.post("/assigned-bm", authenticateToken,fb_middleware, assigned_bm)
-router.post("/update-roles", authenticateToken, role_update)
-router.delete("/delete-bm", authenticateToken, delete_bm)
-router.post("/invite",authenticateToken,add_users)
+router.get("/organization",authenticateToken,roles_auth(["admin","employee"]), employee_details);
+router.post("/assigned-bm", authenticateToken,fb_middleware,roles_auth(["admin"]), assigned_bm)
+router.post("/update-roles", authenticateToken, roles_auth(["admin"]),role_update)
+router.delete("/delete-bm", authenticateToken, roles_auth(["admin"]),delete_bm)
+router.post("/invite",authenticateToken,roles_auth(["admin","employee"]),add_users)
 router.post("/select-asset",authenticateToken,select_asset)
 
 
