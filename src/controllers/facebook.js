@@ -683,10 +683,10 @@ const get_businesses = async (req, res, next) => {
             businesses.data.data.forEach(obj2 => {
               if (
                 obj2.owned_ad_accounts &&
-                obj2.owned_ad_accounts.data 
+                obj2.owned_ad_accounts 
               ) {
                 
-                obj2.owned_ad_accounts.data.find(data =>{ 
+                obj2.owned_ad_accounts.find(data =>{ 
                   if(data.id === obj1.id){
                     owned_ad_accounts_obj.push(data)
                   }
@@ -698,15 +698,16 @@ const get_businesses = async (req, res, next) => {
           result.push({owned_ad_accounts:owned_ad_accounts_obj})
         }
 
-        return responseApi.successResponseWithData(res,"Assigned Assets Found",{data:result},StatusCodes.OK)
+        return responseApi.successResponseWithData(res,"Assigned Assets Found",result,StatusCodes.OK)
       
       }
 
+      
 
       return responseApi.successResponseWithData(
         res,
         "Businessses Found",
-        businesses.data
+        businesses.data.data
       );
     } else {
       return responseApi.ErrorResponse(
