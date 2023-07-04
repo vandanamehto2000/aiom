@@ -688,14 +688,18 @@ const get_businesses = async (req, res, next) => {
                 
                 obj2.owned_ad_accounts.find(data =>{ 
                   if(data.id === obj1.id){
-                    owned_ad_accounts_obj.push(data)
+                    owned_ad_accounts_obj.push({
+                      id:obj2.id,
+                      name:obj2.name,
+                      owned_ad_accounts:data
+                    })
                   }
                 })
                 
               }
             });
           });
-          result.push({owned_ad_accounts:owned_ad_accounts_obj})
+          result.push(owned_ad_accounts_obj)
         }
 
         return responseApi.successResponseWithData(res,"Assigned Assets Found",result,StatusCodes.OK)
