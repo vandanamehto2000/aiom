@@ -74,7 +74,7 @@ const login = async (req, res, next) => {
           { token: token1 },
           { new: true }
         );
-          let result = {}
+
         if(data.facebook_token){
           const businesses = await facebook_get_businesses(data.facebook_token)
           if (businesses.status === "success") {
@@ -588,7 +588,7 @@ const select_asset = async(req,res,next) => {
   try {
     let {bm_id,ad_account_id} = req.body
     let user = await User.findOne({_id:req.auth._id})
-    let updated_token
+    let updated_token 
     if(bm_id && !ad_account_id){
       for(let i =0; i<user.assigned_BM.length;i++){
         if(user.assigned_BM[i].id == bm_id){
@@ -606,8 +606,11 @@ const select_asset = async(req,res,next) => {
     }
     //Update after checking the BM
   let update_user = await User.updateOne({_id:req.auth._id},{ $set: { facebook_token: updated_token } })
+  if(!updated_token){
+    updated_token = user.facebook_token
+  }
   if(update_user.acknowledged=== true){
-    return responseApi.successResponseWithData(res,"Assest Selected Successfull", "Assest Selected Successfully")
+    return responseApi.successResponseWithData(res,"Assest Selected Successfull", {facebook_token:updated_token})
   }else{
     return responseApi.ErrorResponse(res,"Error", "Unable to select asset", StatusCodes.BAD_REQUEST)
   }
