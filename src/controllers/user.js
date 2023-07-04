@@ -6,6 +6,7 @@ const responseApi = require("../utils/apiresponse");
 const { updateOne } = require("../models/businees");
 const nodemailer = require("nodemailer");
 const axios = require("axios");
+const { facebook_get_businesses } = require("../platform/facebook");
 
 const generateAccessToken = (response) => {
   return jwt.sign(
@@ -73,10 +74,27 @@ const login = async (req, res, next) => {
           { token: token1 },
           { new: true }
         );
+          let result = {}
+        if(data.facebook_token){
+          const businesses = await facebook_get_businesses(data.facebook_token)
+          if (businesses.status === "success") {
+            let default_ad_account = {}; 
+            let i=0
+            while(!default_ad_account.id){
+              if(businesses.data.data[i].owned_ad_accounts){
+                default_ad_account.id = businesses.data.data[i].owned_ad_accounts[0].id
+                default_ad_account.name = businesses.data.data[i].owned_ad_accounts[0].name
+              }
+              i++
+            }
+            data._doc.default_ad_account = default_ad_account
+          }
+        }
+        // result = {...data._doc}
         return responseApi.successResponseWithData(
           res,
           "User login successfully",
-          data,
+          data, 
           StatusCodes.OK
         );
       } else {
