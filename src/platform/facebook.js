@@ -1253,15 +1253,12 @@ const facebook_update_adset = async (adset_id, params, access_token) => {
       }
     }
     if ("bid_adjustments" in params) {
-      console.log("bid_adjustments")
       data.append("bid_adjustments", JSON.stringify(params.bid_adjustments));
     }
     if ("promoted_object" in params) {
-      console.log("promoted_object")
       data.append("promoted_object", JSON.stringify(params.promoted_object));
     }
     if ("targeting" in params) {
-      console.log("targeting spec")
       data.append("targeting spec", JSON.stringify(params.targeting));
     }
     data.append("access_token", access_token);
@@ -1274,25 +1271,20 @@ const facebook_update_adset = async (adset_id, params, access_token) => {
       },
       data: data,
     };
-    let response = await axios.request(config);
-    if (response.data) {
-      return {
-        status: "success",
-        data: response.data,
-      };
-    } else {
+   return axios.request(config).then((res)=>{      
+    return {
+      status: "success",
+      data: res.data,
+    } }).catch(error=> {
       return {
         status: "error",
-        data: response.message ? response.message : response,
-      };
-    }
+        data: error.response.data.error.error_user_msg ? error.response.data.error.error_user_msg : error.response.data.error
+      }
+    })
   } catch (error) {
-    console.log("error part1", error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
     return {
       status: "error",
-      data: error.message ? error.message : error,
+      data: error,
     };
   }
 };
