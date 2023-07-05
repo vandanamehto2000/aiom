@@ -1004,7 +1004,7 @@ const save_insight = async (req, res, next) => {
 
 
     if (campaign_insights.status == "success") {
-
+console.log("========================campaign_insights.status",campaign_insights.status)
       const cron_job = await startCronJob(campaign_insights.data)
 
       let batchSize;

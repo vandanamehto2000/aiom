@@ -918,6 +918,10 @@ const creat_image_carousel = async (
   object_story_spec,
   access_token
 ) => {
+  console.log("------------------",          id,
+  name,
+  object_story_spec.link_data.child_attachments,
+  access_token)
   let data = new FormData();
   data.append("name", name);
   data.append("object_story_spec", JSON.stringify(object_story_spec));
@@ -982,7 +986,7 @@ const facebook_create_carousel = async (
           object_story_spec.link_data.child_attachments[i].link = url;
         }
         // upload image and create carousel
-        console.log("upload carousel------------for image");
+        console.log("upload carousel------------for image",object_story_spec.link_data.child_attachments);
         let carousel_result = await creat_image_carousel(
           id,
           name,
@@ -1037,22 +1041,30 @@ const facebook_create_carousel = async (
           }
         }
       }
-      let carousel_result = await creat_image_carousel(
-        id,
-        name,
-        object_story_spec,
-        access_token
-      );
-      if (carousel_result.status === "success") {
-        return {
-          status: "success",
-          data: carousel_result.data,
-        };
-      } else {
+      if(object_story_spec.link_data.child_attachments.length < 2){
         return {
           status: "error",
-          data: carousel_result.data,
+          data: "select at least two image or video for carousel",
         };
+      }
+      else{
+        let carousel_result = await creat_image_carousel(
+          id,
+          name,
+          object_story_spec,
+          access_token
+        );
+        if (carousel_result.status === "success") {
+          return {
+            status: "success",
+            data: carousel_result.data,
+          };
+        } else {
+          return {
+            status: "error",
+            data: carousel_result.data,
+          };
+        }
       }
     }
   } catch (error) {
@@ -1227,13 +1239,16 @@ const facebook_update_adset = async (adset_id, params, access_token) => {
       }
     }
     if ("bid_adjustments" in params) {
+      console.log("bid_adjustments")
       data.append("bid_adjustments", JSON.stringify(params.bid_adjustments));
     }
     if ("promoted_object" in params) {
+      console.log("promoted_object")
       data.append("promoted_object", JSON.stringify(params.promoted_object));
     }
     if ("targeting" in params) {
-      data.append("targeting", JSON.stringify(params.targeting));
+      console.log("targeting spec")
+      data.append("targeting spec", JSON.stringify(params.targeting));
     }
     data.append("access_token", access_token);
     let config = {

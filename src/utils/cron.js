@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const { facebook_get_Insights } = require('../platform/facebook');
+const campaign_model = require('../models/campaign');
 
 
 // Create a function to save a chunk of data to the database
@@ -11,7 +12,7 @@ async function saveDataToDatabase(data, startIndex, endIndex) {
     const dataChunk = data.slice(startIndex, endIndex);
 
     // Insert the data into the collection
-    await collection.insertMany(dataChunk);
+    await campaign_model.insertMany(dataChunk);
 
     console.log(`Data saved to the database. Chunk ${startIndex + 1}-${endIndex}`);
 
@@ -48,7 +49,8 @@ async function processNextChunk(data, startIndex, endIndex) {
 
 async function startCronJob(allData) {
     // cron job to run every hour
-    const job = cron.schedule('0 * * * *', () => {
+    console.log('cron job to run every hour');
+    const job = cron.schedule('59 * * * *', () => {
       console.log('Running the cron job...');
   
       if (allData && allData.length > 0) {
