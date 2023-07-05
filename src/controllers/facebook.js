@@ -23,7 +23,7 @@ const {
   facebook_update_adset,
   facebook_update_ads,
   facebook_get_campaign_by_id,
-  facebook_get_adset_by_id
+  facebook_get_adset_by_id,
 } = require("../platform/facebook");
 
 const fields_constant = require("../utils/constant");
@@ -36,7 +36,6 @@ const businessModel = require("../models/businees");
 const User = require("../models/user");
 const Business = require("../models/businees");
 const startCronJob = require("../utils/cron");
-
 
 //Create a Campaign
 const create_campaign = async (req, res, next) => {
@@ -253,8 +252,7 @@ const create_creative = async (req, res, next) => {
             StatusCodes.BAD_REQUEST
           );
         }
-      }
-      else if (params.image_hash !== "") {
+      } else if (params.image_hash !== "") {
         const adcreatives = await facebook_create_creative(
           null,
           null,
@@ -277,8 +275,7 @@ const create_creative = async (req, res, next) => {
             StatusCodes.BAD_REQUEST
           );
         }
-      }
-      else {
+      } else {
         return responseApi.ErrorResponse(
           res,
           "Invalid Params",
@@ -663,10 +660,10 @@ const get_businesses = async (req, res, next) => {
       let is_business_data = await Business.findOne({ user_id: req.auth._id });
 
       //if not super admin Filter BM and Ad_accounts
-      if(!is_business_data){
-        let user = await User.findById({_id:req.auth._id})
-        let result = []
-        if(user.assigned_BM.length >0){
+      if (!is_business_data) {
+        let user = await User.findById({ _id: req.auth._id });
+        let result = [];
+        if (user.assigned_BM.length > 0) {
           for (let i = 0; i < user.assigned_BM.length; i++) {
             for (let j = 0; j < businesses.data.data.length; j++) {
               if (businesses.data.data[j].id === user.assigned_BM[i].id) {
@@ -677,38 +674,74 @@ const get_businesses = async (req, res, next) => {
           }
         }
 
-        if(user.assigned_ad_account.length>0){
-          let owned_ad_accounts_obj = {
-            data: []
-          }
-          user.assigned_ad_account.forEach(obj1 => {
-            businesses.data.data.forEach(obj2 => {
-              if (
-                obj2.owned_ad_accounts &&
-                obj2.owned_ad_accounts.data 
-              ) {
-                
-                obj2.owned_ad_accounts.data.find(data =>{ 
-                  if(data.id === obj1.id){
-                    owned_ad_accounts_obj.data.push(data)
+        if (user.assigned_ad_account.length > 0) {
+          // let owned_ad_accounts_obj = []
+          // user.assigned_ad_account.forEach(obj1 => {
+          //   businesses.data.data.forEach(obj2 => {
+          //     if (
+          //       obj2.owned_ad_accounts &&
+          //       obj2.owned_ad_accounts
+          //     ) {
+
+          //       obj2.owned_ad_accounts.find(data =>{
+          //         if(data.id === obj1.id){
+          //           owned_ad_accounts_obj.push({
+          //             id:obj2.id,
+          //             name:obj2.name,
+          //             owned_ad_accounts:data
+          //           })
+          //         }
+          //       })
+
+          //     }
+          //   });
+          // });
+
+          let owned_ad_accounts_obj = [];
+
+          user.assigned_ad_account.forEach((obj1) => {
+            businesses.data.data.forEach((obj2) => {
+              if (obj2.owned_ad_accounts && obj2.owned_ad_accounts) {
+                const existingObj = owned_ad_accounts_obj.find((item) => item.id === obj2.id);
+                //If BM pushed already
+                if (existingObj) {
+                  const existingAccount = existingObj.owned_ad_accounts.find((data) => data.id === obj1.id);
+                  //push inside owned_ad_accounts
+                  if (!existingAccount) {
+                    existingObj.owned_ad_accounts.push(obj1);
                   }
-                })
-                
+                } else {
+                  //if not existing BM
+                  obj2.owned_ad_accounts.find((data) => {
+                    if (data.id === obj1.id) {
+                      owned_ad_accounts_obj.push({
+                        id: obj2.id,
+                        name: obj2.name,
+                        owned_ad_accounts: [data],
+                        owned_pages:[]
+                      });
+                    }
+                  });
+                }
               }
             });
           });
-          result.push({owned_ad_accounts:owned_ad_accounts_obj})
+
+          result.push(...owned_ad_accounts_obj);
         }
 
-        return responseApi.successResponseWithData(res,"Assigned Assets Found",{data:result},StatusCodes.OK)
-      
+        return responseApi.successResponseWithData(
+          res,
+          "Assigned Assets Found",
+          result,
+          StatusCodes.OK
+        );
       }
-
 
       return responseApi.successResponseWithData(
         res,
         "Businessses Found",
-        businesses.data
+        businesses.data.data
       );
     } else {
       return responseApi.ErrorResponse(
@@ -827,7 +860,11 @@ const update_campaign = async (req, res, next) => {
   try {
     const { campaign_id, params } = req.body;
     const access_token = req.facebook_token;
-    const facebook_result = await facebook_update_campaign(campaign_id, params, access_token);
+    const facebook_result = await facebook_update_campaign(
+      campaign_id,
+      params,
+      access_token
+    );
     if (facebook_result.status == "success") {
       return responseApi.successResponseWithData(
         res,
@@ -858,7 +895,11 @@ const update_adset = async (req, res, next) => {
   try {
     const { adset_id, params } = req.body;
     const access_token = req.facebook_token;
-    const facebook_result = await facebook_update_adset(adset_id, params, access_token);
+    const facebook_result = await facebook_update_adset(
+      adset_id,
+      params,
+      access_token
+    );
     if (facebook_result.status == "success") {
       return responseApi.successResponseWithData(
         res,
@@ -889,7 +930,10 @@ const get_campaign_by_id = async (req, res, next) => {
   try {
     let campaign_id = req.params.id;
     const access_token = req.facebook_token;
-    const facebook_result = await facebook_get_campaign_by_id(campaign_id, access_token);
+    const facebook_result = await facebook_get_campaign_by_id(
+      campaign_id,
+      access_token
+    );
     if (facebook_result.status == "success") {
       return responseApi.successResponseWithData(
         res,
@@ -920,7 +964,10 @@ const get_adset_by_id = async (req, res, next) => {
   try {
     let adset_id = req.params.id;
     const access_token = req.facebook_token;
-    const facebook_result = await facebook_get_adset_by_id(adset_id, access_token);
+    const facebook_result = await facebook_get_adset_by_id(
+      adset_id,
+      access_token
+    );
     if (facebook_result.status == "success") {
       return responseApi.successResponseWithData(
         res,
@@ -946,13 +993,16 @@ const get_adset_by_id = async (req, res, next) => {
   }
 };
 
-
 //Update a Ad
 const update_ads = async (req, res, next) => {
   try {
     const { ad_id, params_data } = req.body;
     const access_token = req.facebook_token;
-    const facebook_result = await facebook_update_ads(ad_id, params_data, access_token);
+    const facebook_result = await facebook_update_ads(
+      ad_id,
+      params_data,
+      access_token
+    );
     if (facebook_result.status == "success") {
       return responseApi.successResponseWithData(
         res,
@@ -978,8 +1028,6 @@ const update_ads = async (req, res, next) => {
   }
 };
 
-
-
 // save insight data in db.
 const save_insight = async (req, res, next) => {
   try {
@@ -1002,13 +1050,11 @@ const save_insight = async (req, res, next) => {
     let batch;
     let operations;
 
-
     if (campaign_insights.status == "success") {
-console.log("========================campaign_insights.status",campaign_insights.status)
-      const cron_job = await startCronJob(campaign_insights.data)
+      const cron_job = await startCronJob(campaign_insights.data);
 
       let batchSize;
-      let totalData
+      let totalData;
       // for (let i = 0; i < campaign_insights.data.length; i++) {
       //   let adset_insights = await facebook_get_Insights(
       //     campaign_insights.data[i].campaign_id,
@@ -1077,34 +1123,54 @@ console.log("========================campaign_insights.status",campaign_insights
       //   await campaignModel.bulkWrite(operations);
       // }
     }
-    return responseApi.successResponseWithData(res, "data has inserted successfully", "");
+    return responseApi.successResponseWithData(
+      res,
+      "data has inserted successfully",
+      ""
+    );
   } catch (error) {
     console.log(error);
-    return responseApi.ErrorResponse(res,"Unable to Save data",error.message?error.message:error)
+    return responseApi.ErrorResponse(
+      res,
+      "Unable to Save data",
+      error.message ? error.message : error
+    );
   }
-}
-
+};
 
 const get_initial_token = async (req, res, next) => {
   try {
-    const getBusinessesDetails = await facebook_get_businesses(req.body.facebook_token);
+    if (!req.body.facebook_token) {
+      responseApi.ErrorResponse(
+        res,
+        "No Token Found",
+        "Please Provide a valid token",
+        StatusCodes.BAD_REQUEST
+      );
+    }
+    const getBusinessesDetails = await facebook_get_businesses(
+      req.body.facebook_token
+    );
     if (getBusinessesDetails.status == "success") {
       const operations = getBusinessesDetails.data.data.map((doc) => {
-       return {updateOne: {
-          filter: { id: doc.id },
-          update: {
-            $set: {
-              id: doc.id,
-              name: doc.name,
-              owned_ad_accounts: doc.owned_ad_accounts ? doc.owned_ad_accounts.data : [],
-              app_id: req.body.app_id,
-              facebook_token: req.body.facebook_token,
-              user_id: req.auth._id
+        return {
+          updateOne: {
+            filter: { id: doc.id },
+            update: {
+              $set: {
+                id: doc.id,
+                name: doc.name,
+                owned_ad_accounts: doc.owned_ad_accounts
+                  ? doc.owned_ad_accounts.data
+                  : [],
+                app_id: req.body.app_id,
+                facebook_token: req.body.facebook_token,
+                user_id: req.auth._id,
+              },
             },
+            upsert: true,
           },
-          upsert: true,
-        }}
-
+        };
       });
 
       let result = await businessModel.bulkWrite(operations);
@@ -1114,28 +1180,38 @@ const get_initial_token = async (req, res, next) => {
         {
           $set: {
             facebook_token: req.body.facebook_token,
-            is_facebook_linked: true
-          }
+            is_facebook_linked: true,
+          },
         },
         { upsert: true }
       );
 
-      return responseApi.successResponseWithData(res, "Token registration successfull", result);
-
+      return responseApi.successResponseWithData(
+        res,
+        "Token registration successfull",
+        result
+      );
     } else {
-      return responseApi.successResponseWithData(res, "Token registration Unsuccessfull", "");
-
+      return responseApi.successResponseWithData(
+        res,
+        "Token registration Unsuccessfull",
+        ""
+      );
+    }
+  } catch (err) {
+    console.log(err);
+    if (err.code == 11000) {
+      return responseApi.ErrorResponse(
+        res,
+        "Data Already Present",
+        "Data Already Present",
+        StatusCodes.BAD_REQUEST
+      );
+    } else {
+      responseApi.ErrorResponse(res, "Internal server Error", err.message);
     }
   }
-  catch (err) {
-    console.log(err)
-    if(err.code == 11000 ){
-      return responseApi.ErrorResponse(res,"Data Already Present","Data Already Present",StatusCodes.BAD_REQUEST)
-    }else{
-      responseApi.ErrorResponse(res,"Internal server Error",err.message)
-    }
-  }
-}
+};
 
 module.exports = {
   create_campaign,
@@ -1161,5 +1237,5 @@ module.exports = {
   get_campaign_by_id,
   get_adset_by_id,
   save_insight,
-  get_initial_token
+  get_initial_token,
 };

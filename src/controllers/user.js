@@ -6,6 +6,7 @@ const responseApi = require("../utils/apiresponse");
 const { updateOne } = require("../models/businees");
 const nodemailer = require("nodemailer");
 const axios = require("axios");
+const { facebook_get_businesses } = require("../platform/facebook");
 
 const generateAccessToken = (response) => {
   return jwt.sign(
@@ -73,10 +74,27 @@ const login = async (req, res, next) => {
           { token: token1 },
           { new: true }
         );
+
+        if(data.facebook_token){
+          const businesses = await facebook_get_businesses(data.facebook_token)
+          if (businesses.status === "success") {
+            let default_ad_account = {}; 
+            let i=0
+            while(!default_ad_account.id){
+              if(businesses.data.data[i].owned_ad_accounts){
+                default_ad_account.id = businesses.data.data[i].owned_ad_accounts[0].id
+                default_ad_account.name = businesses.data.data[i].owned_ad_accounts[0].name
+              }
+              i++
+            }
+            data._doc.default_ad_account = default_ad_account
+          }
+        }
+        // result = {...data._doc}
         return responseApi.successResponseWithData(
           res,
           "User login successfully",
-          data,
+          data, 
           StatusCodes.OK
         );
       } else {
@@ -208,6 +226,7 @@ const assigned_bm = async (req, res, next) => {
                       },
                       update: {
                         $push: {
+                          is_facebook_linked:true,
                           [`${assign_type}`]: {
                             id: id,
                             name: name,
@@ -234,6 +253,7 @@ const assigned_bm = async (req, res, next) => {
                           update: {
                             // $set: { roles: email[j].role },
                             $set: {
+                              is_facebook_linked:true,
                               [`${assign_type}`]: {
                                 id: id,
                                 name: name,
@@ -258,6 +278,7 @@ const assigned_bm = async (req, res, next) => {
                           update: {
                             // $set: { roles: email[j].role },
                             $push: {
+                              is_facebook_linked:true,
                               [`${assign_type}`]: {
                                 id: id,
                                 name: name,
@@ -285,6 +306,7 @@ const assigned_bm = async (req, res, next) => {
                       },
                       update: {
                         $push: {
+                          is_facebook_linked:true,
                           [`${assign_type}`]: {
                             id: id,
                             name: name,
@@ -315,6 +337,7 @@ const assigned_bm = async (req, res, next) => {
                           update: {
                             // $set: { roles: email[j].role },
                             $set: {
+                              is_facebook_linked:true,
                               [`${assign_type}`]: {
                                 id: id,
                                 name: name,
@@ -339,6 +362,7 @@ const assigned_bm = async (req, res, next) => {
                           update: {
                             // $set: { roles: email[j].role },
                             $push: {
+                              is_facebook_linked:true,
                               [`${assign_type}`]: {
                                 id: id,
                                 name: name,
@@ -364,6 +388,7 @@ const assigned_bm = async (req, res, next) => {
           }
         }
         const result = await User.bulkWrite(bulkWriteOperations);
+
         if (result.matchedCount > 0 && result.modifiedCount > 0) {
           return responseApi.successResponseWithData(
             res,
@@ -437,6 +462,7 @@ const role_update = async (req, res, next) => {
         }
       }
       const result = await User.bulkWrite(bulkWriteOperations);
+
       if (result.matchedCount > 0 && result.modifiedCount > 0) {
         return responseApi.successResponseWithData(
           res,
@@ -570,7 +596,7 @@ const select_asset = async(req,res,next) => {
   try {
     let {bm_id,ad_account_id} = req.body
     let user = await User.findOne({_id:req.auth._id})
-    let updated_token
+    let updated_token 
     if(bm_id && !ad_account_id){
       for(let i =0; i<user.assigned_BM.length;i++){
         if(user.assigned_BM[i].id == bm_id){
@@ -588,8 +614,11 @@ const select_asset = async(req,res,next) => {
     }
     //Update after checking the BM
   let update_user = await User.updateOne({_id:req.auth._id},{ $set: { facebook_token: updated_token } })
+  if(!updated_token){
+    updated_token = user.facebook_token
+  }
   if(update_user.acknowledged=== true){
-    return responseApi.successResponseWithData(res,"Assest Selected Successfull", "Assest Selected Successfully")
+    return responseApi.successResponseWithData(res,"Assest Selected Successfull", {facebook_token:updated_token})
   }else{
     return responseApi.ErrorResponse(res,"Error", "Unable to select asset", StatusCodes.BAD_REQUEST)
   }
@@ -622,7 +651,8 @@ async function register_generate_password(email, organization, role) {
       process.env.PASS_SECRET
     ).toString(),
     organization: organization,
-    roles: role
+    roles: role,
+    is_facebook_linked: true
   };
 
     let userData = await User.create(newUser);

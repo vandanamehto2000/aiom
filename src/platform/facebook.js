@@ -74,6 +74,8 @@ const facebook_get_Insights = async (
    
     let fields2 = fields_constant.fields[2]
 
+    let fields3 = fields_constant.fields[3]
+
     let config = {
       method: "get",
       maxBodyLength: Infinity,
@@ -1090,6 +1092,18 @@ const facebook_get_businesses = async (access_token) => {
 
     const businesses = await axios.request(config);
     if (businesses.data) {
+      for (let j = 0; j < businesses.data.data.length; j++) {
+        if(businesses.data.data[j].owned_ad_accounts){
+          businesses.data.data[j].owned_ad_accounts = businesses.data.data[j].owned_ad_accounts.data
+        }else{
+          businesses.data.data[j].owned_ad_accounts = []
+        }
+        if(businesses.data.data[j].owned_pages){
+          businesses.data.data[j].owned_pages = businesses.data.data[j].owned_pages.data
+        }else{
+          businesses.data.data[j].owned_pages = []
+        }
+      }
       return {
         status: "success",
         data: businesses.data,
