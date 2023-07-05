@@ -226,6 +226,7 @@ const assigned_bm = async (req, res, next) => {
                       },
                       update: {
                         $push: {
+                          is_facebook_linked:true,
                           [`${assign_type}`]: {
                             id: id,
                             name: name,
@@ -252,6 +253,7 @@ const assigned_bm = async (req, res, next) => {
                           update: {
                             // $set: { roles: email[j].role },
                             $set: {
+                              is_facebook_linked:true,
                               [`${assign_type}`]: {
                                 id: id,
                                 name: name,
@@ -276,6 +278,7 @@ const assigned_bm = async (req, res, next) => {
                           update: {
                             // $set: { roles: email[j].role },
                             $push: {
+                              is_facebook_linked:true,
                               [`${assign_type}`]: {
                                 id: id,
                                 name: name,
@@ -303,6 +306,7 @@ const assigned_bm = async (req, res, next) => {
                       },
                       update: {
                         $push: {
+                          is_facebook_linked:true,
                           [`${assign_type}`]: {
                             id: id,
                             name: name,
@@ -333,6 +337,7 @@ const assigned_bm = async (req, res, next) => {
                           update: {
                             // $set: { roles: email[j].role },
                             $set: {
+                              is_facebook_linked:true,
                               [`${assign_type}`]: {
                                 id: id,
                                 name: name,
@@ -357,6 +362,7 @@ const assigned_bm = async (req, res, next) => {
                           update: {
                             // $set: { roles: email[j].role },
                             $push: {
+                              is_facebook_linked:true,
                               [`${assign_type}`]: {
                                 id: id,
                                 name: name,
@@ -382,6 +388,7 @@ const assigned_bm = async (req, res, next) => {
           }
         }
         const result = await User.bulkWrite(bulkWriteOperations);
+
         if (result.matchedCount > 0 && result.modifiedCount > 0) {
           return responseApi.successResponseWithData(
             res,
@@ -455,6 +462,7 @@ const role_update = async (req, res, next) => {
         }
       }
       const result = await User.bulkWrite(bulkWriteOperations);
+
       if (result.matchedCount > 0 && result.modifiedCount > 0) {
         return responseApi.successResponseWithData(
           res,

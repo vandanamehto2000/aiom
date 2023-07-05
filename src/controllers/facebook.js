@@ -706,10 +706,12 @@ const get_businesses = async (req, res, next) => {
                 //If BM pushed already
                 if (existingObj) {
                   const existingAccount = existingObj.owned_ad_accounts.find((data) => data.id === obj1.id);
+                  //push inside owned_ad_accounts
                   if (!existingAccount) {
                     existingObj.owned_ad_accounts.push(obj1);
                   }
                 } else {
+                  //if not existing BM
                   obj2.owned_ad_accounts.find((data) => {
                     if (data.id === obj1.id) {
                       owned_ad_accounts_obj.push({
