@@ -447,6 +447,7 @@ const facebook_get_image_hash = async (imagePath, imageName, access_token) => {
       data: data,
     };
     const response = await axios.request(config);
+    console.log("000000000000000",response)
     if (response.data) {
       return {
         status: "success",
@@ -920,14 +921,11 @@ const creat_image_carousel = async (
   object_story_spec,
   access_token
 ) => {
-  console.log("------------------",          id,
-  name,
-  object_story_spec.link_data.child_attachments,
-  access_token)
   let data = new FormData();
   data.append("name", name);
-  data.append("object_story_spec", JSON.stringify(object_story_spec));
+  data.append("object story spec", JSON.stringify(object_story_spec));
   data.append("access_token", access_token);
+  data.append('degrees_of_freedom_spec', '{"creative_features_spec": {"standard_enhancements": {"enroll_status": "OPT_OUT"}}}');
 
   let config = {
     method: "post",
@@ -988,7 +986,6 @@ const facebook_create_carousel = async (
           object_story_spec.link_data.child_attachments[i].link = url;
         }
         // upload image and create carousel
-        console.log("upload carousel------------for image",object_story_spec.link_data.child_attachments);
         let carousel_result = await creat_image_carousel(
           id,
           name,
