@@ -13,7 +13,7 @@ router.get("/organization",authenticateToken,roles_auth(["admin","employee"]), e
 router.post("/assigned-bm", authenticateToken,fb_middleware,roles_auth(["admin"]), assigned_bm)
 router.post("/update-roles", authenticateToken, roles_auth(["admin"]),role_update)
 router.delete("/delete-bm", authenticateToken, roles_auth(["admin"]),delete_bm)
-router.post("/invite",authenticateToken,roles_auth(["admin","employee"]),add_users)
+router.post("/invite",authenticateToken,roles_auth(["admin"]),add_users)
 router.post("/select-asset",authenticateToken,select_asset)
 
 
