@@ -447,6 +447,7 @@ const facebook_get_image_hash = async (imagePath, imageName, access_token) => {
       data: data,
     };
     const response = await axios.request(config);
+    console.log("000000000000000",response)
     if (response.data) {
       return {
         status: "success",
@@ -922,8 +923,9 @@ const creat_image_carousel = async (
 ) => {
   let data = new FormData();
   data.append("name", name);
-  data.append("object_story_spec", JSON.stringify(object_story_spec));
+  data.append("object story spec", JSON.stringify(object_story_spec));
   data.append("access_token", access_token);
+  data.append('degrees_of_freedom_spec', '{"creative_features_spec": {"standard_enhancements": {"enroll_status": "OPT_OUT"}}}');
 
   let config = {
     method: "post",
@@ -984,7 +986,6 @@ const facebook_create_carousel = async (
           object_story_spec.link_data.child_attachments[i].link = url;
         }
         // upload image and create carousel
-        console.log("upload carousel------------for image");
         let carousel_result = await creat_image_carousel(
           id,
           name,
@@ -1039,22 +1040,30 @@ const facebook_create_carousel = async (
           }
         }
       }
-      let carousel_result = await creat_image_carousel(
-        id,
-        name,
-        object_story_spec,
-        access_token
-      );
-      if (carousel_result.status === "success") {
-        return {
-          status: "success",
-          data: carousel_result.data,
-        };
-      } else {
+      if(object_story_spec.link_data.child_attachments.length < 2){
         return {
           status: "error",
-          data: carousel_result.data,
+          data: "select at least two image or video for carousel",
         };
+      }
+      else{
+        let carousel_result = await creat_image_carousel(
+          id,
+          name,
+          object_story_spec,
+          access_token
+        );
+        if (carousel_result.status === "success") {
+          return {
+            status: "success",
+            data: carousel_result.data,
+          };
+        } else {
+          return {
+            status: "error",
+            data: carousel_result.data,
+          };
+        }
       }
     }
   } catch (error) {
@@ -1080,6 +1089,18 @@ const facebook_get_businesses = async (access_token) => {
 
     const businesses = await axios.request(config);
     if (businesses.data) {
+      for (let j = 0; j < businesses.data.data.length; j++) {
+        if(businesses.data.data[j].owned_ad_accounts){
+          businesses.data.data[j].owned_ad_accounts = businesses.data.data[j].owned_ad_accounts.data
+        }else{
+          businesses.data.data[j].owned_ad_accounts = []
+        }
+        if(businesses.data.data[j].owned_pages){
+          businesses.data.data[j].owned_pages = businesses.data.data[j].owned_pages.data
+        }else{
+          businesses.data.data[j].owned_pages = []
+        }
+      }
       return {
         status: "success",
         data: businesses.data,
@@ -1235,7 +1256,7 @@ const facebook_update_adset = async (adset_id, params, access_token) => {
       data.append("promoted_object", JSON.stringify(params.promoted_object));
     }
     if ("targeting" in params) {
-      data.append("targeting", JSON.stringify(params.targeting));
+      data.append("targeting spec", JSON.stringify(params.targeting));
     }
     data.append("access_token", access_token);
     let config = {
@@ -1247,25 +1268,20 @@ const facebook_update_adset = async (adset_id, params, access_token) => {
       },
       data: data,
     };
-    let response = await axios.request(config);
-    if (response.data) {
-      return {
-        status: "success",
-        data: response.data,
-      };
-    } else {
+   return axios.request(config).then((res)=>{      
+    return {
+      status: "success",
+      data: res.data,
+    } }).catch(error=> {
       return {
         status: "error",
-        data: response.message ? response.message : response,
-      };
-    }
+        data: error.response.data.error.error_user_msg ? error.response.data.error.error_user_msg : error.response.data.error
+      }
+    })
   } catch (error) {
-    console.log("error part1", error);
-    console.log("Error Message:" + error);
-    console.log("Error Stack:" + error.stack);
     return {
       status: "error",
-      data: error.message ? error.message : error,
+      data: error,
     };
   }
 };
