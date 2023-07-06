@@ -5,7 +5,7 @@ const { facebook_get_Insights } = require('../platform/facebook');
 // Create a function to save a chunk of data to the database
 async function saveDataToDatabase(data, startIndex, endIndex) {
   try {
- 
+
 
     // Get the chunk of data to be saved
     const dataChunk = data.slice(startIndex, endIndex);
@@ -47,19 +47,19 @@ async function processNextChunk(data, startIndex, endIndex) {
 
 
 async function startCronJob(allData) {
-    // cron job to run every hour
-    const job = cron.schedule('0 * * * *', () => {
-      console.log('Running the cron job...');
-  
-      if (allData && allData.length > 0) {
-        const startIndex = 0;
-        const endIndex = Math.min(chunkSize, allData.length);
-        processNextChunk(allData, startIndex, endIndex);
-      } else {
-        console.log('No data available to process.');
-      }
-    });
-  }
-  
-  // Export the cron job function
-  module.exports = startCronJob;
+  // cron job to run every hour
+  const job = cron.schedule('0 * * * *', () => {
+    console.log('Running the cron job...');
+
+    if (allData && allData.length > 0) {
+      const startIndex = 0;
+      const endIndex = Math.min(chunkSize, allData.length);
+      processNextChunk(allData, startIndex, endIndex);
+    } else {
+      console.log('No data available to process.');
+    }
+  });
+}
+
+// Export the cron job function
+module.exports = startCronJob;
